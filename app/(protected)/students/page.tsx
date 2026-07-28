@@ -3,23 +3,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getCurrentUser } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
-import StudentsTable from './students-table';
-
-export interface StudentSummary {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string | null;
-  guardianName?: string | null;
-  guardianPhone?: string | null;
-  createdAt: string;
-  enrolledBatchesCount: number;
-  recentAttendance: {
-    status: 'PRESENT' | 'ABSENT' | 'LATE';
-    date: string;
-    batchName: string;
-  } | null;
-}
+import StudentsTable, { StudentSummary } from './students-table';
 
 export default async function StudentsPage() {
   const user = await getCurrentUser();
