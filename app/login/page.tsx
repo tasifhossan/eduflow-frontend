@@ -17,8 +17,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await apiPost('/api/auth/login', { email, password });
-      router.push('/dashboard');
+      const response = await apiPost('/api/auth/login', { email, password });
+      const token = response?.data?.token;
+      if (token) {
+        document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
+      }
+      window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
