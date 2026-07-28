@@ -2,7 +2,7 @@
 
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
 
 interface Student {
@@ -30,6 +30,8 @@ interface PageProps {
 
 export default function MarkAttendancePage({ params }: PageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dateParam = searchParams?.get('date');
   const { id: batchId } = use(params);
 
   // Get today's local date string YYYY-MM-DD
@@ -41,7 +43,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
   };
 
   // State Variables
-  const [date, setDate] = useState(getTodayString());
+  const [date, setDate] = useState(dateParam || getTodayString());
   const [batch, setBatch] = useState<BatchDetails | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<Record<string, 'PRESENT' | 'ABSENT' | 'LATE'>>({});

@@ -40,3 +40,23 @@ export async function apiPost<T = any>(path: string, body?: any, options?: Reque
 
   return response.json();
 }
+
+export async function apiDelete<T = any>(path: string, options?: RequestInit): Promise<T> {
+  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const response = await fetch(url, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `DELETE ${path} failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
