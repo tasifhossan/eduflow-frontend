@@ -263,6 +263,14 @@ export default function BatchTestsPage({ params }: PageProps) {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          {isStaff && (
+                            <Link
+                              href={`/batches/${batchId}/tests/${test.id}/results`}
+                              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition mr-2"
+                            >
+                              View Results
+                            </Link>
+                          )}
                           <Link
                             href={targetUrl}
                             className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${

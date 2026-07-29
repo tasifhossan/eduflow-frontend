@@ -329,12 +329,20 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">{test.title}</h1>
             <p className="mt-2 text-sm text-gray-500">Design questions and choices for this cohort exam</p>
           </div>
-          <Link
-            href={`/batches/${batchId}/tests`}
-            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
-          >
-            Back to Tests
-          </Link>
+          <div className="flex gap-x-3">
+            <Link
+              href={`/batches/${batchId}/tests/${testId}/results`}
+              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+            >
+              View Results
+            </Link>
+            <Link
+              href={`/batches/${batchId}/tests`}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            >
+              Back to Tests
+            </Link>
+          </div>
         </div>
 
         {/* Global Notifications */}
