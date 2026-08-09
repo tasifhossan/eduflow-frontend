@@ -8,6 +8,12 @@ import { apiGet, apiPost } from '@/lib/api';
 interface BatchDetails {
   id: string;
   name: string;
+  subjectId: string;
+}
+
+interface Chapter {
+  id: string;
+  name: string;
 }
 
 interface PageProps {
@@ -22,6 +28,7 @@ export default function NewTestPage({ params }: PageProps) {
   const [batch, setBatch] = useState<BatchDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
 
   // Form Fields
   const [title, setTitle] = useState('');
@@ -30,6 +37,7 @@ export default function NewTestPage({ params }: PageProps) {
   const [negativeMarkingValue, setNegativeMarkingValue] = useState('0');
   const [durationMinutes, setDurationMinutes] = useState('');
   const [testDate, setTestDate] = useState('');
+  const [selectedChapterId, setSelectedChapterId] = useState('');
 
   // UI Feedback States
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -65,9 +73,17 @@ export default function NewTestPage({ params }: PageProps) {
         const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
         if (batchRes.success) {
           setBatch(batchRes.data);
+          
+          // Fetch chapters for this batch's subject
+          const chaptersRes = await apiGet<{ success: boolean; data: Chapter[] }>(
+            `/api/chapters?subjectId=${batchRes.data.subjectId}`
+          );
+          if (chaptersRes.success) {
+            setChapters(chaptersRes.data);
+          }
         }
       } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load batch details');
+        setErrorMsg(err.message || 'Failed to load batch/chapters details');
       } finally {
         setLoading(false);
       }
@@ -111,7 +127,7 @@ export default function NewTestPage({ params }: PageProps) {
         durationMinutes: durationMinutes.trim() ? Number(durationMinutes) : null,
         // Set test date to the selected date at midnight UTC
         testDate: new Date(testDate).toISOString(),
-        chapterId: null, // BACKEND TODO: Support chapters fetching once GET /api/chapters endpoint is available
+        chapterId: selectedChapterId || null,
       };
 
       const response = await apiPost<{ success: boolean; message?: string; data: { id: string } }>(
@@ -287,14 +303,24 @@ export default function NewTestPage({ params }: PageProps) {
               </p>
             </div>
 
-            {/* Chapter ID Info (TODO placeholder) */}
-            <div className="sm:col-span-2 rounded-xl bg-gray-50 border border-gray-200 p-4">
-              <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+            {/* Chapter Selection */}
+            <div className="sm:col-span-2">
+              <label htmlFor="chapterId" className="block text-sm font-semibold text-gray-900 mb-2">
                 Chapter Classification (Optional)
-              </span>
-              <p className="text-xs text-gray-400">
-                ⚠️ Classified chapters will be available once the backend routing module is implemented (Chapter endpoint TODO).
-              </p>
+              </label>
+              <select
+                id="chapterId"
+                value={selectedChapterId}
+                onChange={(e) => setSelectedChapterId(e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm font-medium"
+              >
+                <option value="">Select a chapter (None)</option>
+                {chapters.map((chapter) => (
+                  <option key={chapter.id} value={chapter.id}>
+                    {chapter.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
