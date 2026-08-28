@@ -134,7 +134,27 @@ export default function NewTestPage({ params }: PageProps) {
       );
 
       if (response && response.success) {
-        router.push(`/batches/${batchId}/tests/${response.data.id}/manage`);
+        const createdTestId = response.data.id;
+
+        if (type === 'OFFLINE') {
+          // Check if selected testDate is today or in the past
+          const selectedDate = new Date(testDate);
+          const today = new Date();
+          // Normalize both to start of day for comparison
+          selectedDate.setHours(0, 0, 0, 0);
+          today.setHours(0, 0, 0, 0);
+
+          if (selectedDate <= today) {
+            // Past or today's offline test -> Go directly to Mark Entry page
+            router.push(`/batches/${batchId}/tests/${createdTestId}/results`);
+          } else {
+            // Future offline test -> Go back to Tests list page
+            router.push(`/batches/${batchId}/tests`);
+          }
+        } else {
+          // Online tests (MCQ / WRITTEN / MIXED) -> Go to Question Manager
+          router.push(`/batches/${batchId}/tests/${createdTestId}/manage`);
+        }
       } else {
         setErrorMsg(response.message || 'Failed to create test');
       }
