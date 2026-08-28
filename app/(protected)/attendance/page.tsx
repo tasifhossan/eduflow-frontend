@@ -231,45 +231,45 @@ export default async function AttendancePage() {
 
         {/* ── TEACHER / ADMIN VIEW ────────────────────────────────────────────────── */}
         {!isStudent && !errorMsg && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Marking Progress</span>
-              <div className="mt-2 flex items-baseline gap-x-2">
-                <span className="text-4xl font-extrabold text-gray-900">{markedCount}</span>
-                <span className="text-sm text-gray-500">of {totalCount} batches marked fully today</span>
+          <>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Marking Progress</span>
+                <div className="mt-2 flex items-baseline gap-x-2">
+                  <span className="text-4xl font-extrabold text-gray-900">{markedCount}</span>
+                  <span className="text-sm text-gray-500">of {totalCount} batches marked fully today</span>
+                </div>
+                <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
+                  <div
+                    className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${totalCount > 0 ? (markedCount / totalCount) * 100 : 0}%` }}
+                  />
+                </div>
               </div>
-              <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
-                <div
-                  className="bg-green-600 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${totalCount > 0 ? (markedCount / totalCount) * 100 : 0}%` }}
-                />
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Unmarked Batches</span>
+                <div className="mt-2 flex items-baseline gap-x-2">
+                  <span className="text-4xl font-extrabold text-red-600">
+                    {summaries.filter((s) => s.status === 'unmarked').length}
+                  </span>
+                  <span className="text-sm text-gray-500">batches awaiting records</span>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Partially Marked</span>
+                <div className="mt-2 flex items-baseline gap-x-2">
+                  <span className="text-4xl font-extrabold text-amber-500">
+                    {summaries.filter((s) => s.status === 'partial').length}
+                  </span>
+                  <span className="text-sm text-gray-500">batches partially logged</span>
+                </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Unmarked Batches</span>
-              <div className="mt-2 flex items-baseline gap-x-2">
-                <span className="text-4xl font-extrabold text-red-600">
-                  {summaries.filter((s) => s.status === 'unmarked').length}
-                </span>
-                <span className="text-sm text-gray-500">batches awaiting records</span>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Partially Marked</span>
-              <div className="mt-2 flex items-baseline gap-x-2">
-                <span className="text-4xl font-extrabold text-amber-500">
-                  {summaries.filter((s) => s.status === 'partial').length}
-                </span>
-                <span className="text-sm text-gray-500">batches partially logged</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Batches Summary Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            {/* Batches Summary Table */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           {summaries.length === 0 ? (
             <div className="p-12 text-center text-gray-500">
               <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -342,7 +342,9 @@ export default async function AttendancePage() {
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
+      </>
+    )}
+  </div>
+</div>
+);
 }
