@@ -33,7 +33,7 @@ export default function NewTestPage({ params }: PageProps) {
 
   // Form Fields
   const [title, setTitle] = useState('');
-  const [type, setType] = useState<'MCQ' | 'WRITTEN' | 'MIXED'>('MCQ');
+  const [type, setType] = useState<'MCQ' | 'WRITTEN' | 'MIXED' | 'OFFLINE'>('MCQ');
   const [totalMarks, setTotalMarks] = useState('');
   const [negativeMarkingValue, setNegativeMarkingValue] = useState('0');
   const [durationMinutes, setDurationMinutes] = useState('');
@@ -229,6 +229,7 @@ export default function NewTestPage({ params }: PageProps) {
                 <option value="MCQ">MCQ (Multiple Choice Questions)</option>
                 <option value="WRITTEN">Written Subjective Exam</option>
                 <option value="MIXED">Mixed Format</option>
+                <option value="OFFLINE">Offline / Physical Exam (Manual Entry)</option>
               </select>
             </div>
 

@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { apiGet, apiPatch } from '@/lib/api';
+import { apiGet, apiPatch, apiPost } from '@/lib/api';
 import { getToken } from '@/lib/client-auth';
 
 interface BatchDetails {
@@ -46,9 +46,15 @@ interface ResultSummary {
 interface TestDetails {
   id: string;
   title: string;
-  type: 'MCQ' | 'WRITTEN' | 'MIXED';
+  type: 'MCQ' | 'WRITTEN' | 'MIXED' | 'OFFLINE';
   totalMarks: number;
   negativeMarkingValue: number;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
 }
 
 interface PageProps {
@@ -63,17 +69,22 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
   const [batch, setBatch] = useState<BatchDetails | null>(null);
   const [test, setTest] = useState<TestDetails | null>(null);
   const [results, setResults] = useState<ResultSummary[]>([]);
+  const [batchStudents, setBatchStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'leaderboard' | 'grading'>('leaderboard');
+  const [activeTab, setActiveTab] = useState<'leaderboard' | 'grading' | 'manual'>('leaderboard');
 
   // Input states for grading
   const [gradingScores, setGradingScores] = useState<Record<string, string>>({});
   const [gradingErrors, setGradingErrors] = useState<Record<string, string>>({});
   const [gradingSubmitting, setGradingSubmitting] = useState<Record<string, boolean>>({});
+
+  // Manual score entry states
+  const [manualMarks, setManualMarks] = useState<Record<string, string>>({});
+  const [savingManual, setSavingManual] = useState(false);
 
   // Role validation & fetch initial data
   useEffect(() => {
@@ -108,6 +119,15 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
         const testRes = await apiGet<{ success: boolean; data: TestDetails }>(`/api/tests/${testId}`);
         if (testRes.success) {
           setTest(testRes.data);
+          if (testRes.data.type === 'OFFLINE') {
+            setActiveTab('manual');
+          }
+        }
+
+        const studentsRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`)
+          .catch(() => ({ success: false, data: [] }));
+        if (studentsRes.success && Array.isArray(studentsRes.data)) {
+          setBatchStudents(studentsRes.data);
         }
 
         await fetchResults();
@@ -125,6 +145,41 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
     const resultsRes = await apiGet<{ success: boolean; data: ResultSummary[] }>(`/api/tests/${testId}/results`);
     if (resultsRes.success) {
       setResults(resultsRes.data);
+      // Auto fill existing result marks into manualMarks state
+      const initialManual: Record<string, string> = {};
+      resultsRes.data.forEach((r) => {
+        initialManual[r.studentId] = String(r.totalMarksObtained);
+      });
+      setManualMarks(initialManual);
+    }
+  };
+
+  const handleSaveManualMarks = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingManual(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const payloadResults = Object.entries(manualMarks)
+        .map(([studentId, marksStr]) => ({
+          studentId,
+          marksObtained: Number(marksStr),
+        }))
+        .filter((item) => !isNaN(item.marksObtained));
+
+      const res = await apiPost(`/api/tests/${testId}/manual-results`, {
+        results: payloadResults,
+      });
+
+      if (res && res.success) {
+        setSuccessMsg('Manual test scores saved and ranked successfully!');
+        await fetchResults();
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to save manual test scores');
+    } finally {
+      setSavingManual(false);
     }
   };
 
@@ -275,18 +330,18 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
         )}
 
         {/* Tabs Control */}
-        {isWrittenExam && (
-          <div className="flex border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('leaderboard')}
-              className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all ${
-                activeTab === 'leaderboard'
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-gray-500 hover:text-gray-900'
-              }`}
-            >
-              Leaderboard
-            </button>
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('leaderboard')}
+            className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'leaderboard'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            Leaderboard
+          </button>
+          {isWrittenExam && (
             <button
               onClick={() => setActiveTab('grading')}
               className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all flex items-center gap-x-2 ${
@@ -302,8 +357,18 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
                 </span>
               )}
             </button>
-          </div>
-        )}
+          )}
+          <button
+            onClick={() => setActiveTab('manual')}
+            className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'manual'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            Manual Score Entry
+          </button>
+        </div>
 
         {/* Tab 1: Leaderboard */}
         {activeTab === 'leaderboard' && (
@@ -496,6 +561,93 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
               </div>
             )}
           </div>
+        )}
+
+        {/* Tab 3: Manual Score Entry */}
+        {activeTab === 'manual' && (
+          <form onSubmit={handleSaveManualMarks} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 gap-y-2">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Offline / Paper Exam Score Entry</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Enter student marks manually for physical exam papers out of <strong>{test.totalMarks} Marks</strong>.
+                </p>
+              </div>
+              <button
+                type="submit"
+                disabled={savingManual}
+                className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+              >
+                {savingManual ? 'Saving Scores...' : 'Save All Scores'}
+              </button>
+            </div>
+
+            {batchStudents.length === 0 ? (
+              <div className="p-8 text-center text-gray-400 italic text-sm">
+                No students enrolled in this batch yet.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student Name</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Email</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Marks Obtained</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {batchStudents.map((student) => {
+                      const currentVal = manualMarks[student.id] || '';
+                      const isGraded = currentVal !== '';
+                      return (
+                        <tr key={student.id} className="hover:bg-gray-50/70 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                            {student.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {student.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-x-2">
+                              <input
+                                type="number"
+                                min="0"
+                                max={test.totalMarks}
+                                step="0.5"
+                                value={currentVal}
+                                onChange={(e) =>
+                                  setManualMarks((prev) => ({
+                                    ...prev,
+                                    [student.id]: e.target.value,
+                                  }))
+                                }
+                                placeholder="0"
+                                className="block w-28 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-bold text-gray-900 focus:border-accent focus:ring-1 focus:ring-accent"
+                              />
+                              <span className="text-xs font-bold text-gray-400">/ {test.totalMarks}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
+                                isGraded
+                                  ? 'bg-green-50 text-green-700 ring-green-600/20'
+                                  : 'bg-gray-50 text-gray-600 ring-gray-500/20'
+                              }`}
+                            >
+                              {isGraded ? 'Graded' : 'Pending Entry'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </form>
         )}
       </div>
     </div>
