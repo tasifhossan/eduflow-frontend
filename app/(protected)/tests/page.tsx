@@ -150,15 +150,15 @@ export default function TestsHubPage() {
 
           const enrollRes = await apiGet<{
             success: boolean;
-            data: { batchId: string; batch: Batch }[];
+            data: Batch[];
           }>(`/api/students/${userId}/batches`);
 
-          if (!enrollRes.success) {
+          if (!enrollRes.success || !Array.isArray(enrollRes.data)) {
             setErrorMsg('Failed to load enrolled batches');
             return;
           }
 
-          const batches: Batch[] = enrollRes.data.map((e) => e.batch);
+          const batches: Batch[] = enrollRes.data;
 
           // Fetch tests + my-result status per test in parallel
           const settled = await Promise.allSettled(
