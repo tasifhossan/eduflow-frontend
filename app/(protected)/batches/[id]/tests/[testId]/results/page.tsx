@@ -173,8 +173,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
       });
 
       if (res && res.success) {
-        setSuccessMsg('Manual test scores saved and ranked successfully!');
-        await fetchResults();
+        router.push(`/batches/${batchId}/tests`);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to save manual test scores');
