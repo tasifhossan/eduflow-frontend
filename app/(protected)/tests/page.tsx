@@ -18,7 +18,7 @@ interface Batch {
 interface TestSummary {
   id: string;
   title: string;
-  type: 'MCQ' | 'WRITTEN' | 'MIXED';
+  type: 'MCQ' | 'WRITTEN' | 'MIXED' | 'OFFLINE';
   totalMarks: number;
   testDate: string;
 }
@@ -385,19 +385,30 @@ export default function TestsHubPage() {
                                 href={`/batches/${batch.id}/tests/${test.id}/results`}
                                 className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
                               >
-                                Results
+                                {test.type === 'OFFLINE' ? 'Enter Marks' : 'Results'}
                               </Link>
                             )}
-                            <Link
-                              href={primaryUrl}
-                              className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
-                                !isStaff && !submitted
-                                  ? 'bg-accent text-white border-transparent hover:bg-indigo-500'
-                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                              }`}
-                            >
-                              {primaryLabel}
-                            </Link>
+                            {isStaff ? (
+                              test.type !== 'OFFLINE' && (
+                                <Link
+                                  href={primaryUrl}
+                                  className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                >
+                                  {primaryLabel}
+                                </Link>
+                              )
+                            ) : (
+                              <Link
+                                href={primaryUrl}
+                                className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
+                                  !submitted
+                                    ? 'bg-accent text-white border-transparent hover:bg-indigo-500'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                              >
+                                {primaryLabel}
+                              </Link>
+                            )}
                           </div>
                         </td>
                       </tr>

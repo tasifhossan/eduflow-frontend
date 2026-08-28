@@ -14,7 +14,7 @@ interface BatchDetails {
 interface TestSummary {
   id: string;
   title: string;
-  type: 'MCQ' | 'WRITTEN' | 'MIXED';
+  type: 'MCQ' | 'WRITTEN' | 'MIXED' | 'OFFLINE';
   totalMarks: number;
   testDate: string;
 }
@@ -266,19 +266,30 @@ export default function BatchTestsPage({ params }: PageProps) {
                               href={`/batches/${batchId}/tests/${test.id}/results`}
                               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition mr-2"
                             >
-                              View Results
+                              {test.type === 'OFFLINE' ? 'Enter Marks' : 'View Results'}
                             </Link>
                           )}
-                          <Link
-                            href={targetUrl}
-                            className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
-                              !isStaff && myResults[test.id] === false
-                                ? 'bg-accent text-white border-transparent hover:bg-indigo-500'
-                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                            }`}
-                          >
-                            {actionText}
-                          </Link>
+                          {isStaff ? (
+                            test.type !== 'OFFLINE' && (
+                              <Link
+                                href={targetUrl}
+                                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                              >
+                                {actionText}
+                              </Link>
+                            )
+                          ) : (
+                            <Link
+                              href={targetUrl}
+                              className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
+                                myResults[test.id] === false
+                                  ? 'bg-accent text-white border-transparent hover:bg-indigo-500'
+                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {actionText}
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     );
