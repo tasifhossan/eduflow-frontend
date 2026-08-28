@@ -35,6 +35,7 @@ type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
 
 function getRoleFromCookie(): UserRole | null {
   try {
+    console.log('document.cookie in tests page:', document.cookie);
     const cookies = document.cookie.split(';');
     let token = '';
     for (let c of cookies) {
@@ -50,7 +51,8 @@ function getRoleFromCookie(): UserRole | null {
       return payload.role as UserRole;
     }
     return null;
-  } catch {
+  } catch (e) {
+    console.error('getRoleFromCookie error:', e);
     return null;
   }
 }
@@ -81,17 +83,47 @@ export default function TestsHubPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const detectedRole = getRoleFromCookie();
-    if (!detectedRole) {
-      setErrorMsg('Unauthorized: No role detected in user credentials. Please log in again.');
-      setLoading(false);
-      return;
-    }
-    setRole(detectedRole);
-
     async function load() {
       try {
         setLoading(true);
+        setErrorMsg(null);
+
+        // Fetch current user details from backend (which checks the HTTP-only cookie automatically)
+        let currentUser: { role: UserRole; id: string } | null = null;
+        try {
+          const meRes = await apiGet<{ success: boolean; data: { role: string; id: string } }>('/api/auth/me');
+          if (meRes?.success && meRes?.data) {
+            currentUser = meRes.data as { role: UserRole; id: string };
+          }
+        } catch (e) {
+          console.warn('GET /api/auth/me failed, falling back to local JWT decode.', e);
+        }
+
+        // Fallback local JWT decode if /api/auth/me was unavailable
+        if (!currentUser) {
+          const localRole = getRoleFromCookie();
+          if (localRole) {
+            // Local token decoding fallback
+            const token = document.cookie
+              .split(';')
+              .map(c => c.trim())
+              .find(c => c.startsWith('token='))
+              ?.substring('token='.length);
+            const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+            if (payload?.role && payload?.userId) {
+              currentUser = { role: payload.role as UserRole, id: payload.userId };
+            }
+          }
+        }
+
+        if (!currentUser) {
+          setErrorMsg('Unauthorized: No role detected in user credentials. Please log in again.');
+          setLoading(false);
+          return;
+        }
+
+        const detectedRole = currentUser.role;
+        setRole(detectedRole);
 
         // ── ADMIN / TEACHER: fetch all branch batches ─────────────────────
         if (detectedRole === 'ADMIN' || detectedRole === 'TEACHER') {
@@ -121,13 +153,7 @@ export default function TestsHubPage() {
 
         // ── STUDENT: fetch enrolled batches then their tests ──────────────
         } else {
-          // Get token payload to extract userId
-          const token = document.cookie
-            .split('; ')
-            .find((r) => r.startsWith('token='))
-            ?.split('=')[1];
-          const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
-          const userId: string | null = payload?.userId ?? null;
+          const userId = currentUser.id;
 
           if (!userId) {
             setErrorMsg('Could not determine user identity');
