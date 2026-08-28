@@ -35,10 +35,15 @@ type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
 
 function getRoleFromCookie(): UserRole | null {
   try {
-    const token = document.cookie
-      .split('; ')
-      .find((r) => r.startsWith('token='))
-      ?.split('=')[1];
+    const cookies = document.cookie.split(';');
+    let token = '';
+    for (let c of cookies) {
+      c = c.trim();
+      if (c.startsWith('token=')) {
+        token = c.substring('token='.length);
+        break;
+      }
+    }
     if (!token) return null;
     const payload = JSON.parse(atob(token.split('.')[1]));
     if (['ADMIN', 'TEACHER', 'STUDENT'].includes(payload.role)) {
