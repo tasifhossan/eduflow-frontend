@@ -78,7 +78,8 @@ export default function TestsHubPage() {
   useEffect(() => {
     const detectedRole = getRoleFromCookie();
     if (!detectedRole) {
-      window.location.href = '/login';
+      setErrorMsg('Unauthorized: No role detected in user credentials. Please log in again.');
+      setLoading(false);
       return;
     }
     setRole(detectedRole);
