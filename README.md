@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💻 EduFlow — Frontend Web Application  
+Next.js 16 Web Application for EduFlow Platform.
 
-## Getting Started
+---
 
-First, run the development server:
+## Table of Contents
+
+- [About the Project](#about-the-project)
+- [Project Overview](#project-overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Dependencies](#dependencies)
+- [Installation️ & Setup](#installation--setup)
+- [Folder Structure](#folder-structure)
+- [Contributions](#contributions)
+- [How to Contribute](#how-to-contribute)
+- [License](#license)
+- [Contact](#contact)
+
+---
+
+## About the Project 
+The EduFlow Frontend application provides a responsive portal for Students, Teachers, and Admins to access routines, take digital exams, view leaderboards, and manage coaching branch operations.
+
+---
+
+## Project Overview  
+Built with Next.js 16 App Router and Tailwind CSS v4 to deliver fast performance, smooth UI animations, dark mode capabilities, and interactive assessment components.
+
+---
+
+## Key Features  
+- **Interactive Exam Portal** — Full-screen timed online MCQ & written exam test taker.
+- **Admin & Teacher Dashboards** — Batch creation, routine viewer, attendance logging, and paper test leaderboard entry.
+- **Student Analytics** — Visual test history, marks summary, and attendance records.
+
+---
+
+## Tech Stack  
+**Frontend:** Next.js 16 (App Router) · React 19 · Tailwind CSS v4 · TypeScript  
+**Tools:** Git · VS Code · Lucide React
+
+---
+
+## Dependencies  
+
+```json
+{
+  "next": "16.2.11",
+  "react": "19.2.4",
+  "react-dom": "19.2.4",
+  "lucide-react": "^1.26.0",
+  "tailwindcss": "^4"
+}
+```
+
+---
+
+## Installation️ & Setup
+1. Install dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+2. Set up environment variables in `frontend/.env`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+3. Run the development application:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Folder Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```plaintext
+frontend/
+├── app/
+│   ├── (auth)/
+│   ├── dashboard/
+│   └── page.tsx
+├── components/
+├── lib/
+└── package.json
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Contributions
+Developed by Tasif Hossan.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Name            | Role                | Contributions                            |  
+|-----------------|---------------------|------------------------------------------|  
+| Tasif Hossan    | Lead Developer      | Frontend UI/UX & Next.js App Router      |  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## How to Contribute
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Fork the Project
+- Create a branch (`git checkout -b feature/AmazingFeature`)
+- Commit changes (`git commit -m 'Add some AmazingFeature'`)
+- Push the branch (`git push origin feature/AmazingFeature`)
+- Open a Pull Request
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+## Contact
+
+**Portfolio:** [Tasif Hossan](https://tasif-portfolio.vercel.app/)  
+**LinkedIn:** [Tasif Hossan](https://www.linkedin.com/in/tasifhossan/)  
+**GitHub:** [@tasifhossan](https://github.com/tasifhossan)
