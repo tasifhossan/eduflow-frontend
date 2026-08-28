@@ -4,6 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
+import { getToken } from '@/lib/client-auth';
 
 interface Student {
   id: string;
@@ -56,10 +57,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
 
   // Role validation
   useEffect(() => {
-    const token = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('token='))
-      ?.split('=')[1];
+    const token = getToken();
 
     if (token) {
       try {

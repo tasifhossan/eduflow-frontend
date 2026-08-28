@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiGet } from '@/lib/api';
+import { getToken } from '@/lib/client-auth';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -35,16 +36,7 @@ type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
 
 function getRoleFromCookie(): UserRole | null {
   try {
-    console.log('document.cookie in tests page:', document.cookie);
-    const cookies = document.cookie.split(';');
-    let token = '';
-    for (let c of cookies) {
-      c = c.trim();
-      if (c.startsWith('token=')) {
-        token = c.substring('token='.length);
-        break;
-      }
-    }
+    const token = getToken();
     if (!token) return null;
     const payload = JSON.parse(atob(token.split('.')[1]));
     if (['ADMIN', 'TEACHER', 'STUDENT'].includes(payload.role)) {
@@ -104,11 +96,7 @@ export default function TestsHubPage() {
           const localRole = getRoleFromCookie();
           if (localRole) {
             // Local token decoding fallback
-            const token = document.cookie
-              .split(';')
-              .map(c => c.trim())
-              .find(c => c.startsWith('token='))
-              ?.substring('token='.length);
+            const token = getToken();
             const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
             if (payload?.role && payload?.userId) {
               currentUser = { role: payload.role as UserRole, id: payload.userId };

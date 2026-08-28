@@ -4,6 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
+import { getToken } from '@/lib/client-auth';
 
 interface Option {
   id: string;
@@ -67,10 +68,7 @@ export default function TestResultPage({ params }: PageProps) {
 
   // Role validation & fetch result
   useEffect(() => {
-    const token = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('token='))
-      ?.split('=')[1];
+    const token = getToken();
 
     if (token) {
       try {

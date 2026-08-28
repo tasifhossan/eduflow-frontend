@@ -4,6 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
+import { getToken } from '@/lib/client-auth';
 
 interface Student {
   id: string;
@@ -53,24 +54,25 @@ export default function BatchDetailPage({ params }: PageProps) {
 
   // Role check and initial data load
   useEffect(() => {
-    // Basic client-side role check from cookie
-    const token = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('token='))
-      ?.split('=')[1];
+    const token = getToken();
+    console.error('DEBUG: token found in /batches/[id] page:', token);
 
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
+        console.error('DEBUG: payload decoded in /batches/[id]:', payload);
         if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER') {
+          console.error('DEBUG: payload role is not ADMIN/TEACHER, pushing to /dashboard');
           router.push('/dashboard');
           return;
         }
       } catch (err) {
+        console.error('DEBUG: JSON parse or atob failed in /batches/[id] page:', err);
         router.push('/login');
         return;
       }
     } else {
+      console.error('DEBUG: no token found in /batches/[id], pushing to /login');
       router.push('/login');
       return;
     }
@@ -86,9 +88,10 @@ export default function BatchDetailPage({ params }: PageProps) {
           setBatch(batchRes.data);
         }
 
-        // 2. Fetch enrolled students
-        const enrolledRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`);
-        if (enrolledRes.success) {
+        // 2. Fetch enrolled students safely
+        const enrolledRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`)
+          .catch(() => ({ success: false, data: [] }));
+        if (enrolledRes.success && enrolledRes.data) {
           setEnrolledStudents(enrolledRes.data);
         }
 

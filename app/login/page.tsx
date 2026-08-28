@@ -20,7 +20,13 @@ export default function LoginPage() {
       const response = await apiPost('/api/auth/login', { email, password });
       const token = response?.data?.token;
       if (token) {
-        document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'http:';
+        const cookieString = isLocalhost
+          ? `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
+          : `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=None; Secure`;
+        
+        document.cookie = cookieString;
+        console.log('SET COOKIE VALUE:', document.cookie);
       }
       window.location.href = '/dashboard';
     } catch (err: any) {
