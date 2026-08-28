@@ -40,7 +40,7 @@ export default function NewStudentPage() {
         guardianPhone: guardianPhone.trim() || null,
       };
 
-      const response = await apiPost('/api/enrollments/students', payload);
+      const response = await apiPost('/api/students', payload);
 
       if (response && response.success) {
         // Redirection with hard reload to refresh Vercel server components cache

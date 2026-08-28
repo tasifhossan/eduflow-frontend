@@ -151,7 +151,7 @@ export default function TestsHubPage() {
           const enrollRes = await apiGet<{
             success: boolean;
             data: { batchId: string; batch: Batch }[];
-          }>(`/api/enrollments/students/${userId}/batches`);
+          }>(`/api/students/${userId}/batches`);
 
           if (!enrollRes.success) {
             setErrorMsg('Failed to load enrolled batches');

@@ -76,7 +76,7 @@ export default async function StudentDetailPage({
     } else {
       // 2. Fetch enrolled batches
       const batchesResponse = await apiGet<{ success: boolean; data: Batch[] }>(
-        `/api/enrollments/students/${studentId}/batches`,
+        `/api/students/${studentId}/batches`,
         { headers: { Cookie: cookieHeader } }
       );
       if (batchesResponse && batchesResponse.success) {

@@ -55,24 +55,19 @@ export default function BatchDetailPage({ params }: PageProps) {
   // Role check and initial data load
   useEffect(() => {
     const token = getToken();
-    console.error('DEBUG: token found in /batches/[id] page:', token);
 
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        console.error('DEBUG: payload decoded in /batches/[id]:', payload);
         if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER') {
-          console.error('DEBUG: payload role is not ADMIN/TEACHER, pushing to /dashboard');
           router.push('/dashboard');
           return;
         }
       } catch (err) {
-        console.error('DEBUG: JSON parse or atob failed in /batches/[id] page:', err);
         router.push('/login');
         return;
       }
     } else {
-      console.error('DEBUG: no token found in /batches/[id], pushing to /login');
       router.push('/login');
       return;
     }
@@ -133,8 +128,8 @@ export default function BatchDetailPage({ params }: PageProps) {
 
     try {
       const response = await apiPost('/api/enrollments', {
-        studentId: selectedStudentId,
         batchId,
+        studentId: selectedStudentId,
       });
 
       if (response && response.success) {
