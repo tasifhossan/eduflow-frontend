@@ -95,14 +95,16 @@ export default async function ProtectedLayout({
         </div>
 
         {/* User profile brief */}
-        <div className="p-4 mx-4 my-4 bg-slate-800/40 rounded-xl border border-slate-700/30 flex items-center gap-x-3">
-          <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-semibold">
+        <div className="p-4 mx-4 my-4 bg-slate-800/70 rounded-xl border border-slate-700/60 flex items-center gap-x-3">
+          <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-white font-bold text-base flex-shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-semibold truncate text-slate-100">{user.name}</h4>
-            <div className="flex items-center gap-x-1.5 mt-0.5">
-              <span className="inline-flex items-center rounded-md bg-accent/15 px-1.5 py-0.5 text-xs font-medium text-indigo-400 ring-1 ring-inset ring-accent/30 uppercase tracking-wider">
+            <p className="text-sm font-bold truncate text-white leading-tight">
+              {user.name}
+            </p>
+            <div className="flex items-center gap-x-1.5 mt-1">
+              <span className="inline-flex items-center rounded-md bg-accent/30 px-2 py-0.5 text-[11px] font-bold text-white ring-1 ring-inset ring-accent/60 uppercase tracking-wider">
                 {user.role}
               </span>
             </div>
