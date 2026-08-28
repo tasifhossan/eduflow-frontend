@@ -227,6 +227,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
             <input
               type="date"
               id="attendanceDate"
+              max={getTodayString()}
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm font-medium"
