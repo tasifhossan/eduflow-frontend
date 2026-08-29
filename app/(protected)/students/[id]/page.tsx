@@ -37,6 +37,25 @@ interface StudentSummary {
   createdAt: string;
 }
 
+interface FeePayment {
+  id: string;
+  studentId: string;
+  batchId: string;
+  period: string;
+  amountDue: number;
+  amountPaid: number;
+  status: 'DUE' | 'PARTIAL' | 'PAID';
+  dueDate?: string | null;
+  paidAt?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  batch: {
+    id: string;
+    name: string;
+    type?: string;
+  };
+}
+
 export default async function StudentDetailPage({
   params,
 }: {
@@ -56,6 +75,7 @@ export default async function StudentDetailPage({
   let studentProfile: StudentSummary | null = null;
   let enrolledBatches: Batch[] = [];
   let attendanceHistory: AttendanceRecord[] = [];
+  let paymentHistory: FeePayment[] = [];
   let errorMsg: string | null = null;
 
   try {
@@ -91,10 +111,28 @@ export default async function StudentDetailPage({
       if (attendanceResponse && attendanceResponse.success) {
         attendanceHistory = attendanceResponse.data;
       }
+
+      // 4. Fetch payment history (ADMIN only)
+      if (user.role === 'ADMIN') {
+        const paymentsResponse = await apiGet<{ success: boolean; data: FeePayment[] }>(
+          `/api/students/${studentId}/payments`,
+          { headers: { Cookie: cookieHeader } }
+        ).catch(() => null);
+
+        if (paymentsResponse && paymentsResponse.success) {
+          paymentHistory = paymentsResponse.data;
+        }
+      }
     }
   } catch (err: any) {
     errorMsg = err.message || 'Failed to load student details';
   }
+
+  // Summary totals for payment history
+  const totalPaidAcrossBatches = paymentHistory.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
+  const totalOutstanding = paymentHistory
+    .filter((p) => p.status !== 'PAID')
+    .reduce((sum, p) => sum + Math.max(0, p.amountDue - p.amountPaid), 0);
 
   return (
     <div className="p-8">
@@ -177,7 +215,7 @@ export default async function StudentDetailPage({
               </div>
             </div>
 
-            {/* Right Column: Enrolled Batches & Attendance History */}
+            {/* Right Column: Enrolled Batches, Payment History (ADMIN), & Attendance History */}
             <div className="space-y-8 lg:col-span-2">
               {/* Enrolled Batches */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
@@ -228,6 +266,107 @@ export default async function StudentDetailPage({
                   </div>
                 )}
               </div>
+
+              {/* Payment History (ADMIN Only) */}
+              {user.role === 'ADMIN' && (
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Payment History</h3>
+                      <p className="text-xs text-gray-500">All payment records across enrolled batches</p>
+                    </div>
+
+                    {/* Summary Totals */}
+                    <div className="flex gap-x-4 text-xs font-semibold">
+                      <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg px-3 py-1.5">
+                        <span className="text-[10px] text-emerald-600 uppercase block font-bold">Total Paid</span>
+                        <span className="text-sm font-extrabold">৳{totalPaidAcrossBatches.toLocaleString()}</span>
+                      </div>
+                      <div className="bg-amber-50 text-amber-800 border border-amber-200 rounded-lg px-3 py-1.5">
+                        <span className="text-[10px] text-amber-600 uppercase block font-bold">Outstanding</span>
+                        <span className="text-sm font-extrabold">৳{totalOutstanding.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {paymentHistory.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic py-10 text-center bg-white">
+                      No payment records found for this student.
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Batch Name
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Period
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Amount Due
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Amount Paid
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Status
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Due Date
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              Paid At
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {paymentHistory.map((payment) => (
+                            <tr key={payment.id} className="hover:bg-gray-50/50 transition">
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                                {payment.batch?.name || 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-700 font-mono text-xs">
+                                {payment.period}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                                ৳{payment.amountDue.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                                ৳{payment.amountPaid.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                                    payment.status === 'PAID'
+                                      ? 'bg-green-50 text-green-700 ring-green-600/20'
+                                      : payment.status === 'PARTIAL'
+                                      ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
+                                      : 'bg-red-50 text-red-700 ring-red-600/20'
+                                  }`}
+                                >
+                                  {payment.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                                {payment.dueDate
+                                  ? new Date(payment.dueDate).toLocaleDateString()
+                                  : <span className="text-gray-400 italic">N/A</span>}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                                {payment.paidAt
+                                  ? new Date(payment.paidAt).toLocaleDateString()
+                                  : <span className="text-gray-400 italic">-</span>}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Attendance History */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
