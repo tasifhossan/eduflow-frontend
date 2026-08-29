@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { apiGet, apiPost } from '@/lib/api';
+import { apiGet, apiPost, apiPatch } from '@/lib/api';
 import { getToken } from '@/lib/client-auth';
 
 interface Student {
@@ -13,6 +13,11 @@ interface Student {
   phone?: string | null;
   guardianName?: string | null;
   guardianPhone?: string | null;
+  enrollmentId?: string;
+  customFeeAmount?: number | null;
+  discountType?: 'FIXED' | 'PERCENTAGE' | null;
+  discountValue?: number | null;
+  discountReason?: string | null;
 }
 
 interface BatchDetails {
@@ -20,6 +25,8 @@ interface BatchDetails {
   name: string;
   type: 'ACADEMIC' | 'ADMISSION';
   classLevel?: string | null;
+  feeType?: 'MONTHLY' | 'ONE_TIME';
+  feeAmount?: number;
   subject: {
     id: string;
     name: string;
@@ -31,6 +38,15 @@ interface BatchDetails {
   enrolledStudentsCount: number;
 }
 
+interface NetFeeData {
+  baseFee: number;
+  customFeeAmount?: number | null;
+  discountType?: 'FIXED' | 'PERCENTAGE' | null;
+  discountValue?: number | null;
+  discountReason?: string | null;
+  netFee: number;
+}
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -39,18 +55,51 @@ export default function BatchDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { id: batchId } = use(params);
 
-  // States
+  // User state
+  const [userRole, setUserRole] = useState<string>('');
+
+  // Main States
   const [batch, setBatch] = useState<BatchDetails | null>(null);
   const [enrolledStudents, setEnrolledStudents] = useState<Student[]>([]);
   const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState('');
-  
+  const [netFeeMap, setNetFeeMap] = useState<Record<string, NetFeeData>>({});
+
+  // Batch Fee Edit States
+  const [isEditingBatchFee, setIsEditingBatchFee] = useState(false);
+  const [feeTypeInput, setFeeTypeInput] = useState<'MONTHLY' | 'ONE_TIME'>('MONTHLY');
+  const [feeAmountInput, setFeeAmountInput] = useState<number | ''>('');
+  const [savingBatchFee, setSavingBatchFee] = useState(false);
+  const [batchFeeError, setBatchFeeError] = useState<string | null>(null);
+  const [batchFeeSuccess, setBatchFeeSuccess] = useState<string | null>(null);
+
+  // Student Fee Modal States
+  const [selectedStudentForFee, setSelectedStudentForFee] = useState<Student | null>(null);
+  const [studentCustomFeeInput, setStudentCustomFeeInput] = useState<string>('');
+  const [studentDiscountTypeInput, setStudentDiscountTypeInput] = useState<'NONE' | 'FIXED' | 'PERCENTAGE'>('NONE');
+  const [studentDiscountValueInput, setStudentDiscountValueInput] = useState<string>('');
+  const [studentDiscountReasonInput, setStudentDiscountReasonInput] = useState<string>('');
+  const [savingStudentFee, setSavingStudentFee] = useState(false);
+  const [studentFeeError, setStudentFeeError] = useState<string | null>(null);
+
   // Loading & Error States
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [enrollError, setEnrollError] = useState<string | null>(null);
   const [enrollSuccess, setEnrollSuccess] = useState<string | null>(null);
+
+  // Helper to load net fee for a student's enrollment
+  const loadNetFeeForStudent = async (enrollmentId: string) => {
+    try {
+      const res = await apiGet<{ success: boolean; data: NetFeeData }>(`/api/enrollments/${enrollmentId}/net-fee`);
+      if (res.success && res.data) {
+        setNetFeeMap((prev) => ({ ...prev, [enrollmentId]: res.data }));
+      }
+    } catch (err) {
+      console.error(`Failed to load net fee for enrollment ${enrollmentId}`, err);
+    }
+  };
 
   // Role check and initial data load
   useEffect(() => {
@@ -59,6 +108,7 @@ export default function BatchDetailPage({ params }: PageProps) {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
+        setUserRole(payload.role);
         if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER') {
           router.push('/dashboard');
           return;
@@ -81,6 +131,8 @@ export default function BatchDetailPage({ params }: PageProps) {
         const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
         if (batchRes.success) {
           setBatch(batchRes.data);
+          setFeeTypeInput(batchRes.data.feeType || 'MONTHLY');
+          setFeeAmountInput(batchRes.data.feeAmount ?? 0);
         }
 
         // 2. Fetch enrolled students safely
@@ -88,6 +140,13 @@ export default function BatchDetailPage({ params }: PageProps) {
           .catch(() => ({ success: false, data: [] }));
         if (enrolledRes.success && enrolledRes.data) {
           setEnrolledStudents(enrolledRes.data);
+
+          // Fetch net fees for all enrolled students
+          for (const student of enrolledRes.data) {
+            if (student.enrollmentId) {
+              loadNetFeeForStudent(student.enrollmentId);
+            }
+          }
         }
 
         // 3. Fetch all branch students for enrollment list
@@ -97,7 +156,6 @@ export default function BatchDetailPage({ params }: PageProps) {
         if (studentsRes.success && studentsRes.data.length > 0) {
           setAvailableStudents(studentsRes.data);
         } else {
-          // Fallback to mock students
           setAvailableStudents([
             { id: 'usr-stud1', name: 'Tasif Hossain', email: 'tasif@gmail.com', phone: '01712345678', guardianName: 'Mr. Hossain', guardianPhone: '01711111111' },
             { id: 'usr-stud2', name: 'Imran Khan', email: 'imran@gmail.com', phone: '01812345678', guardianName: 'Mr. Khan', guardianPhone: '01811111111' },
@@ -135,11 +193,18 @@ export default function BatchDetailPage({ params }: PageProps) {
       if (response && response.success) {
         setEnrollSuccess('Student enrolled successfully!');
         setSelectedStudentId('');
-        
+
         // Refresh enrolled students list
         const enrolledRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`);
-        if (enrolledRes.success) {
+        if (enrolledRes.success && enrolledRes.data) {
           setEnrolledStudents(enrolledRes.data);
+
+          // Fetch net fees for updated list
+          for (const student of enrolledRes.data) {
+            if (student.enrollmentId) {
+              loadNetFeeForStudent(student.enrollmentId);
+            }
+          }
         }
       } else {
         setEnrollError(response.message || 'Failed to enroll student');
@@ -148,6 +213,103 @@ export default function BatchDetailPage({ params }: PageProps) {
       setEnrollError(err.message || 'An error occurred during enrollment');
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  const handleUpdateBatchFee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingBatchFee(true);
+    setBatchFeeError(null);
+    setBatchFeeSuccess(null);
+
+    try {
+      const response = await apiPatch(`/api/batches/${batchId}/fee`, {
+        feeType: feeTypeInput,
+        feeAmount: Number(feeAmountInput),
+      });
+
+      if (response && response.success) {
+        setBatchFeeSuccess('Batch fee settings updated successfully!');
+        setIsEditingBatchFee(false);
+        setBatch((prev) => (prev ? { ...prev, feeType: feeTypeInput, feeAmount: Number(feeAmountInput) } : null));
+
+        // Refetch all student net fees as base fee changed
+        for (const student of enrolledStudents) {
+          if (student.enrollmentId) {
+            loadNetFeeForStudent(student.enrollmentId);
+          }
+        }
+      } else {
+        setBatchFeeError(response.message || 'Failed to update batch fee');
+      }
+    } catch (err: any) {
+      setBatchFeeError(err.message || 'Error updating batch fee');
+    } finally {
+      setSavingBatchFee(false);
+    }
+  };
+
+  const openSetStudentFeeModal = (student: Student) => {
+    setSelectedStudentForFee(student);
+    const existingNetFee = student.enrollmentId ? netFeeMap[student.enrollmentId] : null;
+
+    setStudentCustomFeeInput(
+      existingNetFee?.customFeeAmount !== undefined && existingNetFee?.customFeeAmount !== null
+        ? String(existingNetFee.customFeeAmount)
+        : student.customFeeAmount !== undefined && student.customFeeAmount !== null
+        ? String(student.customFeeAmount)
+        : ''
+    );
+
+    const type = existingNetFee?.discountType || student.discountType;
+    setStudentDiscountTypeInput(type ? (type as 'FIXED' | 'PERCENTAGE') : 'NONE');
+
+    const val = existingNetFee?.discountValue ?? student.discountValue;
+    setStudentDiscountValueInput(val !== undefined && val !== null ? String(val) : '');
+
+    const reason = existingNetFee?.discountReason ?? student.discountReason;
+    setStudentDiscountReasonInput(reason || '');
+
+    setStudentFeeError(null);
+  };
+
+  const handleSaveStudentFee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudentForFee?.enrollmentId) {
+      setStudentFeeError('Enrollment ID missing for this student');
+      return;
+    }
+
+    setSavingStudentFee(true);
+    setStudentFeeError(null);
+
+    try {
+      const customFeeAmount = studentCustomFeeInput.trim() !== '' ? Number(studentCustomFeeInput) : null;
+      const discountType = studentDiscountTypeInput === 'NONE' ? null : studentDiscountTypeInput;
+      const discountValue =
+        studentDiscountTypeInput !== 'NONE' && studentDiscountValueInput.trim() !== ''
+          ? Number(studentDiscountValueInput)
+          : null;
+      const discountReason = studentDiscountReasonInput.trim() !== '' ? studentDiscountReasonInput : null;
+
+      const response = await apiPatch(`/api/enrollments/${selectedStudentForFee.enrollmentId}/fee`, {
+        customFeeAmount,
+        discountType,
+        discountValue,
+        discountReason,
+      });
+
+      if (response && response.success) {
+        // Refetch net fee for this student
+        await loadNetFeeForStudent(selectedStudentForFee.enrollmentId);
+        setSelectedStudentForFee(null);
+      } else {
+        setStudentFeeError(response.message || 'Failed to update student fee');
+      }
+    } catch (err: any) {
+      setStudentFeeError(err.message || 'Error updating student fee');
+    } finally {
+      setSavingStudentFee(false);
     }
   };
 
@@ -174,7 +336,6 @@ export default function BatchDetailPage({ params }: PageProps) {
     );
   }
 
-  // Filter out students who are already enrolled in this batch
   const nonEnrolledStudents = availableStudents.filter(
     (student) => !enrolledStudents.some((enrolled) => enrolled.id === student.id)
   );
@@ -193,7 +354,7 @@ export default function BatchDetailPage({ params }: PageProps) {
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">{batch.name}</h1>
-            <p className="mt-2 text-sm text-gray-500">Batch details, routines, attendance, and student list</p>
+            <p className="mt-2 text-sm text-gray-500">Batch details, routines, attendance, fees, and student list</p>
           </div>
           {/* Quick Links */}
           <div className="flex gap-x-3">
@@ -214,7 +375,7 @@ export default function BatchDetailPage({ params }: PageProps) {
 
         {/* Content Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Details & Enrollment */}
+          {/* Left Column: Details & Fee Settings & Enrollment */}
           <div className="space-y-6 lg:col-span-1">
             {/* Details Card */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
@@ -249,6 +410,101 @@ export default function BatchDetailPage({ params }: PageProps) {
                   <span className="text-gray-900 font-semibold">{enrolledStudents.length} Students</span>
                 </div>
               </div>
+            </div>
+
+            {/* Fee Settings Section */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <h2 className="text-lg font-bold text-gray-900">Fee Settings</h2>
+                {userRole === 'ADMIN' && (
+                  <button
+                    onClick={() => {
+                      setFeeTypeInput(batch.feeType || 'MONTHLY');
+                      setFeeAmountInput(batch.feeAmount ?? 0);
+                      setIsEditingBatchFee(!isEditingBatchFee);
+                      setBatchFeeError(null);
+                      setBatchFeeSuccess(null);
+                    }}
+                    className="text-xs font-semibold text-accent hover:underline"
+                  >
+                    {isEditingBatchFee ? 'Cancel' : 'Edit'}
+                  </button>
+                )}
+              </div>
+
+              {batchFeeSuccess && (
+                <div className="rounded-md bg-green-50 p-3 border border-green-200 text-xs text-green-600">
+                  {batchFeeSuccess}
+                </div>
+              )}
+              {batchFeeError && (
+                <div className="rounded-md bg-red-50 p-3 border border-red-200 text-xs text-red-600">
+                  {batchFeeError}
+                </div>
+              )}
+
+              {!isEditingBatchFee ? (
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="text-gray-400 font-medium block">Fee Type</span>
+                    <span className="inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
+                      {batch.feeType || 'MONTHLY'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 font-medium block">Base Fee Amount</span>
+                    <span className="text-gray-900 font-bold text-lg">
+                      ৳{batch.feeAmount !== undefined ? batch.feeAmount.toLocaleString() : '0'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleUpdateBatchFee} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Fee Type
+                    </label>
+                    <select
+                      value={feeTypeInput}
+                      onChange={(e) => setFeeTypeInput(e.target.value as 'MONTHLY' | 'ONE_TIME')}
+                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                    >
+                      <option value="MONTHLY">MONTHLY</option>
+                      <option value="ONE_TIME">ONE_TIME</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Base Fee Amount (৳)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={feeAmountInput}
+                      onChange={(e) => setFeeAmountInput(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-x-2 pt-1">
+                    <button
+                      type="submit"
+                      disabled={savingBatchFee}
+                      className="flex-1 inline-flex justify-center items-center rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                    >
+                      {savingBatchFee ? 'Saving...' : 'Save Fee'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingBatchFee(false)}
+                      className="px-3 py-2 text-xs font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
 
             {/* Enroll Form Card */}
@@ -324,28 +580,65 @@ export default function BatchDetailPage({ params }: PageProps) {
                       <tr>
                         <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student Info</th>
                         <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Guardian Name</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Guardian Phone</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Fee Breakdown</th>
+                        {userRole === 'ADMIN' && (
+                          <th scope="col" className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {enrolledStudents.map((student) => (
-                        <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-semibold text-gray-900">{student.name}</div>
-                            <div className="text-xs text-gray-500">{student.email}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {student.phone || <span className="text-gray-400 italic">None</span>}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {student.guardianName || <span className="text-gray-400 italic">None</span>}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {student.guardianPhone || <span className="text-gray-400 italic">None</span>}
-                          </td>
-                        </tr>
-                      ))}
+                      {enrolledStudents.map((student) => {
+                        const netFeeInfo = student.enrollmentId ? netFeeMap[student.enrollmentId] : null;
+
+                        return (
+                          <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-semibold text-gray-900">{student.name}</div>
+                              <div className="text-xs text-gray-500">{student.email}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                              {student.phone || <span className="text-gray-400 italic">None</span>}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {netFeeInfo ? (
+                                <div>
+                                  <div className="text-sm font-bold text-gray-900">
+                                    ৳{netFeeInfo.netFee.toLocaleString()}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-0.5 flex flex-wrap items-center gap-1">
+                                    <span>
+                                      Base: ৳{(netFeeInfo.customFeeAmount ?? netFeeInfo.baseFee).toLocaleString()}
+                                    </span>
+                                    {netFeeInfo.customFeeAmount != null && (
+                                      <span className="inline-flex items-center rounded bg-amber-50 px-1 py-0.2 text-[10px] font-semibold text-amber-700 border border-amber-200">
+                                        Custom
+                                      </span>
+                                    )}
+                                    {netFeeInfo.discountType && netFeeInfo.discountValue && (
+                                      <span className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+                                        -{netFeeInfo.discountType === 'FIXED' ? `৳${netFeeInfo.discountValue}` : `${netFeeInfo.discountValue}%`}
+                                        {netFeeInfo.discountReason ? ` (${netFeeInfo.discountReason})` : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">Loading fee...</span>
+                              )}
+                            </td>
+                            {userRole === 'ADMIN' && (
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button
+                                  onClick={() => openSetStudentFeeModal(student)}
+                                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                >
+                                  Set Fee / Discount
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -354,6 +647,115 @@ export default function BatchDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Set Student Fee / Discount Modal */}
+      {selectedStudentForFee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Set Fee & Discount</h3>
+                <p className="text-xs text-gray-500">{selectedStudentForFee.name}</p>
+              </div>
+              <button
+                onClick={() => setSelectedStudentForFee(null)}
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            {studentFeeError && (
+              <div className="rounded-md bg-red-50 p-3 border border-red-200 text-xs text-red-600">
+                {studentFeeError}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveStudentFee} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Custom Fee Override (৳)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  placeholder={`Default: ৳${batch.feeAmount ?? 0}`}
+                  value={studentCustomFeeInput}
+                  onChange={(e) => setStudentCustomFeeInput(e.target.value)}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">Leave empty to use batch default fee.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Discount Type
+                </label>
+                <select
+                  value={studentDiscountTypeInput}
+                  onChange={(e) =>
+                    setStudentDiscountTypeInput(e.target.value as 'NONE' | 'FIXED' | 'PERCENTAGE')
+                  }
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                >
+                  <option value="NONE">No Discount</option>
+                  <option value="FIXED">FIXED (Amount off)</option>
+                  <option value="PERCENTAGE">PERCENTAGE (% off)</option>
+                </select>
+              </div>
+
+              {studentDiscountTypeInput !== 'NONE' && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Discount Value {studentDiscountTypeInput === 'PERCENTAGE' ? '(%)' : '(৳)'}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    placeholder={studentDiscountTypeInput === 'PERCENTAGE' ? 'e.g. 20' : 'e.g. 500'}
+                    value={studentDiscountValueInput}
+                    onChange={(e) => setStudentDiscountValueInput(e.target.value)}
+                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                    required
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Discount Reason (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Merit scholarship, Sibling discount"
+                  value={studentDiscountReasonInput}
+                  onChange={(e) => setStudentDiscountReasonInput(e.target.value)}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                />
+              </div>
+
+              <div className="flex gap-x-2 pt-2 border-t border-gray-100">
+                <button
+                  type="submit"
+                  disabled={savingStudentFee}
+                  className="flex-1 inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                >
+                  {savingStudentFee ? 'Saving...' : 'Save Fee Configuration'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStudentForFee(null)}
+                  className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
