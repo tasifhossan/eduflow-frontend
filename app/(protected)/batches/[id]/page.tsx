@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getToken, parseJwt } from '@/lib/client-auth';
 
 interface Student {
   id: string;
@@ -106,14 +106,14 @@ export default function BatchDetailPage({ params }: PageProps) {
     const token = getToken();
 
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = parseJwt(token);
+      if (payload && payload.role) {
         setUserRole(payload.role);
         if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER') {
           router.push('/dashboard');
           return;
         }
-      } catch (err) {
+      } else {
         router.push('/login');
         return;
       }

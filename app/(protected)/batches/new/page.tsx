@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet, apiPost } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getToken, parseJwt } from '@/lib/client-auth';
 
 interface Subject {
   id: string;
@@ -35,25 +35,17 @@ export default function NewBatchPage() {
   // Authorization Check
   useEffect(() => {
     const token = getToken();
-    console.error('DEBUG: token found in /batches/new page:', token);
 
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.error('DEBUG: payload decoded in /batches/new:', payload);
-        if (payload.role !== 'ADMIN') {
-          console.error('DEBUG: payload role is not ADMIN, pushing to /batches');
-          router.push('/batches');
-        }
-      } catch (err) {
-        console.error('DEBUG: JSON parse or atob failed in /batches/new page:', err);
-        router.push('/login');
+      const payload = parseJwt(token);
+      if (!payload || payload.role !== 'ADMIN') {
+        router.push('/batches');
       }
     } else {
-      console.error('DEBUG: no token found in /batches/new, pushing to /login');
       router.push('/login');
     }
   }, [router]);
+
 
   // Fetch subjects and teachers
   useEffect(() => {
