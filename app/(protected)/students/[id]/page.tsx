@@ -4,6 +4,8 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
+import StudentEditControls from '@/components/student-edit-controls';
+
 
 interface Batch {
   id: string;
@@ -211,6 +213,8 @@ export default async function StudentDetailPage({
                       })}
                     </span>
                   </div>
+
+                  <StudentEditControls student={studentProfile} isAdmin={user.role === 'ADMIN'} />
                 </div>
               </div>
             </div>

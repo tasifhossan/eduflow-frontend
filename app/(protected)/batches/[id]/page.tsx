@@ -89,6 +89,38 @@ export default function BatchDetailPage({ params }: PageProps) {
   const [enrollError, setEnrollError] = useState<string | null>(null);
   const [enrollSuccess, setEnrollSuccess] = useState<string | null>(null);
 
+  // Unenroll Modal State
+  const [unenrollStudentTarget, setUnenrollStudentTarget] = useState<Student | null>(null);
+  const [unenrolling, setUnenrolling] = useState(false);
+  const [unenrollError, setUnenrollError] = useState<string | null>(null);
+
+  const handleUnenrollStudent = async () => {
+    if (!unenrollStudentTarget || !unenrollStudentTarget.enrollmentId) return;
+
+    setUnenrolling(true);
+    setUnenrollError(null);
+
+    try {
+      const response = await apiPatch(`/api/enrollments/${unenrollStudentTarget.enrollmentId}/unenroll`, {});
+
+      if (response && response.success) {
+        setUnenrollStudentTarget(null);
+        // Refresh enrolled students list
+        const enrolledRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`);
+        if (enrolledRes.success && enrolledRes.data) {
+          setEnrolledStudents(enrolledRes.data);
+        }
+      } else {
+        setUnenrollError(response.message || 'Failed to unenroll student');
+      }
+    } catch (err: any) {
+      setUnenrollError(err.message || 'Error unenrolling student');
+    } finally {
+      setUnenrolling(false);
+    }
+  };
+
+
   // Helper to load net fee for a student's enrollment
   const loadNetFeeForStudent = async (enrollmentId: string) => {
     try {
@@ -637,12 +669,23 @@ export default function BatchDetailPage({ params }: PageProps) {
                             </td>
                             {userRole === 'ADMIN' && (
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button
-                                  onClick={() => openSetStudentFeeModal(student)}
-                                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
-                                >
-                                  Set Fee / Discount
-                                </button>
+                                <div className="flex items-center justify-end gap-x-2">
+                                  <button
+                                    onClick={() => openSetStudentFeeModal(student)}
+                                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                  >
+                                    Set Fee / Discount
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setUnenrollStudentTarget(student);
+                                      setUnenrollError(null);
+                                    }}
+                                    className="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+                                  >
+                                    Unenroll
+                                  </button>
+                                </div>
                               </td>
                             )}
                           </tr>
@@ -765,6 +808,43 @@ export default function BatchDetailPage({ params }: PageProps) {
           </div>
         </div>
       )}
+
+      {/* Unenroll Confirmation Modal */}
+      {unenrollStudentTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
+            <h3 className="text-lg font-bold text-gray-900">Confirm Unenrollment</h3>
+            <p className="text-sm text-gray-600">
+              Are you sure you want to unenroll <span className="font-semibold text-gray-900">{unenrollStudentTarget.name}</span> from this batch?
+            </p>
+
+            {unenrollError && (
+              <div className="p-3 bg-red-50 text-xs text-red-600 rounded-lg border border-red-200">
+                {unenrollError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-x-3 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setUnenrollStudentTarget(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={unenrolling}
+                onClick={handleUnenrollStudent}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-50"
+              >
+                {unenrolling ? 'Unenrolling...' : 'Yes, Unenroll Student'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
