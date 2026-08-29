@@ -14,6 +14,16 @@ interface UpcomingTest {
   batch: { id: string; name: string };
 }
 
+interface DueSummaryItem {
+  batchId: string;
+  batchName: string;
+  dueCount: number;
+  partialCount: number;
+  totalAmountDue: number;
+  totalAmountPaid: number;
+  totalRemaining: number;
+}
+
 interface AdminTeacherSummary {
   role: 'ADMIN' | 'TEACHER';
   stats: {
@@ -77,6 +87,75 @@ function StatCard({ label, value, sub }: { label: string; value: number | string
         <span className="text-4xl font-extrabold text-gray-900">{value}</span>
         {sub && <span className="text-sm text-gray-500">{sub}</span>}
       </div>
+    </div>
+  );
+}
+
+function FeeCollectionCard({ dueSummary }: { dueSummary: DueSummaryItem[] }) {
+  const overallOutstanding = dueSummary.reduce((sum, item) => sum + item.totalRemaining, 0);
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 gap-2">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">Fee Collection</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Summary of pending & partial student fees by batch</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2 self-start sm:self-auto text-right">
+          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider block">Total Outstanding</span>
+          <span className="text-lg font-extrabold text-red-700">৳{overallOutstanding.toLocaleString()}</span>
+        </div>
+      </div>
+
+      {dueSummary.length === 0 ? (
+        <p className="text-xs text-gray-400 italic py-4 text-center">
+          No pending or partial fee payments recorded.
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-100 text-sm">
+            <thead>
+              <tr className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <th className="pb-3">Batch Name</th>
+                <th className="pb-3 text-center">DUE Count</th>
+                <th className="pb-3 text-center">PARTIAL Count</th>
+                <th className="pb-3 text-right">Outstanding Amount</th>
+                <th className="pb-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {dueSummary.map((item) => (
+                <tr key={item.batchId} className="hover:bg-gray-50/60 transition-colors">
+                  <td className="py-3 font-semibold text-gray-900">
+                    {item.batchName}
+                  </td>
+                  <td className="py-3 text-center font-medium">
+                    <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-600/20">
+                      {item.dueCount} DUE
+                    </span>
+                  </td>
+                  <td className="py-3 text-center font-medium">
+                    <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                      {item.partialCount} PARTIAL
+                    </span>
+                  </td>
+                  <td className="py-3 text-right font-bold text-gray-900">
+                    ৳{item.totalRemaining.toLocaleString()}
+                  </td>
+                  <td className="py-3 text-right">
+                    <Link
+                      href={`/batches/${item.batchId}/payments`}
+                      className="text-xs font-semibold text-accent hover:underline"
+                    >
+                      Payments →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -204,7 +283,15 @@ async function DbStatusBadge({ cookieHeader }: { cookieHeader: string }) {
 
 // ─── Admin / Teacher View ─────────────────────────────────────────────────
 
-function AdminTeacherDashboard({ data }: { data: AdminTeacherSummary }) {
+function AdminTeacherDashboard({
+  data,
+  dueSummary,
+  isAdmin,
+}: {
+  data: AdminTeacherSummary;
+  dueSummary?: DueSummaryItem[];
+  isAdmin?: boolean;
+}) {
   const { stats, attendanceSummary, upcomingTests, recentActivity } = data;
   const attendancePct =
     attendanceSummary.totalBatches > 0
@@ -219,6 +306,11 @@ function AdminTeacherDashboard({ data }: { data: AdminTeacherSummary }) {
         <StatCard label="Total Batches" value={stats.totalBatches} sub="in branch" />
         <StatCard label="Teachers" value={stats.totalTeachers} sub="on staff" />
       </div>
+
+      {/* Fee Collection Card (ADMIN only) */}
+      {isAdmin && dueSummary && (
+        <FeeCollectionCard dueSummary={dueSummary} />
+      )}
 
       {/* Attendance summary */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -286,7 +378,6 @@ function AdminTeacherDashboard({ data }: { data: AdminTeacherSummary }) {
 
 function StudentDashboard({ data }: { data: StudentSummary }) {
   const { enrolledBatchCount, enrolledBatches, upcomingTests, recentAttendance } = data;
-  const totalRecords = recentAttendance.records.length;
 
   return (
     <div className="space-y-6">
@@ -363,6 +454,7 @@ export default async function DashboardPage() {
   const cookieHeader = cookieStore.toString();
 
   let summary: DashboardSummary | null = null;
+  let dueSummaryData: DueSummaryItem[] = [];
   let errorMsg: string | null = null;
 
   try {
@@ -375,6 +467,20 @@ export default async function DashboardPage() {
     );
     if (response?.success) {
       summary = response.data;
+    }
+
+    if (user?.role === 'ADMIN') {
+      const dueRes = await apiGet<{ success: boolean; data: DueSummaryItem[] }>(
+        '/api/payments/due-summary',
+        {
+          headers: { Cookie: cookieHeader },
+          cache: 'no-store',
+        }
+      ).catch(() => null);
+
+      if (dueRes?.success && dueRes.data) {
+        dueSummaryData = dueRes.data;
+      }
     }
   } catch (err: any) {
     errorMsg = err.message || 'Failed to load dashboard summary';
@@ -414,7 +520,11 @@ export default async function DashboardPage() {
           <StudentDashboard data={summary as StudentSummary} />
         )}
         {summary && (summary.role === 'ADMIN' || summary.role === 'TEACHER') && (
-          <AdminTeacherDashboard data={summary as AdminTeacherSummary} />
+          <AdminTeacherDashboard
+            data={summary as AdminTeacherSummary}
+            dueSummary={dueSummaryData}
+            isAdmin={user?.role === 'ADMIN'}
+          />
         )}
 
         {/* Fallback if fetch failed but user is known */}
