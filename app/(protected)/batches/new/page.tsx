@@ -55,32 +55,16 @@ export default function NewBatchPage() {
         const subjRes = await apiGet<{ success: boolean; data: Subject[] }>('/api/subjects')
           .catch(() => ({ success: false, data: [] }));
         
-        if (subjRes.success && subjRes.data.length > 0) {
+        if (subjRes.success && subjRes.data) {
           setSubjects(subjRes.data);
-        } else {
-          // Mock subjects fallback
-          setSubjects([
-            { id: 'sub-phy', name: 'Physics' },
-            { id: 'sub-chem', name: 'Chemistry' },
-            { id: 'sub-math', name: 'Mathematics' },
-            { id: 'sub-bio', name: 'Biology' },
-            { id: 'sub-eng', name: 'English' },
-          ]);
         }
 
         // Attempt fetching teachers
         const teachRes = await apiGet<{ success: boolean; data: Teacher[] }>('/api/users?role=TEACHER')
           .catch(() => ({ success: false, data: [] }));
 
-        if (teachRes.success && teachRes.data.length > 0) {
+        if (teachRes.success && teachRes.data) {
           setTeachers(teachRes.data);
-        } else {
-          // Mock teachers fallback
-          setTeachers([
-            { id: 'usr-teach1', name: 'Dr. Rafiqul Islam' },
-            { id: 'usr-teach2', name: 'Ms. Farhana Yasmin' },
-            { id: 'usr-teach3', name: 'Mr. Tanvir Rahman' },
-          ]);
         }
       } catch (err) {
         console.warn('Failed to load subjects or teachers, using mock fallbacks');
