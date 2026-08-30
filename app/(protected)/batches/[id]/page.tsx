@@ -389,7 +389,13 @@ export default function BatchDetailPage({ params }: PageProps) {
             <p className="mt-2 text-sm text-gray-500">Batch details, routines, attendance, fees, and student list</p>
           </div>
           {/* Quick Links */}
-          <div className="flex gap-x-3">
+          <div className="flex gap-x-3 flex-wrap gap-y-2">
+            <Link
+              href={`/batches/${batchId}/resources`}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            >
+              Study Materials
+            </Link>
             <Link
               href={`/batches/${batchId}/routine`}
               className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
