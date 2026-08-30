@@ -217,7 +217,7 @@ export default async function StudentDetailPage({
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        Portal Access Accounts
+                        Linked Guardian Accounts
                       </span>
                     </div>
                     {studentProfile.linkedGuardians && studentProfile.linkedGuardians.length > 0 ? (
@@ -229,14 +229,9 @@ export default async function StudentDetailPage({
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-bold text-purple-900 text-sm">{g.name}</span>
-                              <div className="flex items-center gap-x-1.5">
-                                <span className="inline-flex items-center rounded-md bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700">
-                                  Active Account
-                                </span>
-                                {user.role === 'ADMIN' && g.linkId && (
-                                  <UnlinkGuardianButton linkId={g.linkId} guardianName={g.name} />
-                                )}
-                              </div>
+                              {user.role === 'ADMIN' && g.linkId && (
+                                <UnlinkGuardianButton linkId={g.linkId} guardianName={g.name} />
+                              )}
                             </div>
                             <span className="text-purple-700 block font-medium">{g.email}</span>
                             {g.phone && <span className="text-purple-600 block">{g.phone}</span>}
