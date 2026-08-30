@@ -174,7 +174,7 @@ export default async function ProtectedLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {visibleLinks.map((link) => (
             <Link
               key={link.name}
