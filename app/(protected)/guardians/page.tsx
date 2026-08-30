@@ -349,7 +349,10 @@ export default function AdminGuardiansPage() {
                 <select
                   required
                   value={selectedGuardianId}
-                  onChange={(e) => setSelectedGuardianId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedGuardianId(e.target.value);
+                    setSelectedStudentId('');
+                  }}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent bg-white"
                 >
                   <option value="">-- Choose Guardian Account --</option>
@@ -365,19 +368,34 @@ export default function AdminGuardiansPage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Select Student <span className="text-red-500">*</span>
                 </label>
-                <select
-                  required
-                  value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent bg-white"
-                >
-                  <option value="">-- Choose Student --</option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.email})
-                    </option>
-                  ))}
-                </select>
+                {(() => {
+                  const linkedStudentIds = selectedGuardianId
+                    ? guardians
+                        .find((g) => g.id === selectedGuardianId)
+                        ?.guardianLinks?.map((link) => link.student.id) || []
+                    : [];
+                  const availableStudents = students.filter((s) => !linkedStudentIds.includes(s.id));
+
+                  return (
+                    <select
+                      required
+                      value={selectedStudentId}
+                      onChange={(e) => setSelectedStudentId(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent bg-white"
+                    >
+                      <option value="">-- Choose Student --</option>
+                      {availableStudents.length === 0 && selectedGuardianId ? (
+                        <option value="" disabled>All students already linked to this guardian</option>
+                      ) : (
+                        availableStudents.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} ({s.email})
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  );
+                })()}
               </div>
 
               <div className="sm:col-span-2 flex justify-end gap-x-3 pt-2">
