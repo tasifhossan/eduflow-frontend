@@ -24,12 +24,14 @@ interface StudentEditControlsProps {
     phone?: string | null;
     guardianName?: string | null;
     guardianPhone?: string | null;
+    linkedGuardians?: any[];
   };
   isAdmin: boolean;
 }
 
 export default function StudentEditControls({ student, isAdmin }: StudentEditControlsProps) {
   const router = useRouter();
+  const hasLinkedGuardian = (student.linkedGuardians && student.linkedGuardians.length > 0) || false;
 
   // Edit Modal State
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -179,7 +181,8 @@ export default function StudentEditControls({ student, isAdmin }: StudentEditCon
                   value={guardianName}
                   onChange={(e) => setGuardianName(e.target.value)}
                   placeholder="e.g. Mr. Hossain"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-accent focus:outline-none"
+                  disabled={hasLinkedGuardian}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-accent focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -190,8 +193,14 @@ export default function StudentEditControls({ student, isAdmin }: StudentEditCon
                   value={guardianPhone}
                   onChange={(e) => setGuardianPhone(e.target.value)}
                   placeholder="e.g. 01711111111"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-accent focus:outline-none"
+                  disabled={hasLinkedGuardian}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-accent focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                 />
+                {hasLinkedGuardian && (
+                  <p className="text-[11px] text-amber-600 mt-1 italic font-medium">
+                    Synced from linked guardian account — unlink to edit manually
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-end gap-x-3 pt-3 border-t border-gray-100">
