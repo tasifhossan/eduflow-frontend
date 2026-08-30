@@ -200,37 +200,44 @@ export default async function StudentDetailPage({
                     </span>
                   </div>
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Guardian Name</span>
+                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Guardian Contact Name</span>
                     <span className="text-sm font-medium text-gray-900 font-poppins">
                       {studentProfile.guardianName || <span className="text-gray-400 italic">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Guardian Phone</span>
+                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Guardian Contact Phone</span>
                     <span className="text-sm font-medium text-gray-900">
                       {studentProfile.guardianPhone || <span className="text-gray-400 italic">Not provided</span>}
                     </span>
                   </div>
 
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                      Linked Guardian Accounts
-                    </span>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Portal Access Accounts
+                      </span>
+                    </div>
                     {studentProfile.linkedGuardians && studentProfile.linkedGuardians.length > 0 ? (
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {studentProfile.linkedGuardians.map((g) => (
                           <div
                             key={g.id}
-                            className="rounded-lg bg-purple-50 p-2 border border-purple-100 text-xs"
+                            className="rounded-xl bg-purple-50/80 p-3 border border-purple-100 text-xs space-y-1"
                           >
-                            <span className="font-bold text-purple-900 block">{g.name}</span>
-                            <span className="text-purple-700 block">{g.email}</span>
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-purple-900 text-sm">{g.name}</span>
+                              <span className="inline-flex items-center rounded-md bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700">
+                                Active Account
+                              </span>
+                            </div>
+                            <span className="text-purple-700 block font-medium">{g.email}</span>
                             {g.phone && <span className="text-purple-600 block">{g.phone}</span>}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">No linked account</span>
+                      <span className="text-xs text-gray-400 italic">No portal login account linked</span>
                     )}
                   </div>
 
