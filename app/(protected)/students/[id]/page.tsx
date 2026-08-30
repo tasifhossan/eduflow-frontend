@@ -29,6 +29,13 @@ interface AttendanceRecord {
   };
 }
 
+interface LinkedGuardian {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+}
+
 interface StudentSummary {
   id: string;
   name: string;
@@ -36,6 +43,7 @@ interface StudentSummary {
   phone?: string | null;
   guardianName?: string | null;
   guardianPhone?: string | null;
+  linkedGuardians?: LinkedGuardian[];
   createdAt: string;
 }
 
@@ -203,6 +211,29 @@ export default async function StudentDetailPage({
                       {studentProfile.guardianPhone || <span className="text-gray-400 italic">Not provided</span>}
                     </span>
                   </div>
+
+                  <div>
+                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                      Linked Guardian Accounts
+                    </span>
+                    {studentProfile.linkedGuardians && studentProfile.linkedGuardians.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {studentProfile.linkedGuardians.map((g) => (
+                          <div
+                            key={g.id}
+                            className="rounded-lg bg-purple-50 p-2 border border-purple-100 text-xs"
+                          >
+                            <span className="font-bold text-purple-900 block">{g.name}</span>
+                            <span className="text-purple-700 block">{g.email}</span>
+                            {g.phone && <span className="text-purple-600 block">{g.phone}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">No linked account</span>
+                    )}
+                  </div>
+
                   <div>
                     <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Admission Date</span>
                     <span className="text-sm font-medium text-gray-900">
