@@ -22,6 +22,13 @@ interface UserItem {
   email: string;
   phone?: string | null;
   role: string;
+  guardianLinks?: {
+    student: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  }[];
 }
 
 export default function AdminGuardiansPage() {
@@ -143,6 +150,10 @@ export default function AdminGuardiansPage() {
         setSelectedGuardianId('');
         setSelectedStudentId('');
         setIsLinkOpen(false);
+
+        // Refresh guardian list to show updated linked students
+        const gRes = await apiGet<{ success: boolean; data: UserItem[] }>('/api/users?role=GUARDIAN');
+        if (gRes.success && gRes.data) setGuardians(gRes.data);
       } else {
         setLinkError(res.message || 'Failed to link guardian to student');
       }
@@ -411,22 +422,42 @@ export default function AdminGuardiansPage() {
             <div className="divide-y divide-gray-100">
               {guardians.map((g) => (
                 <div key={g.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-gray-900 text-base">{g.name}</h3>
-                    <div className="flex items-center gap-x-4 text-xs text-gray-500 flex-wrap">
-                      <span className="flex items-center gap-x-1">
-                        <Mail className="w-3.5 h-3.5 text-gray-400" /> {g.email}
-                      </span>
-                      {g.phone && (
-                        <>
-                          <span>•</span>
-                          <span className="flex items-center gap-x-1">
-                            <Phone className="w-3.5 h-3.5 text-gray-400" /> {g.phone}
+                  <div className="space-y-2">
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-base">{g.name}</h3>
+                      <div className="flex items-center gap-x-4 text-xs text-gray-500 flex-wrap mt-0.5">
+                        <span className="flex items-center gap-x-1">
+                          <Mail className="w-3.5 h-3.5 text-gray-400" /> {g.email}
+                        </span>
+                        {g.phone && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-x-1">
+                              <Phone className="w-3.5 h-3.5 text-gray-400" /> {g.phone}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Linked Students List */}
+                    <div className="flex items-center gap-2 flex-wrap text-xs pt-1">
+                      <span className="text-gray-400 font-medium">Linked Students:</span>
+                      {g.guardianLinks && g.guardianLinks.length > 0 ? (
+                        g.guardianLinks.map((link) => (
+                          <span
+                            key={link.student.id}
+                            className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-accent ring-1 ring-inset ring-accent/10"
+                          >
+                            {link.student.name} ({link.student.email})
                           </span>
-                        </>
+                        ))
+                      ) : (
+                        <span className="text-gray-400 italic">No linked students yet</span>
                       )}
                     </div>
                   </div>
+
                   <span className="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 ring-1 ring-inset ring-purple-700/10 shrink-0 self-start sm:self-center">
                     GUARDIAN ACCOUNT
                   </span>
