@@ -56,7 +56,19 @@ interface StudentSummary {
   };
 }
 
-type DashboardSummary = AdminTeacherSummary | StudentSummary;
+interface GuardianSummary {
+  role: 'GUARDIAN';
+  childrenCount: number;
+  children: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    enrolledBatches: { id: string; name: string }[];
+  }[];
+}
+
+type DashboardSummary = AdminTeacherSummary | StudentSummary | GuardianSummary;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -446,6 +458,79 @@ function StudentDashboard({ data }: { data: StudentSummary }) {
   );
 }
 
+// ─── Guardian View ────────────────────────────────────────────────────────
+
+function GuardianDashboard({ data }: { data: GuardianSummary }) {
+  const { childrenCount, children } = data;
+
+  return (
+    <div className="space-y-6">
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <StatCard label="My Children" value={childrenCount} sub="linked" />
+      </div>
+
+      {/* Linked children */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Linked Children</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Overview of children linked to your guardian account</p>
+          </div>
+          <Link
+            href="/my-children"
+            className="text-xs font-semibold text-accent hover:underline"
+          >
+            View Children Directory →
+          </Link>
+        </div>
+
+        {children.length === 0 ? (
+          <p className="text-xs text-gray-400 italic py-4 text-center">
+            No children are currently linked to your account. Please contact your coaching center admin.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {children.map((child) => (
+              <div
+                key={child.id}
+                className="rounded-xl border border-gray-200 p-5 bg-gray-50/50 hover:bg-gray-50 transition space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900 text-base">{child.name}</h3>
+                  <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                    Student
+                  </span>
+                </div>
+
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p><span className="font-medium text-gray-700">Email:</span> {child.email}</p>
+                  {child.phone && <p><span className="font-medium text-gray-700">Phone:</span> {child.phone}</p>}
+                  <p>
+                    <span className="font-medium text-gray-700">Enrolled Batches:</span>{' '}
+                    {child.enrolledBatches.length > 0
+                      ? child.enrolledBatches.map((b) => b.name).join(', ')
+                      : 'None'}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-gray-200/60 flex justify-end">
+                  <Link
+                    href={`/my-children/${child.id}`}
+                    className="inline-flex items-center justify-center rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-accent/90 transition gap-x-1"
+                  >
+                    View Attendance, Results & Fees →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
@@ -516,6 +601,9 @@ export default async function DashboardPage() {
         )}
 
         {/* Role-aware content */}
+        {summary && summary.role === 'GUARDIAN' && (
+          <GuardianDashboard data={summary as GuardianSummary} />
+        )}
         {summary && summary.role === 'STUDENT' && (
           <StudentDashboard data={summary as StudentSummary} />
         )}
