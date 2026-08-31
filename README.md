@@ -30,8 +30,9 @@ Built with Next.js 16 App Router and Tailwind CSS v4 to deliver fast performance
 ---
 
 ## Key Features  
-- **Interactive Exam Portal** — Full-screen timed online MCQ & written exam test taker.
-- **Admin & Teacher Dashboards** — Batch creation, routine viewer, attendance logging, and paper test leaderboard entry.
+- **Interactive Exam Portal & Tests Hub** — Timed online MCQ & written exam test taker, results viewer, and global test creation hub.
+- **Guardian Portal & Account Links** — Dedicated Guardian dashboard for monitoring linked children, plus student details view showing linked guardian credentials and unlinking workflows.
+- **Admin & Teacher Dashboards** — Batch creation, routine manager, attendance logger, fee calculator, and paper test leaderboard entry.
 - **Student Analytics** — Visual test history, marks summary, and attendance records.
 
 ---
@@ -84,7 +85,13 @@ npm run dev
 frontend/
 ├── app/
 │   ├── (auth)/
-│   ├── dashboard/
+│   ├── (protected)/
+│   │   ├── attendance/
+│   │   ├── batches/
+│   │   ├── dashboard/
+│   │   ├── guardians/
+│   │   ├── students/
+│   │   └── tests/
 │   └── page.tsx
 ├── components/
 ├── lib/
