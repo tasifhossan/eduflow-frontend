@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getToken } from '@/lib/client-auth';
 
@@ -69,10 +70,14 @@ function typeBadgeClass(type: string) {
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function TestsHubPage() {
+  const router = useRouter();
   const [role, setRole] = useState<UserRole | null>(null);
   const [groups, setGroups] = useState<BatchWithTests[]>([]);
+  const [allBatches, setAllBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedBatchId, setSelectedBatchId] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -133,11 +138,10 @@ export default function TestsHubPage() {
 
           const result: BatchWithTests[] = settled
             .filter((s): s is PromiseFulfilledResult<BatchWithTests> => s.status === 'fulfilled')
-            .map((s) => s.value)
-            // Only show batches that have at least one test
-            .filter((g) => g.tests.length > 0);
+            .map((s) => s.value);
 
           setGroups(result);
+          setAllBatches(batches);
 
         // ── STUDENT: fetch enrolled batches then their tests ──────────────
         } else {
@@ -231,7 +235,56 @@ export default function TestsHubPage() {
                 : `Your upcoming and past exams across enrolled batches`}
             </p>
           </div>
+          {isStaff && (
+            <button
+              onClick={() => { setSelectedBatchId(''); setShowCreateModal(true); }}
+              className="inline-flex items-center gap-x-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+            >
+              <svg className="-ml-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              Create Test
+            </button>
+          )}
         </div>
+
+        {/* Create Test Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-1">Create New Test</h2>
+              <p className="text-sm text-gray-500 mb-5">Select a batch to create a test in.</p>
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Batch</label>
+                <select
+                  value={selectedBatchId}
+                  onChange={(e) => setSelectedBatchId(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                >
+                  <option value="">Select a batch…</option>
+                  {allBatches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} · {b.subject.name}{b.classLevel ? ` · Class ${b.classLevel}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-x-3">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={!selectedBatchId}
+                  onClick={() => { if (selectedBatchId) router.push(`/batches/${selectedBatchId}/tests/new`); }}
+                  className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error */}
         {errorMsg && (
@@ -243,7 +296,7 @@ export default function TestsHubPage() {
         )}
 
         {/* Empty state */}
-        {!errorMsg && groups.length === 0 && (
+        {!errorMsg && groups.filter(g => g.tests.length > 0).length === 0 && !isStaff && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
             <svg
               className="mx-auto h-12 w-12 text-gray-300"
@@ -259,24 +312,12 @@ export default function TestsHubPage() {
               />
             </svg>
             <h3 className="mt-4 text-sm font-semibold text-gray-900">No tests found</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              {isStaff
-                ? 'No exams have been created yet. Open a batch to create the first test.'
-                : 'No tests have been scheduled in your batches yet.'}
-            </p>
-            {isStaff && (
-              <Link
-                href="/batches"
-                className="mt-6 inline-flex items-center rounded-md bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
-              >
-                Go to Batches
-              </Link>
-            )}
+            <p className="text-xs text-gray-400 mt-1">No tests have been scheduled in your batches yet.</p>
           </div>
         )}
 
-        {/* Grouped test lists */}
-        {!errorMsg && groups.map(({ batch, tests, myResults }) => (
+        {/* Grouped test lists — for staff show all batches; for students only those with tests */}
+        {!errorMsg && groups.filter(g => isStaff || g.tests.length > 0).map(({ batch, tests, myResults }) => (
           <div
             key={batch.id}
             className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
