@@ -9,6 +9,23 @@ export interface User {
   branchId: string;
 }
 
+export function decodeJwtPayload(token: string): any {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4 !== 0) {
+      base64 += '=';
+    }
+    const jsonString = typeof Buffer !== 'undefined'
+      ? Buffer.from(base64, 'base64').toString('utf-8')
+      : atob(base64);
+    return JSON.parse(jsonString);
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
@@ -17,8 +34,10 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
   }
 
+  const decoded = decodeJwtPayload(token);
+
   try {
-    // Attempt to call the real backend /api/auth/me endpoint (forwarding the auth cookie)
+    // Attempt to call backend /api/auth/me endpoint (forwarding the auth cookie)
     const response = await apiGet<{ success: boolean; data: User }>('/api/auth/me', {
       headers: {
         Cookie: `token=${token}`,
@@ -28,31 +47,17 @@ export async function getCurrentUser(): Promise<User | null> {
       return response.data;
     }
   } catch (error) {
-    // If backend endpoint is missing/fails, fall back to decoding user info from the JWT token
-    console.warn('GET /api/auth/me not available or failed, falling back to local JWT decode.');
+    console.warn('GET /api/auth/me call failed in getCurrentUser, using JWT decoded payload fallback.');
   }
 
-  // JWT Decoding Fallback
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const base64Url = parts[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = atob(base64);
-      const decoded = JSON.parse(jsonPayload);
-      
-      if (decoded && decoded.userId) {
-        return {
-          id: decoded.userId,
-          name: 'Logged In User', // Mock name
-          email: 'user@eduflow.com', // Mock email
-          role: decoded.role,
-          branchId: decoded.branchId,
-        };
-      }
-    }
-  } catch (e) {
-    console.error('Failed to decode JWT locally:', e);
+  if (decoded && (decoded.userId || decoded.id)) {
+    return {
+      id: decoded.userId || decoded.id,
+      name: decoded.name || 'Logged In User',
+      email: decoded.email || 'user@eduflow.com',
+      role: decoded.role,
+      branchId: decoded.branchId,
+    };
   }
 
   return null;
