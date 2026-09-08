@@ -1,7 +1,17 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eduflow-backend-eu3i.onrender.com';
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+  }
+  // In browser, relative URL uses Next.js rewrites proxy to ensure 1st-party httpOnly cookie compatibility
+  if (typeof window !== 'undefined') {
+    return '';
+  }
+  return 'https://eduflow-backend-eu3i.onrender.com';
+};
 
 export async function apiGet<T = any>(path: string, options?: RequestInit): Promise<T> {
-  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
     method: 'GET',
     credentials: 'include',
@@ -21,7 +31,8 @@ export async function apiGet<T = any>(path: string, options?: RequestInit): Prom
 }
 
 export async function apiPost<T = any>(path: string, body?: any, options?: RequestInit): Promise<T> {
-  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -42,7 +53,8 @@ export async function apiPost<T = any>(path: string, body?: any, options?: Reque
 }
 
 export async function apiDelete<T = any>(path: string, options?: RequestInit): Promise<T> {
-  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
     method: 'DELETE',
     credentials: 'include',
@@ -62,7 +74,8 @@ export async function apiDelete<T = any>(path: string, options?: RequestInit): P
 }
 
 export async function apiPatch<T = any>(path: string, body?: any, options?: RequestInit): Promise<T> {
-  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
     method: 'PATCH',
     credentials: 'include',
