@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPatch, apiPost } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface BatchDetails {
   id: string;
@@ -88,25 +88,20 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
 
   // Role validation & fetch initial data
   useEffect(() => {
-    const token = getToken();
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER') {
-          router.push('/dashboard');
-          return;
-        }
-      } catch (err) {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
         router.push('/login');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      if (user.role !== 'ADMIN' && user.role !== 'TEACHER') {
+        router.push('/dashboard');
+        return;
+      }
+      loadResults();
     }
 
-    async function loadDashboardData() {
+    async function loadResults() {
       try {
         setLoading(true);
         setErrorMsg(null);
@@ -138,7 +133,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
       }
     }
 
-    loadDashboardData();
+    init();
   }, [batchId, testId, router]);
 
   const fetchResults = async () => {

@@ -17,17 +17,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await apiPost('/api/auth/login', { email, password });
-      const token = response?.data?.token;
-      if (token) {
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'http:';
-        const cookieString = isLocalhost
-          ? `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
-          : `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=None; Secure`;
-        
-        document.cookie = cookieString;
-        console.log('SET COOKIE VALUE:', document.cookie);
-      }
+      await apiPost('/api/auth/login', { email, password });
       window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');

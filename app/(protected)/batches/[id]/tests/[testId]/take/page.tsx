@@ -4,7 +4,7 @@ import React, { use, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface Option {
   id: string;
@@ -55,23 +55,17 @@ export default function TakeTestPage({ params }: PageProps) {
 
   // Validate student role & check prior submission
   useEffect(() => {
-    const token = getToken();
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'STUDENT') {
-          // Redirect staff away from the exam submission workspace
-          router.push(`/batches/${batchId}/tests`);
-          return;
-        }
-      } catch (err) {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
         router.push('/login');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      if (user.role !== 'STUDENT') {
+        router.push(`/batches/${batchId}/tests`);
+        return;
+      }
+      checkSubmissionAndLoadTest();
     }
 
     async function checkSubmissionAndLoadTest() {
@@ -107,7 +101,7 @@ export default function TakeTestPage({ params }: PageProps) {
       }
     }
 
-    checkSubmissionAndLoadTest();
+    init();
   }, [batchId, testId, router]);
 
   // Countdown timer hook

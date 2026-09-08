@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 import {
   Bell,
   Plus,
@@ -57,15 +57,12 @@ export default function NoticesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const payload = parseJwt(token);
-      if (payload && payload.role) {
-        setUserRole(payload.role);
+    async function loadData() {
+      const user = await getCurrentUserClient();
+      if (user?.role) {
+        setUserRole(user.role);
       }
-    }
 
-    async function loadNotices() {
       try {
         setLoading(true);
         setErrorMsg(null);
@@ -77,8 +74,7 @@ export default function NoticesPage() {
         }
 
         // If ADMIN or TEACHER, fetch batches for the post notice dropdown
-        const role = parseJwt(token || '')?.role;
-        if (role === 'ADMIN' || role === 'TEACHER') {
+        if (user?.role === 'ADMIN' || user?.role === 'TEACHER') {
           const batchRes = await apiGet<{ success: boolean; data: BatchOption[] }>('/api/batches')
             .catch(() => ({ success: false, data: [] }));
           if (batchRes.success && batchRes.data) {
@@ -86,13 +82,13 @@ export default function NoticesPage() {
           }
         }
       } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load notice board');
+        setErrorMsg(err.message || 'Failed to load notices');
       } finally {
         setLoading(false);
       }
     }
 
-    loadNotices();
+    loadData();
   }, []);
 
   const handlePostNotice = async (e: React.FormEvent) => {

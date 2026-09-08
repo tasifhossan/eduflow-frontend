@@ -15,10 +15,8 @@ export default function LogoutButton() {
       // Call POST /api/auth/logout backend to clear session cookie
       await apiPost('/api/auth/logout');
     } catch (err) {
-      console.warn('Backend logout failed or not implemented:', err);
+      console.warn('Backend logout failed:', err);
     } finally {
-      // Always clear the local cookie to ensure redirect works immediately
-      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;';
       router.push('/login');
       router.refresh();
     }

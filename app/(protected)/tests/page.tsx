@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -32,23 +32,6 @@ interface BatchWithTests {
 }
 
 type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-function getRoleFromCookie(): UserRole | null {
-  try {
-    const token = getToken();
-    if (!token) return null;
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    if (['ADMIN', 'TEACHER', 'STUDENT'].includes(payload.role)) {
-      return payload.role as UserRole;
-    }
-    return null;
-  } catch (e) {
-    console.error('getRoleFromCookie error:', e);
-    return null;
-  }
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -88,25 +71,12 @@ export default function TestsHubPage() {
         // Fetch current user details from backend (which checks the HTTP-only cookie automatically)
         let currentUser: { role: UserRole; id: string } | null = null;
         try {
-          const meRes = await apiGet<{ success: boolean; data: { role: string; id: string } }>('/api/auth/me');
-          if (meRes?.success && meRes?.data) {
-            currentUser = meRes.data as { role: UserRole; id: string };
+          const user = await getCurrentUserClient();
+          if (user?.role && user?.id) {
+            currentUser = { role: user.role as UserRole, id: user.id };
           }
         } catch (e) {
-          console.warn('GET /api/auth/me failed, falling back to local JWT decode.', e);
-        }
-
-        // Fallback local JWT decode if /api/auth/me was unavailable
-        if (!currentUser) {
-          const localRole = getRoleFromCookie();
-          if (localRole) {
-            // Local token decoding fallback
-            const token = getToken();
-            const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
-            if (payload?.role && payload?.userId) {
-              currentUser = { role: payload.role as UserRole, id: payload.userId };
-            }
-          }
+          console.warn('GET /api/auth/me failed', e);
         }
 
         if (!currentUser) {

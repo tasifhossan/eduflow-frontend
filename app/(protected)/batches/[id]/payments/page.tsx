@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface Student {
   id: string;
@@ -106,17 +106,19 @@ export default function BatchPaymentsPage({ params }: PageProps) {
 
   // Admin Auth Check
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const payload = parseJwt(token);
-      if (payload && payload.role === 'ADMIN') {
-        // Authorized ADMIN
-      } else {
-        router.push('/dashboard');
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
       }
-    } else {
-      router.push('/login');
+      if (user.role !== 'ADMIN') {
+        router.push('/dashboard');
+        return;
+      }
+      loadData();
     }
+    init();
   }, [router]);
 
   // Load Data

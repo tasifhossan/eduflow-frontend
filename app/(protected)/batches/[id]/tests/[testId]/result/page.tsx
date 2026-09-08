@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface Option {
   id: string;
@@ -68,26 +68,20 @@ export default function TestResultPage({ params }: PageProps) {
 
   // Role validation & fetch result
   useEffect(() => {
-    const token = getToken();
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'STUDENT') {
-          // Redirect staff to tests lists
-          router.push(`/batches/${batchId}/tests`);
-          return;
-        }
-      } catch (err) {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
         router.push('/login');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      if (user.role !== 'STUDENT') {
+        router.push(`/batches/${batchId}/tests`);
+        return;
+      }
+      loadResult();
     }
 
-    async function loadResultData() {
+    async function loadResult() {
       try {
         setLoading(true);
         setErrorMsg(null);
@@ -103,7 +97,7 @@ export default function TestResultPage({ params }: PageProps) {
       }
     }
 
-    loadResultData();
+    init();
   }, [batchId, testId, router]);
 
   if (loading) {

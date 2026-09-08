@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface FeePayment {
   id: string;
@@ -34,19 +34,19 @@ export default function MyPaymentsPage() {
 
   // Role validation & data load
   useEffect(() => {
-    const token = getToken();
-
-    if (token) {
-      const payload = parseJwt(token);
-      if (!payload || payload.role !== 'STUDENT') {
-        // Redirect ADMIN / TEACHER away from this student-only page
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'STUDENT') {
         router.push('/dashboard');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      loadMyPayments();
     }
+    init();
 
     async function loadMyPayments() {
       try {

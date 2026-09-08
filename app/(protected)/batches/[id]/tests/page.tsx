@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface BatchDetails {
   id: string;
@@ -38,28 +38,21 @@ export default function BatchTestsPage({ params }: PageProps) {
 
   // Role validation & fetch initial data
   useEffect(() => {
-    const token = getToken();
-
-    let role: 'ADMIN' | 'TEACHER' | 'STUDENT' | null = null;
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER' && payload.role !== 'STUDENT') {
-          router.push('/dashboard');
-          return;
-        }
-        role = payload.role;
-        setUserRole(role);
-      } catch (err) {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
         router.push('/login');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      if (user.role !== 'ADMIN' && user.role !== 'TEACHER' && user.role !== 'STUDENT') {
+        router.push('/dashboard');
+        return;
+      }
+      setUserRole(user.role as 'ADMIN' | 'TEACHER' | 'STUDENT');
+      loadTests(user.role);
     }
 
-    async function loadTestsData() {
+    async function loadTests(role: string) {
       try {
         setLoading(true);
         setErrorMsg(null);
@@ -109,7 +102,7 @@ export default function BatchTestsPage({ params }: PageProps) {
       }
     }
 
-    loadTestsData();
+    init();
   }, [batchId, router]);
 
   if (loading) {

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface StudentBatchDetails {
   id: string;
@@ -43,18 +43,19 @@ export default function StudentBatchDetailPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-
-    if (!token) {
-      router.push('/login');
-      return;
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'STUDENT') {
+        router.push('/dashboard');
+        return;
+      }
+      loadBatchAndRoutine();
     }
-
-    const payload = parseJwt(token);
-    if (!payload || payload.role !== 'STUDENT') {
-      router.push('/dashboard');
-      return;
-    }
+    init();
 
     async function loadBatchAndRoutine() {
       try {

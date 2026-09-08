@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface Subject {
   id: string;
@@ -41,19 +41,19 @@ export default function SubjectsPage() {
   const [loadingChaptersMap, setLoadingChaptersMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.push('/login');
-      return;
+    async function checkAuthAndLoad() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'ADMIN') {
+        router.push('/dashboard');
+        return;
+      }
+      loadSubjects();
     }
-
-    const payload = parseJwt(token);
-    if (!payload || payload.role !== 'ADMIN') {
-      router.push('/dashboard');
-      return;
-    }
-
-    loadSubjects();
+    checkAuthAndLoad();
   }, [router]);
 
   async function loadSubjects() {

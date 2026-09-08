@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 import {
   Users,
   Loader2,
@@ -42,17 +42,19 @@ export default function MyChildrenPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const payload = parseJwt(token);
-      if (payload && payload.role !== 'GUARDIAN') {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'GUARDIAN') {
         router.push('/dashboard');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      loadLinkedStudents();
     }
+    init();
 
     async function loadLinkedStudents() {
       try {

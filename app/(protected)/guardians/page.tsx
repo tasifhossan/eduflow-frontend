@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { apiGet, apiPost } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 import { useRouter } from 'next/navigation';
 import {
   UserCheck,
@@ -59,17 +59,19 @@ export default function AdminGuardiansPage() {
   const [linkSuccess, setLinkSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const payload = parseJwt(token);
-      if (payload && payload.role !== 'ADMIN') {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'ADMIN') {
         router.push('/dashboard');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      loadData();
     }
+    init();
 
     async function loadData() {
       try {

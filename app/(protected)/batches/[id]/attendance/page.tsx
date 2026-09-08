@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
-import { getToken } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface Student {
   id: string;
@@ -57,28 +57,23 @@ export default function MarkAttendancePage({ params }: PageProps) {
 
   // Role validation
   useEffect(() => {
-    const token = getToken();
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ADMIN' && payload.role !== 'TEACHER') {
-          router.push('/dashboard');
-          return;
-        }
-      } catch (err) {
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
         router.push('/login');
         return;
       }
-    } else {
-      router.push('/login');
-      return;
+      if (user.role !== 'ADMIN' && user.role !== 'TEACHER') {
+        router.push('/dashboard');
+        return;
+      }
+      loadBatchInfo();
     }
-  }, [router]);
+    init();
+  }, [batchId, router]);
 
   // Fetch batch details and students once on load
-  useEffect(() => {
-    async function loadBatchInfo() {
+  async function loadBatchInfo() {
       try {
         const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
         if (batchRes.success) {
@@ -93,8 +88,6 @@ export default function MarkAttendancePage({ params }: PageProps) {
         setErrorMsg(err.message || 'Failed to load batch/students data');
       }
     }
-    loadBatchInfo();
-  }, [batchId]);
 
   // Fetch or reset attendance state when students list or date changes
   useEffect(() => {

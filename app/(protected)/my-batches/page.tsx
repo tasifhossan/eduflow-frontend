@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface EnrolledBatch {
   id: string;
@@ -29,27 +29,27 @@ export default function MyBatchesListPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-
-    if (!token) {
-      router.push('/login');
-      return;
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'STUDENT') {
+        router.push('/dashboard');
+        return;
+      }
+      loadMyBatches(user.id);
     }
+    init();
 
-    const payload = parseJwt(token);
-    if (!payload || payload.role !== 'STUDENT') {
-      // Redirect ADMIN / TEACHER away
-      router.push('/dashboard');
-      return;
-    }
-
-    async function loadMyBatches() {
+    async function loadMyBatches(userId: string) {
       try {
         setLoading(true);
         setErrorMsg(null);
 
         const response = await apiGet<{ success: boolean; data: EnrolledBatch[] }>(
-          `/api/students/${payload.userId}/batches`
+          `/api/students/${userId}/batches`
         );
 
         if (response && response.success && response.data) {
@@ -63,8 +63,6 @@ export default function MyBatchesListPage() {
         setLoading(false);
       }
     }
-
-    loadMyBatches();
   }, [router]);
 
   if (loading) {

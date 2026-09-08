@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet, apiPost } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 
 interface Subject {
   id: string;
@@ -34,16 +34,18 @@ export default function NewBatchPage() {
 
   // Authorization Check
   useEffect(() => {
-    const token = getToken();
-
-    if (token) {
-      const payload = parseJwt(token);
-      if (!payload || payload.role !== 'ADMIN') {
-        router.push('/batches');
+    async function checkAuth() {
+      const user = await getCurrentUserClient();
+      if (!user) {
+        router.push('/login');
+        return;
       }
-    } else {
-      router.push('/login');
+      if (user.role !== 'ADMIN') {
+        router.push('/batches');
+        return;
+      }
     }
+    checkAuth();
   }, [router]);
 
 

@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
-import { getToken, parseJwt } from '@/lib/client-auth';
+import { getCurrentUserClient } from '@/lib/client-auth';
 import {
   FileText,
   FileImage,
@@ -74,12 +74,12 @@ export default function BatchResourcesPage({ params }: PageProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const payload = parseJwt(token);
-      if (payload && payload.role) {
-        setUserRole(payload.role);
+    async function init() {
+      const user = await getCurrentUserClient();
+      if (user?.role) {
+        setUserRole(user.role);
       }
+      loadData();
     }
 
     async function loadData() {
@@ -104,9 +104,9 @@ export default function BatchResourcesPage({ params }: PageProps) {
         }
 
         // Fetch resources
-        const resData = await apiGet<{ success: boolean; data: Resource[] }>(`/api/batches/${batchId}/resources`);
-        if (resData.success && resData.data) {
-          setResources(resData.data);
+        const resRes = await apiGet<{ success: boolean; data: Resource[] }>(`/api/batches/${batchId}/resources`);
+        if (resRes.success && resRes.data) {
+          setResources(resRes.data);
         }
       } catch (err: any) {
         setErrorMsg(err.message || 'Failed to load study materials');
@@ -115,7 +115,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
       }
     }
 
-    loadData();
+    init();
   }, [batchId]);
 
   const getFileIcon = (fileType: string) => {
