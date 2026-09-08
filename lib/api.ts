@@ -1,10 +1,11 @@
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
-  }
-  // In browser, relative URL uses Next.js rewrites proxy to ensure 1st-party httpOnly cookie compatibility
+  // In client browser, ALWAYS use relative path "" so requests go through Next.js proxy rewrite /api/*
+  // This guarantees 1st-party httpOnly cookie storage on Vercel frontend domain regardless of env vars.
   if (typeof window !== 'undefined') {
     return '';
+  }
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
   }
   return 'https://eduflow-backend-eu3i.onrender.com';
 };
