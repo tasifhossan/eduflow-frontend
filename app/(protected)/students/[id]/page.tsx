@@ -68,6 +68,18 @@ interface FeePayment {
   };
 }
 
+interface TrendEntry {
+  testId: string;
+  testName: string;
+  testDate: string;
+  submittedAt: string;
+  totalMarks: number;
+  score: number;
+  percentage: number | null;
+  rank: number | null;
+  batchName?: string;
+}
+
 export default async function StudentDetailPage({
   params,
 }: {
@@ -88,6 +100,7 @@ export default async function StudentDetailPage({
   let enrolledBatches: Batch[] = [];
   let attendanceHistory: AttendanceRecord[] = [];
   let paymentHistory: FeePayment[] = [];
+  let scoreTrend: TrendEntry[] = [];
   let errorMsg: string | null = null;
 
   try {
@@ -134,6 +147,28 @@ export default async function StudentDetailPage({
         if (paymentsResponse && paymentsResponse.success) {
           paymentHistory = paymentsResponse.data;
         }
+      }
+
+      // 5. Fetch score trend for each enrolled batch (ADMIN/TEACHER)
+      if (enrolledBatches.length > 0) {
+        const trendResults = await Promise.all(
+          enrolledBatches.map((batch) =>
+            apiGet<{ success: boolean; data: { trend: TrendEntry[] } }>(
+              `/api/batches/${batch.id}/students/${studentId}/trend`,
+              { headers: { Cookie: cookieHeader } }
+            )
+              .then((res) =>
+                res.success && res.data
+                  ? res.data.trend.map((e) => ({ ...e, batchName: batch.name }))
+                  : []
+              )
+              .catch(() => [])
+          )
+        );
+        // Flatten and sort chronologically
+        scoreTrend = trendResults
+          .flat()
+          .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
       }
     }
   } catch (err: any) {
@@ -411,6 +446,69 @@ export default async function StudentDetailPage({
                   )}
                 </div>
               )}
+
+              {/* Score Trend */}
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900">Score Trend</h3>
+                  <p className="text-xs text-gray-500">Chronological test results across all enrolled batches</p>
+                </div>
+
+                {scoreTrend.length === 0 ? (
+                  <p className="text-sm text-gray-400 italic py-10 text-center bg-white">
+                    No test results found for this student yet.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Test Name</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Batch</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Score</th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">%</th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Rank</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {scoreTrend.map((entry) => (
+                          <tr key={`${entry.testId}`} className="hover:bg-gray-50/50 transition">
+                            <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">{entry.testName}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{entry.batchName || '—'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                              {new Date(entry.testDate).toLocaleDateString(undefined, {
+                                year: 'numeric', month: 'short', day: 'numeric',
+                              })}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right font-mono font-semibold text-gray-900">
+                              {entry.score} / {entry.totalMarks}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                              <span
+                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                                  entry.percentage === null
+                                    ? 'bg-gray-50 text-gray-600 ring-gray-500/10'
+                                    : entry.percentage < 50
+                                    ? 'bg-red-50 text-red-700 ring-red-600/20'
+                                    : entry.percentage < 70
+                                    ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
+                                    : 'bg-green-50 text-green-700 ring-green-600/20'
+                                }`}
+                              >
+                                {entry.percentage !== null ? `${entry.percentage}%` : '—'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-gray-600">
+                              {entry.rank !== null ? `#${entry.rank}` : <span className="text-gray-400 italic">—</span>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
 
               {/* Attendance History */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">

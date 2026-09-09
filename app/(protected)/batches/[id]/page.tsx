@@ -407,6 +407,12 @@ export default function BatchDetailPage({ params }: PageProps) {
               </Link>
             )}
             <Link
+              href={`/batches/${batchId}/analytics`}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            >
+              Analytics
+            </Link>
+            <Link
               href={`/batches/${batchId}/attendance`}
               className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
             >
