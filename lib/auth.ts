@@ -5,7 +5,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN';
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN';
   branchId: string;
 }
 

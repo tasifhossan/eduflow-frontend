@@ -5,7 +5,7 @@ export interface UserClaims {
   name: string;
   email: string;
   phone?: string | null;
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN';
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN';
   branchId: string;
 }
 
