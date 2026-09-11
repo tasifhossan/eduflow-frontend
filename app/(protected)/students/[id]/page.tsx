@@ -6,6 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
 import StudentEditControls from '@/components/student-edit-controls';
 import UnlinkGuardianButton from '@/components/unlink-guardian-button';
+import PracticeWeakSpotCard from '@/components/practice-weak-spot-card';
 
 
 interface Batch {
@@ -87,14 +88,26 @@ export default async function StudentDetailPage({
 }) {
   const user = await getCurrentUser();
 
-  // Enforce ADMIN or TEACHER role access only
-  if (!user || (user.role !== 'ADMIN' && user.role !== 'TEACHER')) {
+  if (!user) {
     redirect('/dashboard');
   }
 
   // Resolve params
   const resolvedParams = await params;
   const studentId = resolvedParams.id;
+
+  const isOwnProfile = user.role === 'STUDENT' && user.id === studentId;
+
+  // Enforce access control:
+  // ADMIN and TEACHER can view any student profile.
+  // STUDENT can only view their own profile.
+  if (user.role === 'STUDENT' && !isOwnProfile) {
+    redirect('/dashboard');
+  }
+
+  if (user.role !== 'ADMIN' && user.role !== 'TEACHER' && !isOwnProfile) {
+    redirect('/dashboard');
+  }
 
   let studentProfile: StudentSummary | null = null;
   let enrolledBatches: Batch[] = [];
@@ -107,13 +120,25 @@ export default async function StudentDetailPage({
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    // 1. Fetch profile details by querying student summaries and matching the ID
-    const summaryResponse = await apiGet<{ success: boolean; data: StudentSummary[] }>('/api/students/summary', {
-      headers: { Cookie: cookieHeader },
-    });
+    // 1. Fetch profile details by querying student summaries (ADMIN/TEACHER) or building from session user (STUDENT)
+    if (user.role === 'ADMIN' || user.role === 'TEACHER') {
+      const summaryResponse = await apiGet<{ success: boolean; data: StudentSummary[] }>('/api/students/summary', {
+        headers: { Cookie: cookieHeader },
+      }).catch(() => null);
 
-    if (summaryResponse && summaryResponse.success) {
-      studentProfile = summaryResponse.data.find((s) => s.id === studentId) || null;
+      if (summaryResponse && summaryResponse.success) {
+        studentProfile = summaryResponse.data.find((s) => s.id === studentId) || null;
+      }
+    } else if (isOwnProfile) {
+      studentProfile = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: (user as any).phone || null,
+        guardianName: (user as any).guardianName || null,
+        guardianPhone: (user as any).guardianPhone || null,
+        createdAt: (user as any).createdAt || new Date().toISOString(),
+      };
     }
 
     if (!studentProfile) {
@@ -294,8 +319,13 @@ export default async function StudentDetailPage({
               </div>
             </div>
 
-            {/* Right Column: Enrolled Batches, Payment History (ADMIN), & Attendance History */}
+            {/* Right Column: Practice Card (own profile), Enrolled Batches, Payment History (ADMIN), & Attendance History */}
             <div className="space-y-8 lg:col-span-2">
+              {/* Practice Weak Chapters Card (Only rendered when student is viewing their own profile) */}
+              {isOwnProfile && (
+                <PracticeWeakSpotCard studentId={studentId} enrolledBatches={enrolledBatches} />
+              )}
+
               {/* Enrolled Batches */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                 <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">
