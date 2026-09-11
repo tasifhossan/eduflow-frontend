@@ -96,16 +96,48 @@ export default async function StudentDetailPage({
   const resolvedParams = await params;
   const studentId = resolvedParams.id;
 
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+
   const isOwnProfile = user.role === 'STUDENT' && user.id === studentId;
 
-  // Enforce access control:
-  // ADMIN and TEACHER can view any student profile.
-  // STUDENT can only view their own profile.
+  let isLinkedChild = false;
+  let linkedChildInfo: StudentSummary | null = null;
+
+  if (user.role === 'GUARDIAN') {
+    const myStudentsRes = await apiGet<{ success: boolean; data: StudentSummary[] }>(
+      '/api/guardians/my-students',
+      { headers: { Cookie: cookieHeader } }
+    ).catch(() => null);
+
+    if (myStudentsRes && myStudentsRes.success && Array.isArray(myStudentsRes.data)) {
+      const match = myStudentsRes.data.find((s) => s.id === studentId);
+      if (match) {
+        isLinkedChild = true;
+        linkedChildInfo = match;
+      }
+    }
+  }
+
+  // Enforce access control rules:
+  // 1. ADMIN, TEACHER, SUPER_ADMIN can view any student profile.
+  // 2. GUARDIAN can only view their linked children's profile page.
+  // 3. STUDENT can only view their own profile page.
   if (user.role === 'STUDENT' && !isOwnProfile) {
     redirect('/dashboard');
   }
 
-  if (user.role !== 'ADMIN' && user.role !== 'TEACHER' && !isOwnProfile) {
+  if (user.role === 'GUARDIAN' && !isLinkedChild) {
+    redirect('/my-children');
+  }
+
+  if (
+    user.role !== 'ADMIN' &&
+    user.role !== 'TEACHER' &&
+    user.role !== 'SUPER_ADMIN' &&
+    user.role !== 'GUARDIAN' &&
+    !isOwnProfile
+  ) {
     redirect('/dashboard');
   }
 
@@ -117,14 +149,12 @@ export default async function StudentDetailPage({
   let errorMsg: string | null = null;
 
   try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
-
-    // 1. Fetch profile details by querying student summaries (ADMIN/TEACHER) or building from session user (STUDENT)
-    if (user.role === 'ADMIN' || user.role === 'TEACHER') {
-      const summaryResponse = await apiGet<{ success: boolean; data: StudentSummary[] }>('/api/students/summary', {
-        headers: { Cookie: cookieHeader },
-      }).catch(() => null);
+    // 1. Fetch profile details
+    if (user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'SUPER_ADMIN') {
+      const summaryResponse = await apiGet<{ success: boolean; data: StudentSummary[] }>(
+        '/api/students/summary',
+        { headers: { Cookie: cookieHeader } }
+      ).catch(() => null);
 
       if (summaryResponse && summaryResponse.success) {
         studentProfile = summaryResponse.data.find((s) => s.id === studentId) || null;
@@ -139,61 +169,129 @@ export default async function StudentDetailPage({
         guardianPhone: (user as any).guardianPhone || null,
         createdAt: (user as any).createdAt || new Date().toISOString(),
       };
+    } else if (isLinkedChild && linkedChildInfo) {
+      studentProfile = {
+        id: linkedChildInfo.id,
+        name: linkedChildInfo.name,
+        email: linkedChildInfo.email,
+        phone: linkedChildInfo.phone || null,
+        guardianName: linkedChildInfo.guardianName || null,
+        guardianPhone: linkedChildInfo.guardianPhone || null,
+        createdAt: linkedChildInfo.createdAt || new Date().toISOString(),
+      };
     }
 
     if (!studentProfile) {
-      errorMsg = 'Student profile not found in your branch';
+      errorMsg = 'Student profile not found in your branch or access denied';
     } else {
-      // 2. Fetch enrolled batches
-      const batchesResponse = await apiGet<{ success: boolean; data: Batch[] }>(
-        `/api/students/${studentId}/batches`,
-        { headers: { Cookie: cookieHeader } }
-      );
-      if (batchesResponse && batchesResponse.success) {
-        enrolledBatches = batchesResponse.data;
-      }
+      if (user.role === 'GUARDIAN') {
+        // Fetch guardian linked child data
+        const [attRes, resRes, payRes] = await Promise.all([
+          apiGet<{ success: boolean; data: any[] }>(
+            `/api/guardians/students/${studentId}/attendance`,
+            { headers: { Cookie: cookieHeader } }
+          ).catch(() => ({ success: false, data: [] })),
+          apiGet<{ success: boolean; data: any[] }>(
+            `/api/guardians/students/${studentId}/results`,
+            { headers: { Cookie: cookieHeader } }
+          ).catch(() => ({ success: false, data: [] })),
+          apiGet<{ success: boolean; data: any[] }>(
+            `/api/guardians/students/${studentId}/payments`,
+            { headers: { Cookie: cookieHeader } }
+          ).catch(() => ({ success: false, data: [] })),
+        ]);
 
-      // 3. Fetch attendance history
-      const attendanceResponse = await apiGet<{ success: boolean; data: AttendanceRecord[] }>(
-        `/api/students/${studentId}/attendance`,
-        { headers: { Cookie: cookieHeader } }
-      );
-      if (attendanceResponse && attendanceResponse.success) {
-        attendanceHistory = attendanceResponse.data;
-      }
+        if (attRes.success && attRes.data) {
+          attendanceHistory = attRes.data.map((r) => ({
+            id: r.id,
+            date: r.date,
+            status: r.status,
+            batch: { name: r.batch?.name || 'Batch' },
+          }));
+        }
 
-      // 4. Fetch payment history (ADMIN only)
-      if (user.role === 'ADMIN') {
-        const paymentsResponse = await apiGet<{ success: boolean; data: FeePayment[] }>(
-          `/api/students/${studentId}/payments`,
+        if (resRes.success && resRes.data) {
+          scoreTrend = resRes.data.map((r) => ({
+            testId: r.test?.id || r.id,
+            testName: r.test?.title || 'Test',
+            testDate: r.test?.testDate || r.submittedAt,
+            submittedAt: r.submittedAt,
+            totalMarks: r.test?.totalMarks || 100,
+            score: r.totalMarksObtained,
+            percentage:
+              r.test?.totalMarks > 0
+                ? parseFloat(((r.totalMarksObtained / r.test.totalMarks) * 100).toFixed(2))
+                : null,
+            rank: r.rank || null,
+            batchName: r.test?.batch?.name || 'Batch',
+          }));
+        }
+
+        if (payRes.success && payRes.data) {
+          paymentHistory = payRes.data.map((p) => ({
+            id: p.id,
+            studentId,
+            batchId: p.batch?.id || '',
+            period: p.period,
+            amountDue: p.amountDue,
+            amountPaid: p.amountPaid,
+            status: p.status,
+            dueDate: p.dueDate,
+            paidAt: p.paidAt,
+            createdAt: p.createdAt || new Date().toISOString(),
+            batch: { id: p.batch?.id || '', name: p.batch?.name || 'Batch' },
+          }));
+        }
+      } else {
+        // ADMIN / TEACHER / STUDENT
+        const batchesResponse = await apiGet<{ success: boolean; data: Batch[] }>(
+          `/api/students/${studentId}/batches`,
           { headers: { Cookie: cookieHeader } }
         ).catch(() => null);
 
-        if (paymentsResponse && paymentsResponse.success) {
-          paymentHistory = paymentsResponse.data;
+        if (batchesResponse && batchesResponse.success) {
+          enrolledBatches = batchesResponse.data;
         }
-      }
 
-      // 5. Fetch score trend for each enrolled batch (ADMIN/TEACHER)
-      if (enrolledBatches.length > 0) {
-        const trendResults = await Promise.all(
-          enrolledBatches.map((batch) =>
-            apiGet<{ success: boolean; data: { trend: TrendEntry[] } }>(
-              `/api/batches/${batch.id}/students/${studentId}/trend`,
-              { headers: { Cookie: cookieHeader } }
-            )
-              .then((res) =>
-                res.success && res.data
-                  ? res.data.trend.map((e) => ({ ...e, batchName: batch.name }))
-                  : []
+        const attendanceResponse = await apiGet<{ success: boolean; data: AttendanceRecord[] }>(
+          `/api/students/${studentId}/attendance`,
+          { headers: { Cookie: cookieHeader } }
+        ).catch(() => null);
+
+        if (attendanceResponse && attendanceResponse.success) {
+          attendanceHistory = attendanceResponse.data;
+        }
+
+        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+          const paymentsResponse = await apiGet<{ success: boolean; data: FeePayment[] }>(
+            `/api/students/${studentId}/payments`,
+            { headers: { Cookie: cookieHeader } }
+          ).catch(() => null);
+
+          if (paymentsResponse && paymentsResponse.success) {
+            paymentHistory = paymentsResponse.data;
+          }
+        }
+
+        if (enrolledBatches.length > 0) {
+          const trendResults = await Promise.all(
+            enrolledBatches.map((batch) =>
+              apiGet<{ success: boolean; data: { trend: TrendEntry[] } }>(
+                `/api/batches/${batch.id}/students/${studentId}/trend`,
+                { headers: { Cookie: cookieHeader } }
               )
-              .catch(() => [])
-          )
-        );
-        // Flatten and sort chronologically
-        scoreTrend = trendResults
-          .flat()
-          .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+                .then((res) =>
+                  res.success && res.data
+                    ? res.data.trend.map((e) => ({ ...e, batchName: batch.name }))
+                    : []
+                )
+                .catch(() => [])
+            )
+          );
+          scoreTrend = trendResults
+            .flat()
+            .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+        }
       }
     }
   } catch (err: any) {
