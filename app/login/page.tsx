@@ -18,9 +18,10 @@ export default function LoginPage() {
 
     try {
       await apiPost('/api/auth/login', { email, password });
-      window.location.href = '/dashboard';
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -85,6 +86,31 @@ export default function LoginPage() {
               className="group relative flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="button"
+              id="demo-student-login-btn"
+              disabled={loading}
+              onClick={async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                  await apiPost('/api/auth/demo', { role: 'STUDENT' });
+                  router.push('/');
+                  router.refresh();
+                } catch (err: unknown) {
+                  const msg = err instanceof Error ? err.message : 'Demo login failed';
+                  setError(msg);
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="w-full flex justify-center py-2 px-4 border border-border text-foreground rounded-lg text-sm font-medium hover:bg-surface-hover transition-colors disabled:opacity-50"
+            >
+              Sign in as Demo Student
             </button>
           </div>
         </form>

@@ -5,12 +5,14 @@ import { cn } from '@/lib/cn';
 
 export interface DropdownMenuItem {
   id?: string;
-  label: string;
+  label?: React.ReactNode;
+  description?: string;
   icon?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   danger?: boolean;
   divider?: boolean;
+  custom?: React.ReactNode;
 }
 
 export interface DropdownMenuProps {
@@ -133,6 +135,14 @@ export function DropdownMenu({
               return <div key={idx} className="my-1.5 h-px bg-border" role="separator" />;
             }
 
+            if (item.custom) {
+              return (
+                <div key={item.id || idx} className="px-2 py-1.5 text-xs text-foreground">
+                  {item.custom}
+                </div>
+              );
+            }
+
             const actionIdx = actionItems.findIndex((a) => a === item);
             const isHighlighted = actionIdx === focusedIndex;
 
@@ -147,7 +157,7 @@ export function DropdownMenu({
                   close();
                 }}
                 className={cn(
-                  'flex w-full items-center gap-2.5 rounded-[calc(var(--radius-control)-2px)] px-3 py-2 text-xs font-medium transition-colors text-left',
+                  'flex w-full items-start gap-2.5 rounded-[calc(var(--radius-control)-2px)] px-3 py-2 text-xs font-medium transition-colors text-left',
                   'hover:bg-surface-hover focus-visible:outline-none',
                   isHighlighted && 'bg-surface-hover',
                   item.danger
@@ -156,8 +166,15 @@ export function DropdownMenu({
                   item.disabled && 'opacity-50 cursor-not-allowed pointer-events-none'
                 )}
               >
-                {item.icon && <span className="h-4 w-4 shrink-0 text-muted-foreground">{item.icon}</span>}
-                <span>{item.label}</span>
+                {item.icon && <span className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground">{item.icon}</span>}
+                <div className="flex flex-col text-left">
+                  <span className="font-medium">{item.label}</span>
+                  {item.description && (
+                    <span className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+                      {item.description}
+                    </span>
+                  )}
+                </div>
               </button>
             );
           })}
