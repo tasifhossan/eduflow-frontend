@@ -1,3 +1,23 @@
+export class ApiError extends Error {
+  status: number;
+  data?: unknown;
+
+  constructor(message: string, status: number, data?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: string;
+  errors?: unknown;
+}
+
 const getBaseUrl = () => {
   // In client browser, ALWAYS use relative path "" so requests go through Next.js proxy rewrite /api/*
   // This guarantees 1st-party httpOnly cookie storage on Vercel frontend domain regardless of env vars.
@@ -5,12 +25,30 @@ const getBaseUrl = () => {
     return '';
   }
   if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+    const raw = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+    return raw.replace(/\/api$/, '');
   }
   return 'https://eduflow-backend-eu3i.onrender.com';
 };
 
-export async function apiGet<T = any>(path: string, options?: RequestInit): Promise<T> {
+async function handleResponse<T>(response: Response, path: string): Promise<T> {
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as {
+      message?: string;
+      error?: string;
+      errors?: unknown;
+    };
+    const errorMessage =
+      errorData.message ||
+      errorData.error ||
+      `Request to ${path} failed with status ${response.status}`;
+    throw new ApiError(errorMessage, response.status, errorData);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export async function apiGet<T = ApiResponse>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
@@ -23,15 +61,14 @@ export async function apiGet<T = any>(path: string, options?: RequestInit): Prom
     ...options,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `GET ${path} failed with status ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, path);
 }
 
-export async function apiPost<T = any>(path: string, body?: any, options?: RequestInit): Promise<T> {
+export async function apiPost<T = ApiResponse>(
+  path: string,
+  body?: unknown,
+  options?: RequestInit
+): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
@@ -41,19 +78,14 @@ export async function apiPost<T = any>(path: string, body?: any, options?: Reque
       'Content-Type': 'application/json',
       ...options?.headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
     ...options,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `POST ${path} failed with status ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, path);
 }
 
-export async function apiDelete<T = any>(path: string, options?: RequestInit): Promise<T> {
+export async function apiDelete<T = ApiResponse>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
@@ -66,15 +98,14 @@ export async function apiDelete<T = any>(path: string, options?: RequestInit): P
     ...options,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `DELETE ${path} failed with status ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, path);
 }
 
-export async function apiPatch<T = any>(path: string, body?: any, options?: RequestInit): Promise<T> {
+export async function apiPatch<T = ApiResponse>(
+  path: string,
+  body?: unknown,
+  options?: RequestInit
+): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
@@ -84,19 +115,18 @@ export async function apiPatch<T = any>(path: string, body?: any, options?: Requ
       'Content-Type': 'application/json',
       ...options?.headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
     ...options,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `PATCH ${path} failed with status ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, path);
 }
 
-export async function apiPut<T = any>(path: string, body?: any, options?: RequestInit): Promise<T> {
+export async function apiPut<T = ApiResponse>(
+  path: string,
+  body?: unknown,
+  options?: RequestInit
+): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const response = await fetch(url, {
@@ -106,14 +136,9 @@ export async function apiPut<T = any>(path: string, body?: any, options?: Reques
       'Content-Type': 'application/json',
       ...options?.headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
     ...options,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `PUT ${path} failed with status ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, path);
 }

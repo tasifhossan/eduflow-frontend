@@ -1,35 +1,203 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #1E293B;
-  --color-accent: #4F46E5;
-  --color-highlight: #F59E0B;
-  --color-background: #F8FAFC;
-  --color-text-body: #475569;
-  --color-success: #059669;
+@custom-variant dark (&:where(.dark, .dark *));
 
-  --font-poppins: var(--font-poppins);
+@theme {
+  /* Font Family Variables */
   --font-inter: var(--font-inter);
+  --font-poppins: var(--font-poppins);
   --font-sans: var(--font-inter);
+  --font-heading: var(--font-poppins);
+
+  /* Radius Tokens */
+  --radius-card: 1rem;
+  --radius-control: 0.625rem;
+  --radius-pill: 9999px;
+
+  /* Theme Colors mapped to CSS Variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-ring: var(--ring);
+
+  /* Brand Colors */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-subtle: var(--primary-subtle);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-subtle: var(--secondary-subtle);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+
+  /* Semantic State Colors */
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-subtle: var(--danger-subtle);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  /* Legacy aliases for backwards compatibility with existing pages */
+  --color-text-body: var(--muted-foreground);
+  --color-highlight: var(--accent);
+
+  /* Shadows */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-card: var(--shadow-card);
+  --shadow-popover: var(--shadow-popover);
+
+  /* Z-index */
+  --z-navbar: 40;
+  --z-dropdown: 50;
+  --z-modal: 60;
+  --z-toast: 100;
 }
 
 :root {
+  /* Neutral Slate Scale (Light) */
   --background: #F8FAFC;
-  --foreground: #1E293B;
+  --foreground: #0F172A;
+  --surface: #FFFFFF;
+  --surface-hover: #F1F5F9;
+  --border: #E2E8F0;
+  --border-hover: #CBD5E1;
+  --muted: #F1F5F9;
+  --muted-foreground: #475569;
+  --ring: #4338CA;
+
+  /* Primary: Indigo */
+  --primary: #4338CA;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #3730A3;
+  --primary-subtle: #EEF2FF;
+
+  /* Secondary: Teal */
+  --secondary: #0F766E;
+  --secondary-foreground: #FFFFFF;
+  --secondary-hover: #115E59;
+  --secondary-subtle: #F0FDFA;
+
+  /* Accent: Amber */
+  --accent: #F59E0B;
+  --accent-foreground: #0F172A;
+  --accent-hover: #D97706;
+  --accent-subtle: #FFFBEB;
+
+  /* Semantic State Colors */
+  --danger: #DC2626;
+  --danger-foreground: #FFFFFF;
+  --danger-hover: #B91C1C;
+  --danger-subtle: #FEF2F2;
+
+  --success: #0F766E;
+  --success-foreground: #FFFFFF;
+  --warning: #F59E0B;
+  --warning-foreground: #0F172A;
+  --info: #4338CA;
+  --info-foreground: #FFFFFF;
+
+  /* Radius Tokens */
+  --radius-card: 1rem;
+  --radius-control: 0.625rem;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-card: 0 4px 6px -1px rgb(15 23 42 / 0.07), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+  --shadow-popover: 0 10px 15px -3px rgb(15 23 42 / 0.1), 0 4px 6px -4px rgb(15 23 42 / 0.06);
+
+  /* Transitions */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  /* Neutral Slate Scale (Dark) */
+  --background: #0B1020;
+  --foreground: #E6EAF5;
+  --surface: #121A2E;
+  --surface-hover: #1A253F;
+  --border: #26324D;
+  --border-hover: #364468;
+  --muted: #1A253F;
+  --muted-foreground: #9AA6C4;
+  --ring: #818CF8;
+
+  /* Primary: Indigo */
+  --primary: #818CF8;
+  --primary-foreground: #0B1020;
+  --primary-hover: #9CA3FF;
+  --primary-subtle: rgba(129, 140, 248, 0.12);
+
+  /* Secondary: Teal */
+  --secondary: #2DD4BF;
+  --secondary-foreground: #0B1020;
+  --secondary-hover: #5EEAD4;
+  --secondary-subtle: rgba(45, 212, 191, 0.12);
+
+  /* Accent: Amber */
+  --accent: #FBBF24;
+  --accent-foreground: #0B1020;
+  --accent-hover: #FCD34D;
+  --accent-subtle: rgba(251, 191, 36, 0.12);
+
+  /* Semantic State Colors */
+  --danger: #F87171;
+  --danger-foreground: #0B1020;
+  --danger-hover: #FCA5A5;
+  --danger-subtle: rgba(248, 113, 113, 0.12);
+
+  --success: #2DD4BF;
+  --success-foreground: #0B1020;
+  --warning: #FBBF24;
+  --warning-foreground: #0B1020;
+  --info: #818CF8;
+  --info-foreground: #0B1020;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.35);
+  --shadow-popover: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
 }
 
 body {
   background-color: var(--background);
-  color: #475569; /* text-body */
+  color: var(--foreground);
   font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color var(--duration-normal) var(--ease-default), color var(--duration-normal) var(--ease-default);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-poppins), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1E293B; /* primary */
+  color: var(--foreground);
 }
 
-/* Custom subtle dark scrollbar for sidebar navigation */
+/* Accessible focus visible styles */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Custom subtle scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
@@ -48,3 +216,14 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
 }
 
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

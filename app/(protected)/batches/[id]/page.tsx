@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface Student {
   id: string;
@@ -111,10 +112,14 @@ export default function BatchDetailPage({ params }: PageProps) {
           setEnrolledStudents(enrolledRes.data);
         }
       } else {
-        setUnenrollError(response.message || 'Failed to unenroll student');
+        setUnenrollError(
+          typeof response === 'object' && response !== null && 'message' in response
+            ? String((response as { message: unknown }).message)
+            : 'Failed to unenroll student'
+        );
       }
-    } catch (err: any) {
-      setUnenrollError(err.message || 'Error unenrolling student');
+    } catch (err: unknown) {
+      setUnenrollError(err instanceof Error ? err.message : 'Error unenrolling student');
     } finally {
       setUnenrolling(false);
     }
@@ -181,18 +186,13 @@ export default function BatchDetailPage({ params }: PageProps) {
         const studentsRes = await apiGet<{ success: boolean; data: Student[] }>('/api/users?role=STUDENT')
           .catch(() => ({ success: false, data: [] }));
 
-        if (studentsRes.success && studentsRes.data.length > 0) {
+        if (studentsRes.success && studentsRes.data && studentsRes.data.length > 0) {
           setAvailableStudents(studentsRes.data);
         } else {
-          setAvailableStudents([
-            { id: 'usr-stud1', name: 'Tasif Hossain', email: 'tasif@gmail.com', phone: '01712345678', guardianName: 'Mr. Hossain', guardianPhone: '01711111111' },
-            { id: 'usr-stud2', name: 'Imran Khan', email: 'imran@gmail.com', phone: '01812345678', guardianName: 'Mr. Khan', guardianPhone: '01811111111' },
-            { id: 'usr-stud3', name: 'Nusrat Jahan', email: 'nusrat@gmail.com', phone: '01912345678', guardianName: 'Mr. Jahan', guardianPhone: '01911111111' },
-            { id: 'usr-stud4', name: 'Afsana Mimi', email: 'afsana@gmail.com', phone: '01512345678', guardianName: 'Mr. Mimi', guardianPhone: '01511111111' },
-          ]);
+          setAvailableStudents([]);
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load batch details');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load batch details');
       } finally {
         setLoading(false);
       }
@@ -235,10 +235,14 @@ export default function BatchDetailPage({ params }: PageProps) {
           }
         }
       } else {
-        setEnrollError(response.message || 'Failed to enroll student');
+        setEnrollError(
+          typeof response === 'object' && response !== null && 'message' in response
+            ? String((response as { message: unknown }).message)
+            : 'Failed to enroll student'
+        );
       }
-    } catch (err: any) {
-      setEnrollError(err.message || 'An error occurred during enrollment');
+    } catch (err: unknown) {
+      setEnrollError(err instanceof Error ? err.message : 'An error occurred during enrollment');
     } finally {
       setEnrolling(false);
     }
@@ -268,10 +272,14 @@ export default function BatchDetailPage({ params }: PageProps) {
           }
         }
       } else {
-        setBatchFeeError(response.message || 'Failed to update batch fee');
+        setBatchFeeError(
+          typeof response === 'object' && response !== null && 'message' in response
+            ? String((response as { message: unknown }).message)
+            : 'Failed to update batch fee'
+        );
       }
-    } catch (err: any) {
-      setBatchFeeError(err.message || 'Error updating batch fee');
+    } catch (err: unknown) {
+      setBatchFeeError(err instanceof Error ? err.message : 'Error updating batch fee');
     } finally {
       setSavingBatchFee(false);
     }
@@ -332,10 +340,14 @@ export default function BatchDetailPage({ params }: PageProps) {
         await loadNetFeeForStudent(selectedStudentForFee.enrollmentId);
         setSelectedStudentForFee(null);
       } else {
-        setStudentFeeError(response.message || 'Failed to update student fee');
+        setStudentFeeError(
+          typeof response === 'object' && response !== null && 'message' in response
+            ? String((response as { message: unknown }).message)
+            : 'Failed to update student fee'
+        );
       }
-    } catch (err: any) {
-      setStudentFeeError(err.message || 'Error updating student fee');
+    } catch (err: unknown) {
+      setStudentFeeError(err instanceof Error ? err.message : 'Error updating student fee');
     } finally {
       setSavingStudentFee(false);
     }
@@ -577,7 +589,11 @@ export default function BatchDetailPage({ params }: PageProps) {
                     Select student from branch list
                   </label>
                   {nonEnrolledStudents.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic">No additional students available in the branch list.</p>
+                    <EmptyState
+                      title="No students available"
+                      description="No eligible students found in the branch roster to enroll in this batch."
+                      className="p-4"
+                    />
                   ) : (
                     <select
                       id="studentSelect"
