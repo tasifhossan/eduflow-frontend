@@ -163,7 +163,7 @@ export default async function StudentDetailPage({
       studentProfile = {
         id: user.id,
         name: user.name,
-        email: user.email,
+        email: user.email || '',
         phone: (user as any).phone || null,
         guardianName: (user as any).guardianName || null,
         guardianPhone: (user as any).guardianPhone || null,

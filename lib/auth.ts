@@ -4,12 +4,16 @@ import { apiGet } from './api';
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string | null;
+  phone?: string | null;
+  studentCode?: string | null;
   role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN';
   branchId: string;
+  mustChangePassword?: boolean;
+  isActive?: boolean;
 }
 
-export function decodeJwtPayload(token: string): any {
+export function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
@@ -17,11 +21,12 @@ export function decodeJwtPayload(token: string): any {
     while (base64.length % 4 !== 0) {
       base64 += '=';
     }
-    const jsonString = typeof Buffer !== 'undefined'
-      ? Buffer.from(base64, 'base64').toString('utf-8')
-      : atob(base64);
-    return JSON.parse(jsonString);
-  } catch (e) {
+    const jsonString =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(base64, 'base64').toString('utf-8')
+        : atob(base64);
+    return JSON.parse(jsonString) as Record<string, unknown>;
+  } catch {
     return null;
   }
 }
@@ -34,31 +39,22 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
   }
 
-  const decoded = decodeJwtPayload(token);
-
   try {
-    // Attempt to call backend /api/auth/me endpoint (forwarding the auth cookie)
+    // Call backend /api/auth/me endpoint (forwarding the auth cookie)
     const response = await apiGet<{ success: boolean; data: User }>('/api/auth/me', {
       headers: {
         Cookie: `token=${token}`,
       },
     });
+
     if (response && response.success && response.data) {
       return response.data;
     }
-  } catch (error) {
-    console.warn('GET /api/auth/me call failed in getCurrentUser, using JWT decoded payload fallback.');
+  } catch {
+    // Fail closed: verification failed, unverified client tokens must never be trusted
+    return null;
   }
 
-  if (decoded && (decoded.userId || decoded.id)) {
-    return {
-      id: decoded.userId || decoded.id,
-      name: decoded.name || 'Logged In User',
-      email: decoded.email || 'user@eduflow.com',
-      role: decoded.role,
-      branchId: decoded.branchId,
-    };
-  }
-
+  // Fail closed if response is invalid
   return null;
 }

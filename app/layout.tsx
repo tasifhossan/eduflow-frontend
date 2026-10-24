@@ -1,36 +1,85 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { CenterProvider } from "@/components/providers/center-provider";
+import { Toaster } from "sonner";
+import { getCenterData } from "@/lib/center";
+import { generateThemeCss } from "@/lib/theme";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["600", "700"],
+  display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "EduFlow - Coaching Center Management Platform",
-  description: "Manage batches, attendance, exams, and results in one place. Built for school, college, and admission coaching centers in Bangladesh.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const center = await getCenterData();
+  const title = `${center.name} - ${center.tagline || 'Coaching Center Platform'}`;
+  const description = `${center.name} coaching management portal. Manage batches, attendance, exams, and routines.`;
 
-export default function RootLayout({
+  return {
+    title: {
+      default: title,
+      template: `%s | ${center.name}`,
+    },
+    description,
+    icons: {
+      icon: center.faviconUrl || '/favicon.ico',
+      shortcut: center.faviconUrl || '/favicon.ico',
+      apple: center.faviconUrl || '/apple-touch-icon.png',
+    },
+    openGraph: {
+      title,
+      description,
+      siteName: center.name,
+      images: center.logoUrl ? [{ url: center.logoUrl }] : [],
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const center = await getCenterData();
+  const themeCss = generateThemeCss(center.primaryColor);
+
   return (
     <html
-      lang="en"
+      lang={center.defaultLocale || "en"}
       className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background text-text-body" suppressHydrationWarning>
-        {children}
+      <head>
+        <style
+          id="center-theme"
+          dangerouslySetInnerHTML={{ __html: themeCss }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-foreground">
+        <CenterProvider initialData={center}>
+          <ThemeProvider>
+            {children}
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              toastOptions={{
+                className: "!rounded-[var(--radius-control)] !font-sans",
+              }}
+            />
+          </ThemeProvider>
+        </CenterProvider>
       </body>
     </html>
   );
