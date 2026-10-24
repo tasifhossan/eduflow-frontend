@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/cn';
 import { siteConfig } from '@/lib/site-config';
 import { useAuth } from '@/components/providers/auth-provider';
+import { useCenter } from '@/components/providers/center-provider';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +36,7 @@ export function MobileMenu() {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { center, features } = useCenter();
   const drawerRef = React.useRef<HTMLDivElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
 
@@ -103,7 +105,10 @@ export function MobileMenu() {
     }
   };
 
-  const navLinks = user ? siteConfig.nav.loggedIn : siteConfig.nav.loggedOut;
+  const rawNavLinks = user ? siteConfig.nav.loggedIn : siteConfig.nav.loggedOut;
+  const navLinks = (user || features.publicSite ? rawNavLinks : []).filter(
+    (item) => !(item.href === '/blog' && !features.blog)
+  );
 
   return (
     <div className="lg:hidden">
@@ -148,15 +153,23 @@ export function MobileMenu() {
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[var(--radius-control)]"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground font-bold text-lg shadow-sm">
-                  E
-                </div>
+                {center.logoUrl ? (
+                  <img
+                    src={center.logoUrl}
+                    alt={center.name}
+                    className="h-9 w-9 object-contain rounded-[var(--radius-control)]"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground font-bold text-lg shadow-sm">
+                    {center.shortName?.[0] || center.name?.[0] || 'C'}
+                  </div>
+                )}
                 <div className="flex flex-col">
                   <span className="font-bold text-base tracking-tight text-foreground leading-tight">
-                    {siteConfig.brand.name}
+                    {center.name}
                   </span>
                   <span className="text-[10px] text-muted-foreground leading-tight font-medium">
-                    Coaching Platform
+                    {center.tagline || 'Coaching Platform'}
                   </span>
                 </div>
               </Link>
@@ -230,57 +243,61 @@ export function MobileMenu() {
                 );
               })}
 
-              {/* Resources Collapsible/Expanded Section */}
-              <div className="pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsResourcesOpen((prev) => !prev)}
-                  className="flex items-center justify-between w-full min-h-[44px] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                  aria-expanded={isResourcesOpen}
-                >
-                  <span>Resources</span>
-                  <ChevronDown
-                    className={cn(
-                      'h-4 w-4 transition-transform duration-200',
-                      isResourcesOpen ? 'rotate-180' : ''
-                    )}
-                    aria-hidden="true"
-                  />
-                </button>
+              {/* Resources Collapsible/Expanded Section (Logged-out only) */}
+              {!user && features.publicSite && (
+                <div className="pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsResourcesOpen((prev) => !prev)}
+                    className="flex items-center justify-between w-full min-h-[44px] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                    aria-expanded={isResourcesOpen}
+                  >
+                    <span>Resources</span>
+                    <ChevronDown
+                      className={cn(
+                        'h-4 w-4 transition-transform duration-200',
+                        isResourcesOpen ? 'rotate-180' : ''
+                      )}
+                      aria-hidden="true"
+                    />
+                  </button>
 
-                {isResourcesOpen && (
-                  <div className="mt-1 space-y-1 pl-2 border-l-2 border-border/60 ml-3">
-                    {siteConfig.nav.resourcesMenu.map((item) => {
-                      const Icon = item.iconName ? ICON_MAP[item.iconName] || HelpCircle : HelpCircle;
-                      const isItemActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  {isResourcesOpen && (
+                    <div className="mt-1 space-y-1 pl-2 border-l-2 border-border/60 ml-3">
+                      {siteConfig.nav.resourcesMenu
+                        .filter((item) => !(item.href === '/blog' && !features.blog))
+                        .map((item) => {
+                          const Icon = item.iconName ? ICON_MAP[item.iconName] || HelpCircle : HelpCircle;
+                          const isItemActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-                      return (
-                        <Link
-                          key={item.href + item.label}
-                          href={item.href}
-                          aria-current={isItemActive ? 'page' : undefined}
-                          className={cn(
-                            'flex items-start gap-2.5 min-h-[44px] px-3 py-2 rounded-[var(--radius-control)] text-xs transition-colors',
-                            isItemActive
-                              ? 'bg-primary/10 text-primary font-semibold'
-                              : 'text-foreground hover:bg-surface-hover'
-                          )}
-                        >
-                          <Icon className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-                          <div className="flex flex-col">
-                            <span className="font-medium text-foreground">{item.label}</span>
-                            {item.description && (
-                              <span className="text-[11px] text-muted-foreground line-clamp-1">
-                                {item.description}
-                              </span>
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                          return (
+                            <Link
+                              key={item.href + item.label}
+                              href={item.href}
+                              aria-current={isItemActive ? 'page' : undefined}
+                              className={cn(
+                                'flex items-start gap-2.5 min-h-[44px] px-3 py-2 rounded-[var(--radius-control)] text-xs transition-colors',
+                                isItemActive
+                                  ? 'bg-primary/10 text-primary font-semibold'
+                                  : 'text-foreground hover:bg-surface-hover'
+                              )}
+                            >
+                              <Icon className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+                              <div className="flex flex-col">
+                                <span className="font-medium text-foreground">{item.label}</span>
+                                {item.description && (
+                                  <span className="text-[11px] text-muted-foreground line-clamp-1">
+                                    {item.description}
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Bottom Actions / Auth */}

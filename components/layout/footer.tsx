@@ -1,11 +1,14 @@
+'use client';
+
 import * as React from 'react';
 import Link from 'next/link';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe } from 'lucide-react';
 import { siteConfig } from '@/lib/site-config';
 import { Container } from '@/components/ui/container';
 import { NewsletterForm } from '@/components/forms/newsletter-form';
 import { FooterBranches } from './footer-branches';
 import { FooterAuthLinks } from './footer-auth-links';
+import { useCenter } from '@/components/providers/center-provider';
 
 // Custom inline SVG icons for social platforms
 function FacebookIcon({ className }: { className?: string }) {
@@ -52,47 +55,59 @@ function InstagramIcon({ className }: { className?: string }) {
     <svg
       className={className}
       viewBox="0 0 24 24"
-      fill="currentColor"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
     </svg>
   );
 }
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { center, features } = useCenter();
+
+  // Filter links by feature flags
+  const filteredQuickLinks = siteConfig.footer.quickLinks.filter((link) => {
+    if (link.href === '/blog' && !features.blog) return false;
+    if (link.href === '/explore' && !features.publicSite) return false;
+    return true;
+  });
 
   return (
     <footer
-      className="w-full bg-surface-muted border-t border-border text-foreground transition-colors"
-      aria-labelledby="footer-heading"
+      aria-label="Site Footer"
+      className="bg-surface-sunken border-t border-border mt-auto transition-colors duration-200"
     >
-      <h2 id="footer-heading" className="sr-only">
-        Site Footer
-      </h2>
-
-      {/* Newsletter Section */}
-      <div className="border-b border-border/80 bg-surface/50 py-10 sm:py-12">
-        <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-            <div className="lg:col-span-5">
-              <span className="text-xs font-bold text-primary tracking-wider uppercase">
-                Stay In The Loop
-              </span>
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mt-1">
-                Subscribe to EduFlow Insights
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                Get monthly admission alerts, exam tips, syllabus updates, and academic guides directly to your inbox.
-              </p>
+      {/* Newsletter Section (Top of Footer, conditionally rendered) */}
+      {features.newsletter && (
+        <div className="border-b border-border bg-surface/50 py-10 sm:py-12">
+          <Container>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 items-center">
+              <div className="lg:col-span-5 space-y-1">
+                <span className="text-xs font-bold text-primary tracking-wider uppercase">
+                  Stay In The Loop
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mt-1">
+                  Subscribe to {center.name} Updates
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                  Get monthly admission alerts, exam tips, syllabus updates, and academic guides directly to your inbox.
+                </p>
+              </div>
+              <div className="lg:col-span-7">
+                <NewsletterForm />
+              </div>
             </div>
-            <div className="lg:col-span-7">
-              <NewsletterForm />
-            </div>
-          </div>
-        </Container>
-      </div>
+          </Container>
+        </div>
+      )}
 
       {/* Main 4-Column Footer */}
       <div className="py-12 sm:py-16">
@@ -103,133 +118,125 @@ export function Footer() {
               <Link
                 href="/"
                 className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[var(--radius-control)] w-fit"
-                aria-label={`${siteConfig.brand.name} Home`}
+                aria-label={`${center.name} Home`}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground font-bold text-lg shadow-xs select-none">
-                  E
-                </div>
+                {center.logoUrl ? (
+                  <img
+                    src={center.logoUrl}
+                    alt={center.name}
+                    className="h-9 w-9 object-contain rounded-[var(--radius-control)]"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground font-bold text-lg shadow-xs select-none">
+                    {center.shortName?.[0] || center.name?.[0] || 'C'}
+                  </div>
+                )}
                 <div className="flex flex-col">
                   <span className="font-bold text-base tracking-tight text-foreground leading-tight">
-                    {siteConfig.brand.name}
+                    {center.name}
                   </span>
                   <span className="text-[10px] text-muted-foreground leading-tight font-medium">
-                    Coaching Platform
+                    {center.tagline || 'Coaching Platform'}
                   </span>
                 </div>
               </Link>
 
               <p className="text-xs leading-relaxed text-muted-foreground max-w-sm">
-                {siteConfig.brand.tagline}. {siteConfig.brand.shortTagline}.
+                {center.tagline || 'Coaching Center Management Platform'}.
               </p>
 
               {/* Social Icons */}
-              <div className="pt-2">
-                <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
-                  Follow Us
+              {center.socials && Object.values(center.socials).some(Boolean) && (
+                <div className="pt-2">
+                  <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+                    Follow Us
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    {center.socials.facebook && (
+                      <a
+                        href={center.socials.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Follow ${center.name} on Facebook`}
+                        className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <FacebookIcon className="h-4 w-4" />
+                      </a>
+                    )}
+
+                    {center.socials.youtube && (
+                      <a
+                        href={center.socials.youtube}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Follow ${center.name} on YouTube`}
+                        className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <YouTubeIcon className="h-4 w-4" />
+                      </a>
+                    )}
+
+                    {center.socials.linkedin && (
+                      <a
+                        href={center.socials.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Connect with ${center.name} on LinkedIn`}
+                        className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <LinkedInIcon className="h-4 w-4" />
+                      </a>
+                    )}
+
+                    {center.socials.instagram && (
+                      <a
+                        href={center.socials.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Follow ${center.name} on Instagram`}
+                        className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <InstagramIcon className="h-4 w-4" />
+                      </a>
+                    )}
+
+                    {center.socials.website && (
+                      <a
+                        href={center.socials.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Visit ${center.name} website`}
+                        className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Globe className="h-4 w-4" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  {siteConfig.socials.facebook && (
-                    <a
-                      href={siteConfig.socials.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Follow EduFlow on Facebook"
-                      className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <FacebookIcon className="h-4 w-4" />
-                    </a>
-                  )}
-
-                  {siteConfig.socials.youtube && (
-                    <a
-                      href={siteConfig.socials.youtube}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Follow EduFlow on YouTube"
-                      className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <YouTubeIcon className="h-4 w-4" />
-                    </a>
-                  )}
-
-                  {siteConfig.socials.linkedin && (
-                    <a
-                      href={siteConfig.socials.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Connect with EduFlow on LinkedIn"
-                      className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <LinkedInIcon className="h-4 w-4" />
-                    </a>
-                  )}
-
-                  {siteConfig.socials.instagram && (
-                    <a
-                      href={siteConfig.socials.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Follow EduFlow on Instagram"
-                      className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <InstagramIcon className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Column 2: Quick Links (2 cols on lg) */}
-            <div className="space-y-3 lg:col-span-2">
+            {/* Column 2: Navigation Links (2 cols on lg) */}
+            <div className="space-y-4 lg:col-span-2">
               <div className="text-xs font-bold text-foreground uppercase tracking-wider">
-                Quick Links
+                Explore
               </div>
               <ul className="space-y-2.5 text-xs">
-                <li>
-                  <Link
-                    href="/"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/explore"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-                  >
-                    Explore
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/blog"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-                  >
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-                  >
-                    Contact
-                  </Link>
-                </li>
+                {filteredQuickLinks.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Column 3: Resources (2 cols on lg) */}
-            <div className="space-y-3 lg:col-span-2">
+            {/* Column 3: Resources & Auth (2 cols on lg) */}
+            <div className="space-y-4 lg:col-span-2">
               <div className="text-xs font-bold text-foreground uppercase tracking-wider">
                 Resources
               </div>
@@ -237,7 +244,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/faq"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Help & FAQ
                   </Link>
@@ -245,7 +252,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/privacy"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Privacy Policy
                   </Link>
@@ -253,7 +260,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/terms"
-                    className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Terms of Service
                   </Link>
@@ -270,33 +277,40 @@ export function Footer() {
               </div>
 
               <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={`mailto:${siteConfig.contact.email}`}
-                    className="hover:text-foreground transition-colors font-medium"
-                  >
-                    {siteConfig.contact.email}
-                  </a>
-                </div>
+                {center.contactEmail && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="h-4 w-4 shrink-0 text-primary" />
+                    <a
+                      href={`mailto:${center.contactEmail}`}
+                      className="hover:text-foreground transition-colors font-medium"
+                    >
+                      {center.contactEmail}
+                    </a>
+                  </div>
+                )}
 
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={`tel:${siteConfig.contact.phone}`}
-                    className="hover:text-foreground transition-colors font-medium"
-                  >
-                    {siteConfig.contact.formattedPhone}
-                  </a>
-                </div>
+                {center.contactPhone && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-4 w-4 shrink-0 text-primary" />
+                    <a
+                      href={`tel:${center.contactPhone}`}
+                      className="hover:text-foreground transition-colors font-medium"
+                    >
+                      {center.contactPhone}
+                    </a>
+                  </div>
+                )}
 
-                <p className="text-[11px] text-muted-foreground/80 pt-0.5">
-                  {siteConfig.contact.officeHours}
-                </p>
+                {center.address && (
+                  <div className="flex items-start gap-2 text-muted-foreground">
+                    <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+                    <span>{center.address}</span>
+                  </div>
+                )}
               </div>
 
               {/* Dynamic Branches from GET /api/public/branches */}
-              <FooterBranches />
+              {features.publicSite && <FooterBranches />}
             </div>
           </div>
         </Container>
@@ -307,8 +321,16 @@ export function Footer() {
         <Container>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
             <div>
-              &copy; {currentYear} {siteConfig.brand.name}. All rights reserved.
+              &copy; {currentYear} {center.name}. All rights reserved.
             </div>
+
+            {/* Powered By EduFlow Credit */}
+            {features.showPoweredBy !== false && (
+              <div className="text-[11px] text-muted-foreground/70">
+                Powered by <span className="font-semibold text-foreground/80">EduFlow</span>
+              </div>
+            )}
+
             <div className="flex items-center gap-6">
               <Link
                 href="/privacy"

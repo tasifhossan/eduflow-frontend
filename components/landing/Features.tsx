@@ -67,7 +67,7 @@ export default function Features() {
             Everything You Need to Run Your Center
           </h2>
           <p className="font-inter text-base text-text-body leading-relaxed">
-            Eliminate spreadsheets and paper logs. EduFlow brings all administrative operations 
+            Eliminate spreadsheets and paper logs. Our platform brings all administrative operations 
             into a single dashboard designed for the unique needs of coaching centers in Bangladesh.
           </p>
         </div>

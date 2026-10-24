@@ -13,7 +13,7 @@ export default function WhoItsFor() {
           </h2>
           <p className="font-inter text-base text-text-body leading-relaxed">
             Whether you run a local subject-wise tutoring hub or a massive nationwide admission coaching branch, 
-            EduFlow adapts perfectly to your operational structure.
+            our platform adapts perfectly to your operational structure.
           </p>
         </div>
 

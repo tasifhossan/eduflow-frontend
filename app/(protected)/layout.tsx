@@ -2,6 +2,7 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
+import { getCenterData } from '@/lib/center';
 import LogoutButton from '@/components/logout-button';
 
 interface SidebarLink {
@@ -17,6 +18,7 @@ export default async function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
+  const center = await getCenterData();
 
   // If user is not authenticated, redirect to login page
   if (!user) {
@@ -175,8 +177,18 @@ export default async function ProtectedLayout({
         </svg>
       ),
     },
+    {
+      name: 'Settings',
+      href: '/settings',
+      roles: ['SUPER_ADMIN'],
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
   ];
-
 
   const visibleLinks = links.filter((link) => link.roles.includes(user.role));
 
@@ -186,12 +198,20 @@ export default async function ProtectedLayout({
       <aside className="w-64 bg-primary text-white flex flex-col flex-shrink-0">
         {/* Brand */}
         <div className="h-16 flex items-center px-6 border-b border-slate-700/50">
-          <Link href="/dashboard" className="flex items-center gap-x-2">
-            <span className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center font-bold text-white text-lg">
-              E
-            </span>
-            <span className="font-poppins text-xl font-bold tracking-wide">
-              EduFlow
+          <Link href="/dashboard" className="flex items-center gap-x-2 min-w-0">
+            {center.logoUrl ? (
+              <img
+                src={center.logoUrl}
+                alt={center.name}
+                className="h-8 w-8 object-contain rounded-lg flex-shrink-0"
+              />
+            ) : (
+              <span className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center font-bold text-white text-lg flex-shrink-0">
+                {center.shortName?.[0] || center.name?.[0] || 'C'}
+              </span>
+            )}
+            <span className="font-poppins text-lg font-bold tracking-wide truncate">
+              {center.name}
             </span>
           </Link>
         </div>
@@ -228,8 +248,8 @@ export default async function ProtectedLayout({
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-700/50 text-xs text-slate-400 text-center">
-          EduFlow Management v1.0
+        <div className="p-4 border-t border-slate-700/50 text-xs text-slate-400 text-center truncate">
+          {center.name} Portal
         </div>
       </aside>
 

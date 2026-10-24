@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { apiPost } from '@/lib/api';
 import { useAuth } from '@/components/providers/auth-provider';
+import { useCenter } from '@/components/providers/center-provider';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ interface LoginResponse {
 export default function LoginPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
+  const { center } = useCenter();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -101,18 +103,29 @@ export default function LoginPage() {
     <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-block">
-            <span className="text-3xl font-black tracking-tight text-primary">EduFlow</span>
+          <Link href="/" className="inline-flex flex-col items-center">
+            {center.logoUrl ? (
+              <img
+                src={center.logoUrl}
+                alt={center.name}
+                className="h-12 w-12 object-contain mb-2 rounded-[var(--radius-control)]"
+              />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground font-bold text-2xl shadow-sm mb-2">
+                {center.shortName?.[0] || center.name?.[0] || 'C'}
+              </div>
+            )}
+            <span className="text-3xl font-black tracking-tight text-foreground">{center.name}</span>
           </Link>
           <p className="mt-2 text-sm text-muted-foreground">
-            Multi-Branch Coaching Center Management Platform
+            {center.tagline || 'Coaching Center Management Platform'}
           </p>
         </div>
 
         <Card className="border-border shadow-card">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl font-bold tracking-tight text-foreground">
-              Sign in to EduFlow
+              Sign in to {center.name}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
               Access is provisioned by coaching center staff. Use your phone number, student ID, or registered email.

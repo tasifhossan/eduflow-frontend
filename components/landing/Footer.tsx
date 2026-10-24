@@ -65,7 +65,7 @@ export default function Footer() {
         {/* Footer Bottom */}
         <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p className="font-inter text-slate-500">
-            &copy; {currentYear} EduFlow. All rights reserved.
+            &copy; {currentYear} Coaching Portal. All rights reserved.
           </p>
           <p className="font-inter text-slate-500 flex items-center gap-1">
             Built for coaching centers in Bangladesh 🇧🇩

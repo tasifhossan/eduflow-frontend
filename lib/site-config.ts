@@ -10,57 +10,25 @@ export interface NavDropdownGroup {
   items: NavItem[];
 }
 
+export interface SiteNavConfig {
+  loggedOut: NavItem[];
+  resourcesMenu: NavItem[];
+  loggedIn: NavItem[];
+}
+
+export interface SiteFooterConfig {
+  quickLinks: NavItem[];
+  resourceLinks: NavItem[];
+  legalLinks: NavItem[];
+}
+
 export interface SiteConfig {
-  brand: {
-    name: string;
-    tagline: string;
-    shortTagline: string;
-  };
-  contact: {
-    email: string;
-    phone: string;
-    formattedPhone: string;
-    officeHours: string;
-  };
-  socials: {
-    facebook?: string;
-    youtube?: string;
-    linkedin?: string;
-    instagram?: string;
-    twitter?: string;
-  };
-  nav: {
-    loggedOut: NavItem[];
-    resourcesMenu: NavItem[];
-    loggedIn: NavItem[];
-  };
-  footer: {
-    quickLinks: NavItem[];
-    resourceLinks: NavItem[];
-    legalLinks: NavItem[];
-  };
+  nav: SiteNavConfig;
+  footer: SiteFooterConfig;
 }
 
 export const siteConfig: SiteConfig = {
-  brand: {
-    name: 'EduFlow',
-    tagline: 'Modern Multi-Branch Coaching Center Management Platform',
-    shortTagline: 'Empowering students and teachers across Bangladesh',
-  },
-  contact: {
-    email: 'contact@eduflow.com',
-    phone: '+8801700000000',
-    formattedPhone: '+880 1700-000000',
-    officeHours: 'Saturday – Thursday: 9:00 AM – 8:00 PM',
-  },
-  socials: {
-    facebook: '#',
-    youtube: '#',
-    linkedin: '#',
-    instagram: '#',
-  },
   nav: {
-    // 5 Logged-out routes (exceeds min 4)
     loggedOut: [
       { label: 'Home', href: '/' },
       { label: 'Explore', href: '/explore' },
@@ -68,7 +36,6 @@ export const siteConfig: SiteConfig = {
       { label: 'About', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
-    // Advanced Resources dropdown menu
     resourcesMenu: [
       {
         label: 'Help & FAQ',
@@ -95,7 +62,6 @@ export const siteConfig: SiteConfig = {
         iconName: 'FileText',
       },
     ],
-    // 7 Logged-in routes (exceeds min 6)
     loggedIn: [
       { label: 'Home', href: '/' },
       { label: 'Explore', href: '/explore' },
@@ -111,7 +77,7 @@ export const siteConfig: SiteConfig = {
       { label: 'Home', href: '/' },
       { label: 'Explore Batches', href: '/explore' },
       { label: 'Blog & Insights', href: '/blog' },
-      { label: 'About EduFlow', href: '/about' },
+      { label: 'About Us', href: '/about' },
       { label: 'Contact Us', href: '/contact' },
     ],
     resourceLinks: [
