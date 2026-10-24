@@ -16,6 +16,41 @@ export interface CenterSocials {
   website?: string;
 }
 
+export interface AnnouncementSettings {
+  enabled: boolean;
+  text: string;
+  linkLabel?: string | null;
+  linkUrl?: string | null;
+}
+
+export interface HighlightItem {
+  label: string;
+  value: string;
+}
+
+export interface WhyChooseUsItem {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface AdmissionStepItem {
+  title: string;
+  description: string;
+}
+
+export interface HomepageSettings {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImageUrl?: string | null;
+  announcement?: AnnouncementSettings;
+  highlights?: HighlightItem[];
+  whyChooseUs?: WhyChooseUsItem[];
+  admissionSteps?: AdmissionStepItem[];
+  showFees?: boolean;
+  showPhotoGallery?: boolean;
+}
+
 export interface CenterPublicData {
   name: string;
   shortName: string;
@@ -33,6 +68,7 @@ export interface CenterPublicData {
   timezone: string;
   defaultLocale: string;
   features: CenterFeatures;
+  homepage?: HomepageSettings;
 }
 
 export interface FullCenterSettings extends CenterPublicData {
@@ -69,5 +105,16 @@ export const defaultCenterData: CenterPublicData = {
     testimonials: true,
     newsletter: true,
     showPoweredBy: true,
+  },
+  homepage: {
+    heroTitle: '',
+    heroSubtitle: '',
+    heroImageUrl: null,
+    announcement: { enabled: false, text: '', linkLabel: '', linkUrl: '' },
+    highlights: [],
+    whyChooseUs: [],
+    admissionSteps: [],
+    showFees: true,
+    showPhotoGallery: true,
   },
 };

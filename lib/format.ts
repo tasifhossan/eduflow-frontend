@@ -82,3 +82,31 @@ export function formatDateTime(
     return '—';
   }
 }
+
+/**
+ * Normalizes Bangladeshi phone numbers into canonical 11-digit format: 01XXXXXXXXX
+ */
+export function normalizePhone(phone: string | null | undefined): string | null {
+  if (!phone) return null;
+  const trimmed = phone.trim();
+  if (!trimmed) return null;
+
+  let cleaned = trimmed.replace(/[\s-]/g, '');
+  if (cleaned.startsWith('+880')) {
+    cleaned = '0' + cleaned.slice(4);
+  } else if (cleaned.startsWith('880')) {
+    cleaned = '0' + cleaned.slice(3);
+  }
+
+  return cleaned;
+}
+
+/**
+ * Validates whether a phone string conforms to standard 11-digit Bangladeshi mobile format.
+ */
+export function isValidBangladeshiPhone(phone: string): boolean {
+  const norm = normalizePhone(phone);
+  if (!norm) return false;
+  return /^01[3-9]\d{8}$/.test(norm);
+}
+

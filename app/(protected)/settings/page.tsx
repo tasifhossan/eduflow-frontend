@@ -6,7 +6,14 @@ import { toast } from 'sonner';
 import { apiGet, apiPatch, ApiResponse } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
 import { useCenter } from '@/components/providers/center-provider';
-import { FullCenterSettings } from '@/lib/types/center';
+import {
+  FullCenterSettings,
+  HomepageSettings,
+  AnnouncementSettings,
+  HighlightItem,
+  WhyChooseUsItem,
+  AdmissionStepItem,
+} from '@/lib/types/center';
 import { enforceWcagAA, sanitizeHex } from '@/lib/theme';
 import {
   Palette,
@@ -22,7 +29,43 @@ import {
   RotateCcw,
   Sparkles,
   ExternalLink,
+  Home,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Eye,
 } from 'lucide-react';
+
+const WHITELISTED_ICONS = [
+  'BookOpen',
+  'GraduationCap',
+  'Award',
+  'Users',
+  'Clock',
+  'CheckCircle',
+  'CheckCircle2',
+  'Star',
+  'Shield',
+  'ShieldCheck',
+  'Sparkles',
+  'Target',
+  'Compass',
+  'Lightbulb',
+  'Smile',
+  'Heart',
+  'TrendingUp',
+  'Zap',
+  'HelpCircle',
+  'FileText',
+  'Calendar',
+  'MapPin',
+  'Brain',
+  'Layers',
+  'Flame',
+  'Trophy',
+  'BadgeCheck',
+] as const;
 
 const TIMEZONES = [
   'Asia/Dhaka',
@@ -41,17 +84,19 @@ const TIMEZONES = [
 export default function SettingsPage() {
   const router = useRouter();
   const { updateCenter } = useCenter();
-  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'homepage'>('branding');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
   const [initialData, setInitialData] = useState<FullCenterSettings | null>(null);
   const [formData, setFormData] = useState<FullCenterSettings | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const faviconInputRef = useRef<HTMLInputElement>(null);
+  const heroInputRef = useRef<HTMLInputElement>(null);
 
   // Load settings on mount
   useEffect(() => {
@@ -152,7 +197,7 @@ export default function SettingsPage() {
   };
 
   // Cloudinary image upload helper
-  const handleImageUpload = async (file: File, type: 'logo' | 'favicon') => {
+  const handleImageUpload = async (file: File, type: 'logo' | 'favicon' | 'hero') => {
     // Client format validation
     const validFormats = ['image/png', 'image/jpeg', 'image/webp'];
     if (!validFormats.includes(file.type)) {
@@ -165,7 +210,12 @@ export default function SettingsPage() {
       return;
     }
 
-    const setUploading = type === 'logo' ? setUploadingLogo : setUploadingFavicon;
+    const setUploading =
+      type === 'logo'
+        ? setUploadingLogo
+        : type === 'favicon'
+        ? setUploadingFavicon
+        : setUploadingHero;
     setUploading(true);
 
     try {
@@ -212,15 +262,132 @@ export default function SettingsPage() {
 
       if (type === 'logo') {
         handleChange('logoUrl', secureUrl);
-      } else {
+      } else if (type === 'favicon') {
         handleChange('faviconUrl', secureUrl);
+      } else {
+        handleHomepageChange('heroImageUrl', secureUrl);
       }
-      toast.success(`${type === 'logo' ? 'Logo' : 'Favicon'} uploaded successfully`);
+      toast.success(`${type === 'logo' ? 'Logo' : type === 'favicon' ? 'Favicon' : 'Hero banner image'} uploaded successfully`);
     } catch (err: any) {
       toast.error(err.message || 'Upload failed');
     } finally {
       setUploading(false);
     }
+  };
+
+  // Homepage helpers
+  const handleHomepageChange = <K extends keyof HomepageSettings>(field: K, value: HomepageSettings[K]) => {
+    setFormData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        homepage: {
+          ...(prev.homepage || {}),
+          [field]: value,
+        },
+      };
+    });
+  };
+
+  const handleAnnouncementChange = (field: keyof AnnouncementSettings, value: any) => {
+    setFormData((prev) => {
+      if (!prev) return prev;
+      const current = prev.homepage?.announcement || { enabled: false, text: '', linkLabel: '', linkUrl: '' };
+      return {
+        ...prev,
+        homepage: {
+          ...(prev.homepage || {}),
+          announcement: {
+            ...current,
+            [field]: value,
+          },
+        },
+      };
+    });
+  };
+
+  const addHighlight = () => {
+    const list = formData?.homepage?.highlights || [];
+    if (list.length >= 4) return;
+    handleHomepageChange('highlights', [...list, { value: '', label: '' }]);
+  };
+
+  const updateHighlight = (index: number, field: keyof HighlightItem, val: string) => {
+    const list = [...(formData?.homepage?.highlights || [])];
+    if (!list[index]) return;
+    list[index] = { ...list[index], [field]: val };
+    handleHomepageChange('highlights', list);
+  };
+
+  const removeHighlight = (index: number) => {
+    const list = (formData?.homepage?.highlights || []).filter((_, i) => i !== index);
+    handleHomepageChange('highlights', list);
+  };
+
+  const moveHighlight = (index: number, direction: 'up' | 'down') => {
+    const list = [...(formData?.homepage?.highlights || [])];
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return;
+    const temp = list[index];
+    list[index] = list[target];
+    list[target] = temp;
+    handleHomepageChange('highlights', list);
+  };
+
+  const addWhyChooseUs = () => {
+    const list = formData?.homepage?.whyChooseUs || [];
+    if (list.length >= 6) return;
+    handleHomepageChange('whyChooseUs', [...list, { title: '', description: '', icon: 'BookOpen' }]);
+  };
+
+  const updateWhyChooseUs = (index: number, field: keyof WhyChooseUsItem, val: string) => {
+    const list = [...(formData?.homepage?.whyChooseUs || [])];
+    if (!list[index]) return;
+    list[index] = { ...list[index], [field]: val };
+    handleHomepageChange('whyChooseUs', list);
+  };
+
+  const removeWhyChooseUs = (index: number) => {
+    const list = (formData?.homepage?.whyChooseUs || []).filter((_, i) => i !== index);
+    handleHomepageChange('whyChooseUs', list);
+  };
+
+  const moveWhyChooseUs = (index: number, direction: 'up' | 'down') => {
+    const list = [...(formData?.homepage?.whyChooseUs || [])];
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return;
+    const temp = list[index];
+    list[index] = list[target];
+    list[target] = temp;
+    handleHomepageChange('whyChooseUs', list);
+  };
+
+  const addAdmissionStep = () => {
+    const list = formData?.homepage?.admissionSteps || [];
+    if (list.length >= 5) return;
+    handleHomepageChange('admissionSteps', [...list, { title: '', description: '' }]);
+  };
+
+  const updateAdmissionStep = (index: number, field: keyof AdmissionStepItem, val: string) => {
+    const list = [...(formData?.homepage?.admissionSteps || [])];
+    if (!list[index]) return;
+    list[index] = { ...list[index], [field]: val };
+    handleHomepageChange('admissionSteps', list);
+  };
+
+  const removeAdmissionStep = (index: number) => {
+    const list = (formData?.homepage?.admissionSteps || []).filter((_, i) => i !== index);
+    handleHomepageChange('admissionSteps', list);
+  };
+
+  const moveAdmissionStep = (index: number, direction: 'up' | 'down') => {
+    const list = [...(formData?.homepage?.admissionSteps || [])];
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return;
+    const temp = list[index];
+    list[index] = list[target];
+    list[target] = temp;
+    handleHomepageChange('admissionSteps', list);
   };
 
   // Live WCAG analysis
@@ -254,6 +421,30 @@ export default function SettingsPage() {
         receiptHeader: formData.receiptHeader || null,
         receiptFooter: formData.receiptFooter || null,
         features: formData.features,
+        homepage: {
+          heroTitle: formData.homepage?.heroTitle || undefined,
+          heroSubtitle: formData.homepage?.heroSubtitle || undefined,
+          heroImageUrl: formData.homepage?.heroImageUrl?.trim() || null,
+          announcement: formData.homepage?.announcement
+            ? {
+                enabled: !!formData.homepage.announcement.enabled,
+                text: formData.homepage.announcement.text || '',
+                linkLabel: formData.homepage.announcement.linkLabel || undefined,
+                linkUrl: formData.homepage.announcement.linkUrl?.trim() || null,
+              }
+            : undefined,
+          highlights: (formData.homepage?.highlights || [])
+            .filter((h) => h.value?.trim() || h.label?.trim())
+            .slice(0, 4),
+          whyChooseUs: (formData.homepage?.whyChooseUs || [])
+            .filter((w) => w.title?.trim())
+            .slice(0, 6),
+          admissionSteps: (formData.homepage?.admissionSteps || [])
+            .filter((s) => s.title?.trim())
+            .slice(0, 5),
+          showFees: formData.homepage?.showFees !== false,
+          showPhotoGallery: formData.homepage?.showPhotoGallery !== false,
+        },
       };
 
       const res = await apiPatch<ApiResponse<FullCenterSettings>>('/api/settings', payload);
@@ -402,6 +593,19 @@ export default function SettingsPage() {
         >
           <ToggleLeft className="h-4 w-4" />
           Feature Flags
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('homepage')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+            activeTab === 'homepage'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <Home className="h-4 w-4" />
+          Homepage
         </button>
       </div>
 
@@ -964,6 +1168,578 @@ export default function SettingsPage() {
                 onChange={(e) => handleFeatureToggle('showPoweredBy', e.target.checked)}
                 className="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 6: Homepage Settings */}
+      {activeTab === 'homepage' && (
+        <div className="space-y-8">
+          {/* Live Preview Card */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-700 space-y-4">
+            <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-700/60">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
+                <Eye className="h-3.5 w-3.5" /> Live Hero Preview
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {formData.homepage?.showFees !== false ? 'Fees: Displayed' : 'Fees: Hidden'}
+              </span>
+            </div>
+
+            {formData.homepage?.announcement?.enabled && formData.homepage?.announcement?.text && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-200 border border-primary/30 rounded-full text-xs">
+                <Sparkles className="h-3 w-3 text-primary" />
+                <span>{formData.homepage.announcement.text}</span>
+              </div>
+            )}
+
+            <div className="max-w-2xl space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight text-white">
+                {formData.homepage?.heroTitle?.trim() || formData.name || 'Your Coaching Center'}
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                {formData.homepage?.heroSubtitle?.trim() ||
+                  formData.tagline ||
+                  'Structured coaching programs with expert educators, regular assessments, and student progress tracking.'}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <span className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-sm">
+                Enquire now
+              </span>
+              <span className="px-4 py-2 bg-white/10 text-white text-xs font-semibold rounded-lg border border-white/20">
+                View courses
+              </span>
+              <span className="text-xs text-slate-400 ml-auto">
+                Student login / Go to dashboard
+              </span>
+            </div>
+          </div>
+
+          {/* Section 1: Hero Banner */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold text-slate-900">Hero Section</h3>
+              <p className="text-xs text-slate-500">
+                The primary banner greeting admission-seeking students and parents. Leave blank to default to center name and tagline.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Hero Title
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {(formData.homepage?.heroTitle || '').length} / 90
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  maxLength={90}
+                  value={formData.homepage?.heroTitle || ''}
+                  onChange={(e) => handleHomepageChange('heroTitle', e.target.value)}
+                  placeholder={formData.name || 'e.g. Build Strong Foundations for Board & Entrance Exams'}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Hero Subtitle
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {(formData.homepage?.heroSubtitle || '').length} / 220
+                  </span>
+                </div>
+                <textarea
+                  rows={3}
+                  maxLength={220}
+                  value={formData.homepage?.heroSubtitle || ''}
+                  onChange={(e) => handleHomepageChange('heroSubtitle', e.target.value)}
+                  placeholder={
+                    formData.tagline ||
+                    'e.g. Structured coaching programs with verified faculty, small batches, and transparent progress reports.'
+                  }
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Hero Image (Optional • HTTPS URL or Upload)
+                </label>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <input
+                    type="url"
+                    value={formData.homepage?.heroImageUrl || ''}
+                    onChange={(e) => handleHomepageChange('heroImageUrl', e.target.value)}
+                    placeholder="https://images.unsplash.com/..."
+                    className="flex-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+
+                  <input
+                    ref={heroInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'hero');
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => heroInputRef.current?.click()}
+                    disabled={uploadingHero}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer shrink-0"
+                  >
+                    {uploadingHero ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="h-3.5 w-3.5" />
+                    )}
+                    Upload Image
+                  </button>
+
+                  {formData.homepage?.heroImageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleHomepageChange('heroImageUrl', null)}
+                      className="text-xs text-red-500 hover:underline cursor-pointer shrink-0"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {formData.homepage?.heroImageUrl && (
+                  <div className="mt-3 h-28 w-48 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                    <img
+                      src={formData.homepage.heroImageUrl}
+                      alt="Hero banner preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Announcement Bar */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Announcement Bar</h3>
+                <p className="text-xs text-slate-500">
+                  Dismissible banner pinned across the very top of the homepage for admissions, scholarships, or notices.
+                </p>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.homepage?.announcement?.enabled === true}
+                  onChange={(e) => handleAnnouncementChange('enabled', e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-slate-700">Enabled</span>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Announcement Text
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {(formData.homepage?.announcement?.text || '').length} / 160
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  maxLength={160}
+                  value={formData.homepage?.announcement?.text || ''}
+                  onChange={(e) => handleAnnouncementChange('text', e.target.value)}
+                  placeholder="e.g. Admissions Open for Academic Session 2026-2027 • Scholarship Test on Nov 15"
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Link Label (Optional)
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {(formData.homepage?.announcement?.linkLabel || '').length} / 40
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={formData.homepage?.announcement?.linkLabel || ''}
+                  onChange={(e) => handleAnnouncementChange('linkLabel', e.target.value)}
+                  placeholder="e.g. Register now"
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Link Destination URL (Relative or HTTPS)
+                </label>
+                <input
+                  type="text"
+                  value={formData.homepage?.announcement?.linkUrl || ''}
+                  onChange={(e) => handleAnnouncementChange('linkUrl', e.target.value)}
+                  placeholder="/explore or https://..."
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Highlights & Statistics */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Highlights & Statistics</h3>
+                <p className="text-xs text-slate-500">
+                  Key metrics displayed in the highlight strip below the hero (maximum 4 statistics).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addHighlight}
+                disabled={(formData.homepage?.highlights?.length || 0) >= 4}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg disabled:opacity-40 cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Statistic
+              </button>
+            </div>
+
+            {(!formData.homepage?.highlights || formData.homepage.highlights.length === 0) ? (
+              <p className="text-xs text-slate-400 italic py-2">
+                No highlights configured. The highlights strip will be hidden on the homepage.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {formData.homepage.highlights.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl"
+                  >
+                    <div className="w-full sm:w-1/3">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                        Metric Value (e.g. 1,500+)
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={40}
+                        value={item.value}
+                        onChange={(e) => updateHighlight(idx, 'value', e.target.value)}
+                        placeholder="1,500+"
+                        className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="w-full sm:flex-1">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                        Metric Label (e.g. Students enrolled)
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={40}
+                        value={item.label}
+                        onChange={(e) => updateHighlight(idx, 'label', e.target.value)}
+                        placeholder="Students enrolled"
+                        className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-1 pt-4 sm:pt-0">
+                      <button
+                        type="button"
+                        onClick={() => moveHighlight(idx, 'up')}
+                        disabled={idx === 0}
+                        className="p-1.5 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
+                        title="Move Up"
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveHighlight(idx, 'down')}
+                        disabled={idx === (formData.homepage?.highlights?.length || 0) - 1}
+                        className="p-1.5 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
+                        title="Move Down"
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeHighlight(idx)}
+                        className="p-1.5 text-red-500 hover:text-red-700 cursor-pointer"
+                        title="Remove"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 4: Why Choose Us */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Why Choose Us</h3>
+                <p className="text-xs text-slate-500">
+                  Feature pillars with icons highlighting coaching strengths (maximum 6 items).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addWhyChooseUs}
+                disabled={(formData.homepage?.whyChooseUs?.length || 0) >= 6}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg disabled:opacity-40 cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Feature
+              </button>
+            </div>
+
+            {(!formData.homepage?.whyChooseUs || formData.homepage.whyChooseUs.length === 0) ? (
+              <p className="text-xs text-slate-400 italic py-2">
+                No "Why Choose Us" items configured. The section will be hidden on the homepage.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {formData.homepage.whyChooseUs.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-600">Feature #{idx + 1}</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveWhyChooseUs(idx, 'up')}
+                          disabled={idx === 0}
+                          className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveWhyChooseUs(idx, 'down')}
+                          disabled={idx === (formData.homepage?.whyChooseUs?.length || 0) - 1}
+                          className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeWhyChooseUs(idx)}
+                          className="p-1 text-red-500 hover:text-red-700 cursor-pointer ml-1"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2">
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Title ({item.title.length}/60)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={60}
+                          value={item.title}
+                          onChange={(e) => updateWhyChooseUs(idx, 'title', e.target.value)}
+                          placeholder="e.g. Expert Faculty"
+                          className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Icon
+                        </label>
+                        <select
+                          value={item.icon}
+                          onChange={(e) => updateWhyChooseUs(idx, 'icon', e.target.value)}
+                          className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                        >
+                          {WHITELISTED_ICONS.map((icon) => (
+                            <option key={icon} value={icon}>
+                              {icon}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Description ({item.description.length}/220)
+                        </label>
+                        <textarea
+                          rows={2}
+                          maxLength={220}
+                          value={item.description}
+                          onChange={(e) => updateWhyChooseUs(idx, 'description', e.target.value)}
+                          placeholder="e.g. Learn directly from top university graduates and seasoned subject specialists."
+                          className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 5: Admission Steps */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Admission Steps</h3>
+                <p className="text-xs text-slate-500">
+                  How admission works, guiding prospective students step-by-step (maximum 5 steps).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addAdmissionStep}
+                disabled={(formData.homepage?.admissionSteps?.length || 0) >= 5}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg disabled:opacity-40 cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Step
+              </button>
+            </div>
+
+            {(!formData.homepage?.admissionSteps || formData.homepage.admissionSteps.length === 0) ? (
+              <p className="text-xs text-slate-400 italic py-2">
+                No admission steps configured. The section will be hidden on the homepage.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {formData.homepage.admissionSteps.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-600">Step {idx + 1}</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveAdmissionStep(idx, 'up')}
+                          disabled={idx === 0}
+                          className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveAdmissionStep(idx, 'down')}
+                          disabled={idx === (formData.homepage?.admissionSteps?.length || 0) - 1}
+                          className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeAdmissionStep(idx)}
+                          className="p-1 text-red-500 hover:text-red-700 cursor-pointer ml-1"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Step Title ({step.title.length}/60)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={60}
+                          value={step.title}
+                          onChange={(e) => updateAdmissionStep(idx, 'title', e.target.value)}
+                          placeholder="e.g. Choose Your Course & Branch"
+                          className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Step Description ({step.description.length}/220)
+                        </label>
+                        <textarea
+                          rows={2}
+                          maxLength={220}
+                          value={step.description}
+                          onChange={(e) => updateAdmissionStep(idx, 'description', e.target.value)}
+                          placeholder="e.g. Browse active batches and pick your preferred campus timing."
+                          className="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 6: Section Toggles */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              Section Visibility & Display Toggles
+            </h3>
+
+            <div className="divide-y divide-slate-100">
+              <div className="flex items-center justify-between py-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Show Course Fees</h4>
+                  <p className="text-xs text-slate-500">
+                    When enabled, course fees are displayed on homepage batch cards and explore pages. When disabled, fees are hidden and replaced with "Contact for fee".
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.homepage?.showFees !== false}
+                  onChange={(e) => handleHomepageChange('showFees', e.target.checked)}
+                  className="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center justify-between py-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Show Photo Gallery</h4>
+                  <p className="text-xs text-slate-500">
+                    Display campus life, classroom, and activity photos if gallery images are available.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.homepage?.showPhotoGallery !== false}
+                  onChange={(e) => handleHomepageChange('showPhotoGallery', e.target.checked)}
+                  className="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                />
+              </div>
             </div>
           </div>
         </div>

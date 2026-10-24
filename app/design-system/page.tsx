@@ -35,6 +35,14 @@ import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { DataTable, Column } from '@/components/ui/data-table';
+import {
+  HighlightStat,
+  IconFeatureCard,
+  BranchCard,
+  TeacherCard,
+  TestimonialCard,
+  BlogCard,
+} from '@/components/cards';
 
 import {
   Search,
@@ -753,6 +761,81 @@ export default function DesignSystemShowcasePage() {
                 description="Create a model test or quiz to evaluate batch performance."
                 action={<Button size="sm" variant="primary">Create Test</Button>}
               />
+            </div>
+          </div>
+        </Section>
+
+        {/* SECTION 10: Homepage & Content Card Catalog */}
+        <Section
+          title="10. Homepage & Public Content Cards"
+          subtitle="Specialized cards built on the unified Card foundation with matching radius, borders, and shadows."
+        >
+          <div className="space-y-8">
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">Highlights & Features</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <HighlightStat value="98.5%" label="Board Exam Pass Rate" />
+                <IconFeatureCard
+                  icon="GraduationCap"
+                  title="Experienced Faculty"
+                  description="Top university educators mentoring students with structured mock tests."
+                />
+                <IconFeatureCard
+                  icon="Award"
+                  title="Scholarship Programs"
+                  description="Merit-based waivers and admission incentives for top-performing students."
+                />
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">Public Content Cards</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <BranchCard
+                  branch={{
+                    id: 'b-1',
+                    name: 'Dhanmondi Campus',
+                    address: 'House 42, Road 7/A, Dhanmondi, Dhaka',
+                    phone: '01700000000',
+                  }}
+                />
+                <TeacherCard
+                  teacher={{
+                    id: 't-1',
+                    name: 'Dr. Zahid Hasan',
+                    headline: 'Senior Physics Faculty',
+                    bio: '15+ years mentoring board toppers with personalized test analysis.',
+                    subjectName: 'Physics',
+                    batchCount: 3,
+                  }}
+                />
+                <TestimonialCard
+                  testimonial={{
+                    id: 'rev-1',
+                    name: 'Anika Rahman',
+                    role: 'HSC Candidate',
+                    batchName: 'HSC 2026 Batch',
+                    content: 'The weekly creative question practice sessions and routine helped me secure GPA 5.',
+                    rating: 5,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">Blog & Articles</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <BlogCard
+                  post={{
+                    id: 'post-1',
+                    slug: 'how-to-prepare-for-board-exams',
+                    title: 'Top 5 Revision Strategies for Final Board Examinations',
+                    excerpt: 'Proven time-management and paper-solving techniques recommended by senior educators.',
+                    category: 'Study Tips',
+                    createdAt: new Date().toISOString(),
+                  }}
+                />
+              </div>
             </div>
           </div>
         </Section>

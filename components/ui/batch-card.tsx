@@ -41,10 +41,12 @@ export function BatchCard({ batch, href, className }: BatchCardProps) {
   const targetHref = href || `/batches/${batch.id}`;
 
   const symbol = center.currencySymbol || '৳';
-  const formattedFee =
-    batch.feeAmount !== undefined && batch.feeAmount !== null
-      ? `${symbol}${batch.feeAmount.toLocaleString()}${batch.feeType === 'MONTHLY' ? '/mo' : ''}`
-      : 'Free';
+  const hasFee = batch.feeAmount !== undefined && batch.feeAmount !== null;
+  const formattedFee = hasFee
+    ? `${symbol}${batch.feeAmount!.toLocaleString()}${batch.feeType === 'MONTHLY' ? '/mo' : ''}`
+    : null;
+
+  const hasReviews = Boolean(batch.ratingCount && batch.ratingCount > 0 && batch.ratingAverage);
 
   return (
     <Card
@@ -94,7 +96,7 @@ export function BatchCard({ batch, href, className }: BatchCardProps) {
       {/* Card Body */}
       <div className="flex flex-col flex-1 p-5 space-y-3">
         {/* Rating and Subject */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-muted-foreground min-h-[1.25rem]">
           {batch.subjectName ? (
             <span className="inline-flex items-center gap-1 font-medium text-primary">
               <Tag className="h-3 w-3" />
@@ -104,12 +106,14 @@ export function BatchCard({ batch, href, className }: BatchCardProps) {
             <span />
           )}
 
-          <Rating
-            value={batch.ratingAverage ?? 4.8}
-            size="sm"
-            showCount
-            count={batch.ratingCount ?? 24}
-          />
+          {hasReviews ? (
+            <Rating
+              value={batch.ratingAverage!}
+              size="sm"
+              showCount
+              count={batch.ratingCount!}
+            />
+          ) : null}
         </div>
 
         {/* Title clamped to 2 lines with consistent min-height */}
@@ -118,16 +122,22 @@ export function BatchCard({ batch, href, className }: BatchCardProps) {
         </h3>
 
         {/* Description clamped to 2 lines with consistent min-height */}
-        <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem] leading-relaxed">
-          {batch.description || 'Comprehensive curriculum covering all syllabus components with structured exams.'}
-        </p>
+        {batch.description ? (
+          <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem] leading-relaxed">
+            {batch.description}
+          </p>
+        ) : (
+          <div className="min-h-[2rem]" />
+        )}
 
         {/* Meta Row: Fee, Schedule, Branch */}
         <div className="pt-2 border-t border-border/60 space-y-1.5 text-xs text-muted-foreground">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">Fee:</span>
-            <span className="text-sm font-bold text-foreground">{formattedFee}</span>
-          </div>
+          {formattedFee ? (
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Fee:</span>
+              <span className="text-sm font-bold text-foreground">{formattedFee}</span>
+            </div>
+          ) : null}
 
           {batch.schedule && (
             <div className="flex items-center gap-1.5 truncate">
