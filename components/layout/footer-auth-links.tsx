@@ -29,23 +29,13 @@ export function FooterAuthLinks() {
   }
 
   return (
-    <>
-      <li>
-        <Link
-          href="/login"
-          className="text-muted-foreground hover:text-foreground transition-colors font-medium text-xs"
-        >
-          Log in
-        </Link>
-      </li>
-      <li>
-        <Link
-          href="/register"
-          className="text-muted-foreground hover:text-foreground transition-colors font-medium text-xs"
-        >
-          Register
-        </Link>
-      </li>
-    </>
+    <li>
+      <Link
+        href="/login"
+        className="text-muted-foreground hover:text-foreground transition-colors font-medium text-xs"
+      >
+        Log in
+      </Link>
+    </li>
   );
 }

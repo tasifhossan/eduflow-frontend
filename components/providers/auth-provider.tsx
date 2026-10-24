@@ -8,11 +8,14 @@ import { apiGet, apiPost } from '@/lib/api';
 export interface AuthUser {
   id: string;
   name: string;
-  email: string;
+  email?: string | null;
   phone?: string | null;
+  studentCode?: string | null;
   role: 'SUPER_ADMIN' | 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN';
   branchId?: string;
   avatarUrl?: string | null;
+  mustChangePassword?: boolean;
+  isActive?: boolean;
 }
 
 interface AuthContextType {

@@ -308,12 +308,9 @@ export function MobileMenu() {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2.5">
-                  <Button asChild variant="outline" className="min-h-[44px] text-xs font-semibold">
+                <div>
+                  <Button asChild variant="primary" className="w-full min-h-[44px] text-xs font-semibold">
                     <Link href="/login">Log in</Link>
-                  </Button>
-                  <Button asChild variant="primary" className="min-h-[44px] text-xs font-semibold">
-                    <Link href="/register">Get started</Link>
                   </Button>
                 </div>
               )}

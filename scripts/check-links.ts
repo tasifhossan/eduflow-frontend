@@ -22,7 +22,6 @@ while ((match = hrefRegex.exec(siteConfigContent)) !== null) {
 
 // Add auth links referenced in navbar/footer/mobile menu
 linksSet.add('/login');
-linksSet.add('/register');
 
 // 2. Scan app/ directory for all route pages
 const appDir = path.resolve(process.cwd(), 'app');

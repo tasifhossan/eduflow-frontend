@@ -4,9 +4,13 @@ import { apiGet } from './api';
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string | null;
+  phone?: string | null;
+  studentCode?: string | null;
   role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN';
   branchId: string;
+  mustChangePassword?: boolean;
+  isActive?: boolean;
 }
 
 export function decodeJwtPayload(token: string): Record<string, unknown> | null {

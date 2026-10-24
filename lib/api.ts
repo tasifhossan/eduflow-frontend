@@ -34,10 +34,21 @@ const getBaseUrl = () => {
 async function handleResponse<T>(response: Response, path: string): Promise<T> {
   if (!response.ok) {
     const errorData = (await response.json().catch(() => ({}))) as {
+      code?: string;
       message?: string;
       error?: string;
       errors?: unknown;
     };
+
+    if (
+      response.status === 403 &&
+      errorData.code === 'PASSWORD_CHANGE_REQUIRED' &&
+      typeof window !== 'undefined' &&
+      !window.location.pathname.startsWith('/change-password')
+    ) {
+      window.location.href = '/change-password';
+    }
+
     const errorMessage =
       errorData.message ||
       errorData.error ||

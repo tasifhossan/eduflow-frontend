@@ -136,11 +136,8 @@ export function NavbarAuth() {
   // Logged-out state
   return (
     <div className="flex items-center gap-2 sm:gap-2.5">
-      <Button asChild variant="outline" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4">
-        <Link href="/login">Log in</Link>
-      </Button>
       <Button asChild variant="primary" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4 shadow-sm">
-        <Link href="/register">Get started</Link>
+        <Link href="/login">Log in</Link>
       </Button>
     </div>
   );

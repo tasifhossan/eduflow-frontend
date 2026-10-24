@@ -2,59 +2,78 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { apiPost } from '@/lib/api';
+import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Copy, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function NewStudentPage() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [guardianName, setGuardianName] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdCreds, setCreatedCreds] = useState<{
+    name: string;
+    identifier: string;
+    studentCode?: string | null;
+    temporaryPassword?: string;
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     setErrorMsg(null);
-    setValidationErrors({});
-    setIsSubmitting(true);
-
-    if (password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters long');
-      setIsSubmitting(false);
+    if (!name.trim()) {
+      setErrorMsg('Student name is required');
+      return;
+    }
+    if (!phone.trim() && !email.trim()) {
+      setErrorMsg('Please provide at least a student phone number or email address');
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         name: name.trim(),
-        email: email.trim(),
-        password,
-        phone: phone.trim() || null,
-        guardianName: guardianName.trim() || null,
-        guardianPhone: guardianPhone.trim() || null,
+        role: 'STUDENT',
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
+        guardianName: guardianName.trim() || undefined,
+        guardianPhone: guardianPhone.trim() || undefined,
       };
 
-      const response = await apiPost('/api/students', payload);
+      const response = await apiPost<{
+        success: boolean;
+        message: string;
+        data: {
+          user: { name: string; studentCode?: string | null };
+          temporaryPassword?: string;
+          identifier: string;
+        };
+      }>('/api/auth/register', payload);
 
-      if (response && response.success) {
-        // Redirection with hard reload to refresh Vercel server components cache
-        window.location.href = '/students';
+      if (response && response.success && response.data) {
+        setCreatedCreds({
+          name: response.data.user.name,
+          identifier: response.data.identifier,
+          studentCode: response.data.user.studentCode,
+          temporaryPassword: response.data.temporaryPassword,
+        });
       } else {
-        setErrorMsg(response.message || 'Failed to create student account');
+        setErrorMsg(response.message || 'Failed to provision student account');
       }
-    } catch (err: any) {
-      // Handle Zod validation errors returned by backend (if any)
-      if (err.message && err.message.includes('Validation failed')) {
-        setErrorMsg('Validation failed. Please verify your inputs.');
-      } else {
-        setErrorMsg(err.message || 'An error occurred during submission');
-      }
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred during submission');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,8 +91,10 @@ export default function NewStudentPage() {
 
         {/* Header */}
         <div className="border-b border-gray-200 pb-5">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Add New Student</h1>
-          <p className="mt-2 text-sm text-gray-500">Create a student user account under your branch</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Provision Student</h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Create an official student account. A unique student ID and secure temporary password will be generated automatically.
+          </p>
         </div>
 
         {errorMsg && (
@@ -89,7 +110,7 @@ export default function NewStudentPage() {
             {/* Student Name */}
             <div className="sm:col-span-2">
               <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
-                Full Name
+                Full Name *
               </label>
               <input
                 type="text"
@@ -102,42 +123,10 @@ export default function NewStudentPage() {
               />
             </div>
 
-            {/* Email Address */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. tanvir@example.com"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-900 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
-                required
-              />
-            </div>
-
             {/* Phone Number */}
-            <div className="sm:col-span-2">
+            <div>
               <label htmlFor="phone" className="block text-sm font-semibold text-gray-900 mb-2">
-                Phone Number (Optional)
+                Student Phone Number
               </label>
               <input
                 type="text"
@@ -147,6 +136,27 @@ export default function NewStudentPage() {
                 placeholder="e.g. 01712345678"
                 className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
               />
+            </div>
+
+            {/* Email Address */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
+                Student Email (Optional)
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. tanvir@example.com"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+              />
+            </div>
+
+            <div className="sm:col-span-2 pt-2 border-t border-gray-100">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Guardian Information
+              </span>
             </div>
 
             {/* Guardian Name */}
@@ -193,11 +203,78 @@ export default function NewStudentPage() {
               disabled={isSubmitting}
               className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
             >
-              {isSubmitting ? 'Creating...' : 'Create Student'}
+              {isSubmitting ? 'Provisioning...' : 'Provision Student'}
             </button>
           </div>
         </form>
       </div>
+
+      {/* Modal: Credential Reveal */}
+      <Modal
+        isOpen={Boolean(createdCreds)}
+        onClose={() => router.push('/students')}
+        title="Student Account Provisioned"
+        description="Credentials generated for new student account. Please copy them now."
+        maxWidth="md"
+      >
+        {createdCreds && (
+          <div className="space-y-4 pt-2">
+            <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4 space-y-3">
+              <div>
+                <span className="text-[11px] text-gray-500 uppercase font-semibold">Student Name</span>
+                <p className="text-sm font-bold text-gray-900">{createdCreds.name}</p>
+              </div>
+
+              {createdCreds.studentCode && (
+                <div>
+                  <span className="text-[11px] text-gray-500 uppercase font-semibold">Student ID</span>
+                  <p className="font-mono text-base font-bold text-accent">{createdCreds.studentCode}</p>
+                </div>
+              )}
+
+              <div>
+                <span className="text-[11px] text-gray-500 uppercase font-semibold">Login Identifier</span>
+                <p className="font-mono text-sm font-semibold text-gray-800">{createdCreds.identifier}</p>
+              </div>
+
+              <div>
+                <span className="text-[11px] text-gray-500 uppercase font-semibold">Temporary Password</span>
+                <div className="flex items-center justify-between gap-2 bg-white p-2.5 rounded border border-gray-200 mt-1">
+                  <span className="font-mono text-sm font-bold tracking-wider text-red-600">
+                    {createdCreds.temporaryPassword}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1"
+                    onClick={() => {
+                      if (createdCreds.temporaryPassword) {
+                        navigator.clipboard.writeText(createdCreds.temporaryPassword);
+                        toast.success('Password copied to clipboard');
+                      }
+                    }}
+                  >
+                    <Copy className="h-3 w-3" />
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-gray-100">
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => router.push('/students')}
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
