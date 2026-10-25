@@ -43,6 +43,12 @@ import {
   TestimonialCard,
   BlogCard,
 } from '@/components/cards';
+import {
+  PageHeader as DashboardPageHeader,
+  StatCard,
+  SectionCard,
+  StatusBadge,
+} from '@/components/dashboard';
 
 import {
   Search,
@@ -836,6 +842,108 @@ export default function DesignSystemShowcasePage() {
                   }}
                 />
               </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* 11. Dashboard Primitives & Semantic Status Tokens */}
+        <Section
+          title="11. Dashboard Primitives & Semantic Status Tokens"
+          subtitle="Calm, brand-aware primitives for protected layouts, administrative workflows, and metrics."
+        >
+
+          <div className="space-y-10">
+            {/* Semantic Status Badges */}
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">Semantic Status Badges (WCAG AA Compliant)</h4>
+              <p className="text-xs text-muted-foreground mb-4">
+                Independent of the primary brand color to guarantee standardized semantic feedback across all color themes.
+              </p>
+              <div className="flex flex-wrap gap-3 items-center">
+                <StatusBadge variant="paid" showDot />
+                <StatusBadge variant="present" showDot />
+                <StatusBadge variant="partial" showDot />
+                <StatusBadge variant="late" showDot />
+                <StatusBadge variant="due" showDot />
+                <StatusBadge variant="absent" showDot />
+                <StatusBadge variant="upcoming" showDot />
+                <StatusBadge variant="closed" showDot />
+              </div>
+            </div>
+
+            {/* Dashboard PageHeader Demo */}
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">Dashboard PageHeader</h4>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+                <DashboardPageHeader
+                  title="Academic Operations Dashboard"
+                  description="Monitor ongoing batch lectures, fee completions, and instructor routines."
+                  breadcrumbs={[
+                    { label: 'Portal', href: '/dashboard' },
+                    { label: 'Academics', href: '/batches' },
+                    { label: 'Operations' },
+                  ]}
+                  actions={
+                    <Button variant="primary" size="sm">
+                      Export Report
+                    </Button>
+                  }
+                />
+              </div>
+            </div>
+
+            {/* StatCard Demos */}
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">StatCards (With Trend, Unit & Skeleton)</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <StatCard
+                  label="Enrolled Students"
+                  value={1420}
+                  unit="active"
+                  trend={{ value: '12%', direction: 'up', label: 'vs last month' }}
+                />
+                <StatCard
+                  label="Outstanding Balance"
+                  value="৳84,500"
+                  trend={{ value: '4%', direction: 'down', label: 'overdue rate' }}
+                />
+                <StatCard
+                  label="Batch Attendance"
+                  value="94.2%"
+                  isLoading={false}
+                  description="Average across 18 batches"
+                />
+              </div>
+            </div>
+
+            {/* SectionCard Demo */}
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-3">SectionCard</h4>
+              <SectionCard
+                title="Weekly Routine Allocation"
+                description="Upcoming scheduled lecture halls and faculty assignments"
+                actions={
+                  <Button variant="outline" size="sm">
+                    View Timetable
+                  </Button>
+                }
+                footer="Showing 3 of 18 scheduled slots for today."
+              >
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between py-2 border-b border-border">
+                    <span className="font-medium text-foreground">HSC 2026 Higher Mathematics</span>
+                    <StatusBadge variant="upcoming">04:30 PM</StatusBadge>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border">
+                    <span className="font-medium text-foreground">Medical Intensive Biology Drill</span>
+                    <StatusBadge variant="present">In Session</StatusBadge>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="font-medium text-foreground">SSC Physics Foundation</span>
+                    <StatusBadge variant="closed">Completed</StatusBadge>
+                  </div>
+                </div>
+              </SectionCard>
             </div>
           </div>
         </Section>
