@@ -11,7 +11,7 @@ import { useCenter } from '@/components/providers/center-provider';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Lock, User, Sparkles } from 'lucide-react';
+import { AlertCircle, Lock, User, Sparkles, ArrowLeft } from 'lucide-react';
 
 interface LoginResponse {
   success: boolean;
@@ -100,8 +100,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4 py-12">
+    <div className="flex flex-1 min-h-[calc(100vh-16rem)] flex-col items-center justify-center bg-background px-4 py-8 sm:py-12">
       <div className="w-full max-w-md">
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Back to home</span>
+          </Link>
+        </div>
+
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex flex-col items-center">
             {center.logoUrl ? (
