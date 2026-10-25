@@ -23,7 +23,7 @@ const poppins = Poppins({
 
 export async function generateMetadata(): Promise<Metadata> {
   const center = await getCenterData();
-  const title = `${center.name} - ${center.tagline || 'Coaching Center Platform'}`;
+  const title = center.tagline ? `${center.name} - ${center.tagline}` : center.name;
   const description = `${center.name} coaching management portal. Manage batches, attendance, exams, and routines.`;
 
   return {

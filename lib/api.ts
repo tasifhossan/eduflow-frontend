@@ -1,12 +1,14 @@
 export class ApiError extends Error {
   status: number;
   data?: unknown;
+  retryAfter?: number;
 
-  constructor(message: string, status: number, data?: unknown) {
+  constructor(message: string, status: number, data?: unknown, retryAfter?: number) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.data = data;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -53,7 +55,10 @@ async function handleResponse<T>(response: Response, path: string): Promise<T> {
       errorData.message ||
       errorData.error ||
       `Request to ${path} failed with status ${response.status}`;
-    throw new ApiError(errorMessage, response.status, errorData);
+    const retryHeader = response.headers.get('retry-after');
+    const parsedRetry = retryHeader ? parseInt(retryHeader, 10) : undefined;
+    const retryAfter = parsedRetry !== undefined && !Number.isNaN(parsedRetry) ? parsedRetry : undefined;
+    throw new ApiError(errorMessage, response.status, errorData, retryAfter);
   }
 
   return response.json() as Promise<T>;

@@ -27,12 +27,14 @@ export function CenterProvider({
 }) {
   const [center, setCenter] = useState<CenterPublicData>(initialData || defaultCenterData);
 
-  // When initialData changes (e.g. server revalidation), sync state
-  useEffect(() => {
+  const [prevInitialData, setPrevInitialData] = useState(initialData);
+
+  if (initialData !== prevInitialData) {
+    setPrevInitialData(initialData);
     if (initialData) {
       setCenter(initialData);
     }
-  }, [initialData]);
+  }
 
   // Dynamically update document title & dynamic style when center or primaryColor changes
   useEffect(() => {
