@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -92,10 +93,13 @@ export function Navbar() {
             aria-label={`${center.name} Home`}
           >
             {center.logoUrl ? (
-              <img
+              <Image
                 src={center.logoUrl}
                 alt={center.name}
+                width={36}
+                height={36}
                 className="h-9 w-9 object-contain rounded-[var(--radius-control)]"
+                unoptimized
               />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground font-bold text-lg shadow-xs select-none">
@@ -106,9 +110,11 @@ export function Navbar() {
               <span className="font-bold text-base tracking-tight text-foreground leading-tight">
                 {center.name}
               </span>
-              <span className="text-[10px] text-muted-foreground leading-tight font-medium hidden sm:inline">
-                {center.tagline || 'Coaching Platform'}
-              </span>
+              {center.tagline ? (
+                <span className="text-[10px] text-muted-foreground leading-tight font-medium hidden sm:inline">
+                  {center.tagline}
+                </span>
+              ) : null}
             </div>
           </Link>
 

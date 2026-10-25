@@ -21,7 +21,7 @@ import { FloatingWhatsApp } from '@/components/ui/floating-whatsapp';
 
 export async function generateMetadata(): Promise<Metadata> {
   const center = await getCenterData();
-  const title = `${center.name} | ${center.tagline}`;
+  const title = center.tagline ? `${center.name} | ${center.tagline}` : center.name;
   const description =
     center.homepage?.heroSubtitle ||
     center.tagline ||

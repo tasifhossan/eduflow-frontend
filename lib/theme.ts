@@ -243,7 +243,7 @@ export function computeThemeTokens(primaryHex: string): ThemeColors {
  * Strictly validates that primaryHex is exactly #RRGGBB; rejects anything else and
  * falls back to the default palette before building CSS.
  */
-export function generateThemeCss(primaryHex: string): string {
+export function generateThemeCss(primaryHex?: string | null): string {
   const safeHex = isValidHex(primaryHex) ? primaryHex.trim().toLowerCase() : DEFAULT_PRIMARY;
   const tokens = computeThemeTokens(safeHex);
   return `

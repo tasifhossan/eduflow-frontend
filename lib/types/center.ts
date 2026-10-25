@@ -82,9 +82,9 @@ export interface FullCenterSettings extends CenterPublicData {
 }
 
 export const defaultCenterData: CenterPublicData = {
-  name: 'Coaching Portal',
-  shortName: 'Portal',
-  tagline: 'Coaching Management Platform',
+  name: 'Coaching Center',
+  shortName: 'Center',
+  tagline: '',
   logoUrl: null,
   faviconUrl: null,
   primaryColor: '#0ea5e9',
