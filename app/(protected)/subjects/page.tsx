@@ -154,7 +154,7 @@ export default function SubjectsPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading subjects...</span>
       </div>
     );
@@ -163,15 +163,15 @@ export default function SubjectsPage() {
   return (
     <div className="p-8 space-y-6 max-w-5xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-3">
         <div>
-          <nav className="flex text-sm text-gray-500 gap-x-2 mb-1">
-            <Link href="/dashboard" className="hover:text-accent font-medium">Dashboard</Link>
+          <nav className="flex text-sm text-muted-foreground gap-x-2 mb-1">
+            <Link href="/dashboard" className="hover:text-primary font-medium">Dashboard</Link>
             <span>/</span>
-            <span className="text-gray-900 font-semibold">Subjects</span>
+            <span className="text-foreground font-semibold">Subjects</span>
           </nav>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Subject & Chapter Management</h1>
-          <p className="mt-1 text-sm text-gray-500">Organize academic curriculum subjects and chapter topics</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Subject & Chapter Management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Organize academic curriculum subjects and chapter topics</p>
         </div>
 
         <button
@@ -179,7 +179,7 @@ export default function SubjectsPage() {
             setSubjectError(null);
             setIsAddSubjectOpen(true);
           }}
-          className="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90 transition"
+          className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
         >
           + Add Subject
         </button>
@@ -196,9 +196,9 @@ export default function SubjectsPage() {
 
       {/* Subjects & Chapters List */}
       {subjects.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-          <p className="text-base font-semibold text-gray-900">No subjects found</p>
-          <p className="text-sm text-gray-500 mt-1">Click "+ Add Subject" above to create your first subject.</p>
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-12 text-center shadow-card">
+          <p className="text-base font-semibold text-foreground">No subjects found</p>
+          <p className="text-sm text-muted-foreground mt-1">Click "+ Add Subject" above to create your first subject.</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -207,19 +207,19 @@ export default function SubjectsPage() {
             const isLoadingChapters = loadingChaptersMap[subject.id];
 
             return (
-              <div key={subject.id} className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+              <div key={subject.id} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
                 {/* Subject Header */}
-                <div className="px-6 py-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 bg-surface-hover/30 border-b border-border flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">{subject.name}</h2>
-                    <p className="text-xs text-gray-500">{chapters.length} Chapters defined</p>
+                    <h2 className="text-lg font-bold text-foreground">{subject.name}</h2>
+                    <p className="text-xs text-muted-foreground">{chapters.length} Chapters defined</p>
                   </div>
                   <button
                     onClick={() => {
                       setActiveSubjectForChapter(subject);
                       setChapterError(null);
                     }}
-                    className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+                    className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
                   >
                     + Add Chapter
                   </button>
@@ -228,20 +228,20 @@ export default function SubjectsPage() {
                 {/* Chapters List */}
                 <div className="p-6">
                   {isLoadingChapters ? (
-                    <p className="text-xs text-gray-400 italic">Loading chapters...</p>
+                    <p className="text-xs text-muted-foreground italic">Loading chapters...</p>
                   ) : chapters.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">No chapters created for this subject yet.</p>
+                    <p className="text-xs text-muted-foreground italic">No chapters created for this subject yet.</p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                       {chapters.map((ch, index) => (
                         <div
                           key={ch.id}
-                          className="flex items-center gap-x-2.5 p-3 rounded-xl border border-gray-100 bg-gray-50/50"
+                          className="flex items-center gap-x-2.5 p-3 rounded-xl border border-border bg-surface-hover/40"
                         >
-                          <span className="h-6 w-6 rounded-full bg-accent/10 flex items-center justify-center text-accent text-xs font-bold flex-shrink-0">
+                          <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
                             {index + 1}
                           </span>
-                          <span className="text-sm font-semibold text-gray-800 truncate" title={ch.name}>
+                          <span className="text-sm font-semibold text-foreground truncate" title={ch.name}>
                             {ch.name}
                           </span>
                         </div>
@@ -258,12 +258,12 @@ export default function SubjectsPage() {
       {/* Add Subject Modal */}
       {isAddSubjectOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="text-lg font-bold text-gray-900">Add New Subject</h3>
+          <div className="w-full max-w-md bg-surface border border-border rounded-2xl p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-lg font-bold text-foreground">Add New Subject</h3>
               <button
                 onClick={() => setIsAddSubjectOpen(false)}
-                className="text-gray-400 hover:text-gray-600 font-bold"
+                className="text-muted-foreground hover:text-foreground font-bold"
               >
                 ✕
               </button>
@@ -277,29 +277,29 @@ export default function SubjectsPage() {
 
             <form onSubmit={handleCreateSubject} className="space-y-4 text-sm">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Subject Name</label>
+                <label className="block font-semibold text-foreground mb-1">Subject Name</label>
                 <input
                   type="text"
                   value={newSubjectName}
                   onChange={(e) => setNewSubjectName(e.target.value)}
                   placeholder="e.g. Physics, Higher Mathematics"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-accent focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-surface text-foreground px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-x-3 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-x-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsAddSubjectOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50"
+                  className="px-4 py-2 rounded-lg border border-border bg-surface text-foreground text-xs font-semibold hover:bg-surface-hover"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingSubject}
-                  className="px-4 py-2 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary-hover disabled:opacity-50"
                 >
                   {savingSubject ? 'Creating...' : 'Create Subject'}
                 </button>
@@ -312,15 +312,15 @@ export default function SubjectsPage() {
       {/* Add Chapter Modal */}
       {activeSubjectForChapter && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="w-full max-w-md bg-surface border border-border rounded-2xl p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Add Chapter</h3>
-                <p className="text-xs text-gray-500">Subject: {activeSubjectForChapter.name}</p>
+                <h3 className="text-lg font-bold text-foreground">Add Chapter</h3>
+                <p className="text-xs text-muted-foreground">Subject: {activeSubjectForChapter.name}</p>
               </div>
               <button
                 onClick={() => setActiveSubjectForChapter(null)}
-                className="text-gray-400 hover:text-gray-600 font-bold"
+                className="text-muted-foreground hover:text-foreground font-bold"
               >
                 ✕
               </button>
@@ -334,29 +334,29 @@ export default function SubjectsPage() {
 
             <form onSubmit={handleCreateChapter} className="space-y-4 text-sm">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Chapter Name</label>
+                <label className="block font-semibold text-foreground mb-1">Chapter Name</label>
                 <input
                   type="text"
                   value={newChapterName}
                   onChange={(e) => setNewChapterName(e.target.value)}
                   placeholder="e.g. Chapter 1: Thermodynamics"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-accent focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-surface text-foreground px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-x-3 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-x-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setActiveSubjectForChapter(null)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50"
+                  className="px-4 py-2 rounded-lg border border-border bg-surface text-foreground text-xs font-semibold hover:bg-surface-hover"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingChapter}
-                  className="px-4 py-2 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary-hover disabled:opacity-50"
                 >
                   {savingChapter ? 'Adding...' : 'Add Chapter'}
                 </button>

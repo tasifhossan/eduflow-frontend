@@ -123,73 +123,73 @@ export default async function AttendancePage() {
           <>
             {/* Student Stats */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Attendance Rate</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Attendance Rate</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
-                  <span className="text-4xl font-extrabold text-gray-900">{attendanceRate}%</span>
+                  <span className="text-4xl font-extrabold text-foreground">{attendanceRate}%</span>
                 </div>
-                <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
+                <div className="mt-4 w-full bg-surface-hover rounded-full h-2">
                   <div
-                    className="bg-accent h-2 rounded-full transition-all duration-500"
+                    className="bg-primary h-2 rounded-full transition-all duration-500"
                     style={{ width: `${attendanceRate}%` }}
                   />
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Present</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Present</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
-                  <span className="text-4xl font-extrabold text-green-600">{presentCount}</span>
-                  <span className="text-sm text-gray-500">classes</span>
+                  <span className="text-4xl font-extrabold text-green-600 dark:text-green-400">{presentCount}</span>
+                  <span className="text-sm text-muted-foreground">classes</span>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Absent</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Absent</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
-                  <span className="text-4xl font-extrabold text-red-600">{absentCount}</span>
-                  <span className="text-sm text-gray-500">classes</span>
+                  <span className="text-4xl font-extrabold text-red-600 dark:text-red-400">{absentCount}</span>
+                  <span className="text-sm text-muted-foreground">classes</span>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Late</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Late</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
                   <span className="text-4xl font-extrabold text-amber-500">{lateCount}</span>
-                  <span className="text-sm text-gray-500">classes</span>
+                  <span className="text-sm text-muted-foreground">classes</span>
                 </div>
               </div>
             </div>
 
             {/* Student Attendance Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="border-b border-gray-200 px-6 py-4">
-                <h3 className="text-base font-semibold text-gray-900">Attendance Log</h3>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+              <div className="border-b border-border px-6 py-4">
+                <h3 className="text-base font-semibold text-foreground">Attendance Log</h3>
               </div>
               {studentHistory.length === 0 ? (
-                <div className="p-12 text-center text-gray-500">
-                  <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <div className="p-12 text-center text-muted-foreground">
+                  <svg className="mx-auto h-12 w-12 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
-                  <h3 className="mt-4 text-sm font-semibold text-gray-900">No attendance logs found</h3>
-                  <p className="text-xs text-gray-400 mt-1">Your teachers haven't recorded any attendance logs yet.</p>
+                  <h3 className="mt-4 text-sm font-semibold text-foreground">No attendance logs found</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Your teachers haven't recorded any attendance logs yet.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-surface-hover/50">
                       <tr>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Batch Name</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Remarks</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Batch Name</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Remarks</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-surface divide-y divide-border">
                       {studentHistory.map((rec) => (
-                        <tr key={rec.id} className="hover:bg-gray-50/70 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <tr key={rec.id} className="hover:bg-surface-hover/50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                             {new Date(rec.date).toLocaleDateString(undefined, {
                               weekday: 'short',
                               year: 'numeric',
@@ -197,26 +197,26 @@ export default async function AttendancePage() {
                               day: 'numeric',
                             })}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">
                             {rec.batch.name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                            <span className="rounded bg-gray-100 px-2 py-1 font-mono text-gray-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
+                            <span className="rounded bg-surface-hover border border-border px-2 py-1 font-mono text-foreground">
                               {rec.batch.type}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                               rec.status === 'PRESENT'
-                                ? 'bg-green-50 text-green-700 ring-green-600/20'
+                                ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                                 : rec.status === 'LATE'
-                                ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                                : 'bg-red-50 text-red-700 ring-red-600/20'
+                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
                             }`}>
                               {rec.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {rec.remarks || '—'}
                           </td>
                         </tr>
@@ -233,13 +233,13 @@ export default async function AttendancePage() {
         {!isStudent && !errorMsg && (
           <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Marking Progress</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Marking Progress</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
-                  <span className="text-4xl font-extrabold text-gray-900">{markedCount}</span>
-                  <span className="text-sm text-gray-500">of {totalCount} batches marked fully today</span>
+                  <span className="text-4xl font-extrabold text-foreground">{markedCount}</span>
+                  <span className="text-sm text-muted-foreground">of {totalCount} batches marked fully today</span>
                 </div>
-                <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
+                <div className="mt-4 w-full bg-surface-hover rounded-full h-2">
                   <div
                     className="bg-green-600 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${totalCount > 0 ? (markedCount / totalCount) * 100 : 0}%` }}
@@ -247,78 +247,78 @@ export default async function AttendancePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Unmarked Batches</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unmarked Batches</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
-                  <span className="text-4xl font-extrabold text-red-600">
+                  <span className="text-4xl font-extrabold text-red-600 dark:text-red-400">
                     {summaries.filter((s) => s.status === 'unmarked').length}
                   </span>
-                  <span className="text-sm text-gray-500">batches awaiting records</span>
+                  <span className="text-sm text-muted-foreground">batches awaiting records</span>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Partially Marked</span>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Partially Marked</span>
                 <div className="mt-2 flex items-baseline gap-x-2">
                   <span className="text-4xl font-extrabold text-amber-500">
                     {summaries.filter((s) => s.status === 'partial').length}
                   </span>
-                  <span className="text-sm text-gray-500">batches partially logged</span>
+                  <span className="text-sm text-muted-foreground">batches partially logged</span>
                 </div>
               </div>
             </div>
 
             {/* Batches Summary Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
           {summaries.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
-              <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <div className="p-12 text-center text-muted-foreground">
+              <svg className="mx-auto h-12 w-12 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <h3 className="mt-4 text-sm font-semibold text-gray-900">No batches defined</h3>
-              <p className="text-xs text-gray-400 mt-1">Create batches in the branch before logging attendance summaries.</p>
+              <h3 className="mt-4 text-sm font-semibold text-foreground">No batches defined</h3>
+              <p className="text-xs text-muted-foreground mt-1">Create batches in the branch before logging attendance summaries.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-surface-hover/50">
                   <tr>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Batch Name</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Class Level</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Subject</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Teacher</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Enrolled Students</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Today's Status</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Batch Name</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Class Level</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Subject</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Teacher</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Enrolled Students</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today's Status</th>
                     <th scope="col" className="relative px-6 py-3.5"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-surface divide-y divide-border">
                   {summaries.map((batch) => (
-                    <tr key={batch.id} className="hover:bg-gray-50/70 transition-colors">
+                    <tr key={batch.id} className="hover:bg-surface-hover/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Link href={`/batches/${batch.id}`} className="text-sm font-semibold text-accent hover:underline">
+                        <Link href={`/batches/${batch.id}`} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
                           {batch.name}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {batch.classLevel || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground font-medium">
                         {batch.subjectName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {batch.teacherName || <span className="text-gray-400 italic">Unassigned</span>}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                        {batch.teacherName || <span className="text-muted-foreground italic">Unassigned</span>}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         <span className="font-semibold">{batch.totalEnrolled}</span> students
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ring-1 ring-inset ${
                           batch.status === 'marked'
-                            ? 'bg-green-50 text-green-700 ring-green-600/20'
+                            ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                             : batch.status === 'partial'
-                            ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                            : 'bg-red-50 text-red-700 ring-red-600/20'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
+                            : 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
                         }`}>
                           {batch.status === 'marked'
                             ? 'Marked'
@@ -330,7 +330,7 @@ export default async function AttendancePage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           href={`/batches/${batch.id}/attendance?date=${todayStr}`}
-                          className="inline-flex items-center rounded-md bg-white border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                          className="inline-flex items-center rounded-md bg-surface border border-border px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                         >
                           {batch.status === 'unmarked' ? 'Take Attendance' : 'Edit Attendance'}
                         </Link>

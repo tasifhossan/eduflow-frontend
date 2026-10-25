@@ -253,7 +253,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-accent animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-sm font-medium text-gray-500">Loading study materials...</p>
         </div>
       </div>
@@ -265,9 +265,9 @@ export default function BatchResourcesPage({ params }: PageProps) {
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Breadcrumb */}
         <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-accent font-medium">{batch?.name || 'Batch'}</Link>
+          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch?.name || 'Batch'}</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">Study Materials</span>
         </nav>
@@ -285,7 +285,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
           {canManage && (
             <button
               onClick={() => setIsUploadOpen(!isUploadOpen)}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition gap-x-2"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition gap-x-2"
             >
               {isUploadOpen ? (
                 <>
@@ -309,28 +309,28 @@ export default function BatchResourcesPage({ params }: PageProps) {
 
         {/* Upload Form Modal/Card (Admin & Teacher only) */}
         {canManage && isUploadOpen && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-x-2">
-                <Plus className="w-5 h-5 text-accent" /> Upload New Study Material
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-x-2">
+                <Plus className="w-5 h-5 text-primary" /> Upload New Study Material
               </h2>
               <button
                 onClick={() => setIsUploadOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-1"
+                className="text-muted-foreground hover:text-foreground p-1 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {uploadError && (
-              <div className="rounded-lg bg-red-50 p-3 border border-red-200 text-sm text-red-700">
+              <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-3 border border-red-200 dark:border-red-900/50 text-sm text-red-700 dark:text-red-300">
                 {uploadError}
               </div>
             )}
 
             <form onSubmit={handleUploadSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -339,19 +339,19 @@ export default function BatchResourcesPage({ params }: PageProps) {
                   placeholder="e.g. Chapter 3 - Organic Chemistry Notes"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-foreground mb-1">
                     Chapter Tag (Optional)
                   </label>
                   <select
                     value={selectedChapterId}
                     onChange={(e) => setSelectedChapterId(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent bg-white"
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-surface text-foreground"
                   >
                     <option value="">-- No Specific Chapter --</option>
                     {chapters.map((chap) => (
@@ -363,14 +363,14 @@ export default function BatchResourcesPage({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-foreground mb-1">
                     File <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="file"
                     required
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-accent hover:file:bg-indigo-100"
+                    className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                   />
                 </div>
               </div>
@@ -380,14 +380,14 @@ export default function BatchResourcesPage({ params }: PageProps) {
                   type="button"
                   onClick={() => setIsUploadOpen(false)}
                   disabled={uploading}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition"
+                  className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover disabled:opacity-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition"
                 >
                   {uploading ? (
                     <>
@@ -404,47 +404,47 @@ export default function BatchResourcesPage({ params }: PageProps) {
         )}
 
         {/* Resources List */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-x-2">
-              <BookOpen className="w-4 h-4 text-accent" /> Available Resources ({resources.length})
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-border bg-surface-hover/50 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-x-2">
+              <BookOpen className="w-4 h-4 text-primary" /> Available Resources ({resources.length})
             </h2>
           </div>
 
           {resources.length === 0 ? (
             <div className="p-12 text-center space-y-3">
-              <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                <File className="w-6 h-6 text-gray-400" />
+              <div className="mx-auto w-12 h-12 rounded-full bg-surface-hover flex items-center justify-center">
+                <File className="w-6 h-6 text-muted-foreground" />
               </div>
-              <h3 className="text-base font-semibold text-gray-900">No study materials found</h3>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              <h3 className="text-base font-semibold text-foreground">No study materials found</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 {canManage
                   ? 'No study materials have been uploaded for this batch yet. Click "Upload Material" to share notes.'
                   : 'Your teachers have not uploaded study materials for this batch yet.'}
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {resources.map((res) => (
                 <div
                   key={res.id}
-                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50/60 transition"
+                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-hover/50 transition"
                 >
                   <div className="flex items-start gap-x-4">
-                    <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 shrink-0 mt-0.5">
+                    <div className="p-2.5 rounded-xl bg-surface-hover border border-border shrink-0 mt-0.5">
                       {getFileIcon(res.fileType)}
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-x-2 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 text-base">{res.title}</h3>
+                        <h3 className="font-semibold text-foreground text-base">{res.title}</h3>
                         {res.chapter && (
-                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                          <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                             {res.chapter.name}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-x-4 text-xs text-gray-500 flex-wrap">
-                        <span>Type: <strong className="uppercase font-medium text-gray-700">{res.fileType}</strong></span>
+                      <div className="flex items-center gap-x-4 text-xs text-muted-foreground flex-wrap">
+                        <span>Type: <strong className="uppercase font-medium text-foreground">{res.fileType}</strong></span>
                         <span>•</span>
                         <span>Uploaded: {new Date(res.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
                         {res.uploadedBy && (
@@ -462,7 +462,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
                       href={res.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 hover:text-accent transition gap-x-1.5"
+                      className="inline-flex items-center rounded-lg border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover hover:text-primary transition gap-x-1.5"
                     >
                       <span>View / Download</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -472,7 +472,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
                       <button
                         onClick={() => handleDeleteResource(res.id)}
                         disabled={deletingId === res.id}
-                        className="inline-flex items-center rounded-lg border border-red-200 bg-red-50 p-1.5 text-red-600 hover:bg-red-100 disabled:opacity-50 transition"
+                        className="inline-flex items-center rounded-lg border border-red-500/20 bg-red-500/10 p-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition"
                         title="Delete resource"
                       >
                         {deletingId === res.id ? (

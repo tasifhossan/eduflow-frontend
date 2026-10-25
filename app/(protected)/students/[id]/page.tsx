@@ -311,17 +311,17 @@ export default async function StudentDetailPage({
         <div className="flex items-center justify-between border-b border-gray-200 pb-5">
           <div className="space-y-1">
             <nav className="flex text-sm text-gray-500 gap-x-2">
-              <Link href="/students" className="hover:text-accent font-medium">Students</Link>
+              <Link href="/students" className="hover:text-primary font-medium">Students</Link>
               <span>/</span>
-              <span className="text-gray-900 font-semibold">{studentProfile?.name || 'Student Profile'}</span>
+              <span className="text-foreground font-semibold">{studentProfile?.name || 'Student Profile'}</span>
             </nav>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               {studentProfile ? `${studentProfile.name}'s Profile` : 'Student Details'}
             </h1>
           </div>
           <Link
             href="/students"
-            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
           >
             Back to List
           </Link>
@@ -339,42 +339,42 @@ export default async function StudentDetailPage({
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {/* Left Column: Student Profile Details Card */}
             <div className="space-y-6 lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-6">
                 <div className="flex flex-col items-center text-center">
-                  <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center text-accent text-3xl font-bold mb-4">
+                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-bold mb-4">
                     {studentProfile.name.charAt(0).toUpperCase()}
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">{studentProfile.name}</h2>
-                  <p className="text-xs text-gray-400 font-mono mt-1">ID: {studentProfile.id}</p>
+                  <h2 className="text-xl font-bold text-foreground">{studentProfile.name}</h2>
+                  <p className="text-xs text-muted-foreground font-mono mt-1">ID: {studentProfile.id}</p>
                 </div>
 
-                <div className="border-t border-gray-100 pt-5 space-y-4">
+                <div className="border-t border-border pt-5 space-y-4">
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Address</span>
-                    <span className="text-sm font-medium text-gray-900">{studentProfile.email}</span>
+                    <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</span>
+                    <span className="text-sm font-medium text-foreground">{studentProfile.email}</span>
                   </div>
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Phone Number</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {studentProfile.phone || <span className="text-gray-400 italic">No phone recorded</span>}
+                    <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone Number</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {studentProfile.phone || <span className="text-muted-foreground italic">No phone recorded</span>}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Guardian Contact Name</span>
-                    <span className="text-sm font-medium text-gray-900 font-poppins">
-                      {studentProfile.guardianName || <span className="text-gray-400 italic">Not provided</span>}
+                    <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Guardian Contact Name</span>
+                    <span className="text-sm font-medium text-foreground font-poppins">
+                      {studentProfile.guardianName || <span className="text-muted-foreground italic">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Guardian Contact Phone</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {studentProfile.guardianPhone || <span className="text-gray-400 italic">Not provided</span>}
+                    <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Guardian Contact Phone</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {studentProfile.guardianPhone || <span className="text-muted-foreground italic">Not provided</span>}
                     </span>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Linked Guardian Accounts
                       </span>
                     </div>
@@ -383,27 +383,27 @@ export default async function StudentDetailPage({
                         {studentProfile.linkedGuardians.map((g) => (
                           <div
                             key={g.id}
-                            className="rounded-xl bg-purple-50/80 p-3 border border-purple-100 text-xs space-y-1"
+                            className="rounded-xl bg-purple-500/10 p-3 border border-purple-500/20 text-xs space-y-1"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-purple-900 text-sm">{g.name}</span>
+                              <span className="font-bold text-purple-600 dark:text-purple-400 text-sm">{g.name}</span>
                               {user.role === 'ADMIN' && g.linkId && (
                                 <UnlinkGuardianButton linkId={g.linkId} guardianName={g.name} />
                               )}
                             </div>
-                            <span className="text-purple-700 block font-medium">{g.email}</span>
-                            {g.phone && <span className="text-purple-600 block">{g.phone}</span>}
+                            <span className="text-purple-600 dark:text-purple-300 block font-medium">{g.email}</span>
+                            {g.phone && <span className="text-purple-600 dark:text-purple-400 block">{g.phone}</span>}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">No portal login account linked</span>
+                      <span className="text-xs text-muted-foreground italic">No portal login account linked</span>
                     )}
                   </div>
 
                   <div>
-                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Admission Date</span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admission Date</span>
+                    <span className="text-sm font-medium text-foreground">
                       {new Date(studentProfile.createdAt).toLocaleDateString(undefined, {
                         year: 'numeric',
                         month: 'long',
@@ -425,13 +425,13 @@ export default async function StudentDetailPage({
               )}
 
               {/* Enrolled Batches */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6">
+                <h3 className="text-lg font-bold text-foreground border-b border-border pb-3 mb-4">
                   Enrolled Batches ({enrolledBatches.length})
                 </h3>
 
                 {enrolledBatches.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic py-4 text-center">
+                  <p className="text-sm text-muted-foreground italic py-4 text-center">
                     This student is not enrolled in any batches yet.
                   </p>
                 ) : (
@@ -439,12 +439,12 @@ export default async function StudentDetailPage({
                     {enrolledBatches.map((batch) => (
                       <div
                         key={batch.id}
-                        className="rounded-xl border border-gray-200 p-4 bg-gray-50/50 hover:bg-gray-50 transition"
+                        className="rounded-xl border border-border p-4 bg-surface-hover/30 hover:bg-surface-hover/50 transition"
                       >
                         <div className="flex items-start justify-between">
                           <Link
                             href={`/batches/${batch.id}`}
-                            className="text-sm font-semibold text-accent hover:underline font-poppins"
+                            className="text-sm font-semibold text-foreground hover:text-primary transition-colors font-poppins"
                           >
                             {batch.name}
                           </Link>
@@ -476,95 +476,95 @@ export default async function StudentDetailPage({
 
               {/* Payment History (ADMIN Only) */}
               {user.role === 'ADMIN' && (
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Payment History</h3>
-                      <p className="text-xs text-gray-500">All payment records across enrolled batches</p>
+                      <h3 className="text-lg font-bold text-foreground">Payment History</h3>
+                      <p className="text-xs text-muted-foreground">All payment records across enrolled batches</p>
                     </div>
 
                     {/* Summary Totals */}
                     <div className="flex gap-x-4 text-xs font-semibold">
-                      <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg px-3 py-1.5">
-                        <span className="text-[10px] text-emerald-600 uppercase block font-bold">Total Paid</span>
+                      <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-lg px-3 py-1.5">
+                        <span className="text-[10px] uppercase block font-bold">Total Paid</span>
                         <span className="text-sm font-extrabold">৳{totalPaidAcrossBatches.toLocaleString()}</span>
                       </div>
-                      <div className="bg-amber-50 text-amber-800 border border-amber-200 rounded-lg px-3 py-1.5">
-                        <span className="text-[10px] text-amber-600 uppercase block font-bold">Outstanding</span>
+                      <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-lg px-3 py-1.5">
+                        <span className="text-[10px] uppercase block font-bold">Outstanding</span>
                         <span className="text-sm font-extrabold">৳{totalOutstanding.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
 
                   {paymentHistory.length === 0 ? (
-                    <p className="text-sm text-gray-400 italic py-10 text-center bg-white">
+                    <p className="text-sm text-muted-foreground italic py-10 text-center">
                       No payment records found for this student.
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-border text-sm">
+                        <thead className="bg-surface-hover/50">
                           <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Batch Name
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Period
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Amount Due
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Amount Paid
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Status
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Due Date
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Paid At
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-surface divide-y divide-border">
                           {paymentHistory.map((payment) => (
-                            <tr key={payment.id} className="hover:bg-gray-50/50 transition">
-                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                            <tr key={payment.id} className="hover:bg-surface-hover/50 transition">
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
                                 {payment.batch?.name || 'N/A'}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-gray-700 font-mono text-xs">
+                              <td className="px-6 py-4 whitespace-nowrap text-muted-foreground font-mono text-xs">
                                 {payment.period}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
                                 ৳{payment.amountDue.toLocaleString()}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
                                 ৳{payment.amountPaid.toLocaleString()}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span
                                   className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                                     payment.status === 'PAID'
-                                      ? 'bg-green-50 text-green-700 ring-green-600/20'
+                                      ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                                       : payment.status === 'PARTIAL'
-                                      ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                                      : 'bg-red-50 text-red-700 ring-red-600/20'
+                                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
+                                      : 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
                                   }`}
                                 >
                                   {payment.status}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                              <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
                                 {payment.dueDate
                                   ? new Date(payment.dueDate).toLocaleDateString()
-                                  : <span className="text-gray-400 italic">N/A</span>}
+                                  : <span className="text-muted-foreground italic">N/A</span>}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                              <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
                                 {payment.paidAt
                                   ? new Date(payment.paidAt).toLocaleDateString()
-                                  : <span className="text-gray-400 italic">-</span>}
+                                  : <span className="text-muted-foreground italic">-</span>}
                               </td>
                             </tr>
                           ))}
@@ -576,59 +576,59 @@ export default async function StudentDetailPage({
               )}
 
               {/* Score Trend */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900">Score Trend</h3>
-                  <p className="text-xs text-gray-500">Chronological test results across all enrolled batches</p>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-border">
+                  <h3 className="text-lg font-bold text-foreground">Score Trend</h3>
+                  <p className="text-xs text-muted-foreground">Chronological test results across all enrolled batches</p>
                 </div>
 
                 {scoreTrend.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic py-10 text-center bg-white">
+                  <p className="text-sm text-muted-foreground italic py-10 text-center">
                     No test results found for this student yet.
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-border text-sm">
+                      <thead className="bg-surface-hover/50">
                         <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Test Name</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Batch</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Score</th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">%</th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Rank</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Test Name</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Batch</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Score</th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">%</th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rank</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-surface divide-y divide-border">
                         {scoreTrend.map((entry) => (
-                          <tr key={`${entry.testId}`} className="hover:bg-gray-50/50 transition">
-                            <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">{entry.testName}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{entry.batchName || '—'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                          <tr key={`${entry.testId}`} className="hover:bg-surface-hover/50 transition">
+                            <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">{entry.testName}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">{entry.batchName || '—'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
                               {new Date(entry.testDate).toLocaleDateString(undefined, {
                                 year: 'numeric', month: 'short', day: 'numeric',
                               })}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right font-mono font-semibold text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-right font-mono font-semibold text-foreground">
                               {entry.score} / {entry.totalMarks}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <span
                                 className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                                   entry.percentage === null
-                                    ? 'bg-gray-50 text-gray-600 ring-gray-500/10'
+                                    ? 'bg-surface-hover text-muted-foreground ring-border'
                                     : entry.percentage < 50
-                                    ? 'bg-red-50 text-red-700 ring-red-600/20'
+                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
                                     : entry.percentage < 70
-                                    ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                                    : 'bg-green-50 text-green-700 ring-green-600/20'
+                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
+                                    : 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                                 }`}
                               >
                                 {entry.percentage !== null ? `${entry.percentage}%` : '—'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-gray-600">
-                              {entry.rank !== null ? `#${entry.rank}` : <span className="text-gray-400 italic">—</span>}
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-muted-foreground">
+                              {entry.rank !== null ? `#${entry.rank}` : <span className="text-muted-foreground italic">—</span>}
                             </td>
                           </tr>
                         ))}
@@ -639,44 +639,44 @@ export default async function StudentDetailPage({
               </div>
 
               {/* Attendance History */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900">Attendance History</h3>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-border">
+                  <h3 className="text-lg font-bold text-foreground">Attendance History</h3>
                 </div>
 
                 {attendanceHistory.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic py-10 text-center bg-white">
+                  <p className="text-sm text-muted-foreground italic py-10 text-center">
                     No attendance records found for this student.
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-border">
+                      <thead className="bg-surface-hover/50">
                         <tr>
                           <th
                             scope="col"
-                            className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                            className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                           >
                             Date
                           </th>
                           <th
                             scope="col"
-                            className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                            className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                           >
                             Batch
                           </th>
                           <th
                             scope="col"
-                            className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                            className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                           >
                             Status
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-surface divide-y divide-border">
                         {attendanceHistory.map((record) => (
-                          <tr key={record.id} className="hover:bg-gray-50/50 transition">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                          <tr key={record.id} className="hover:bg-surface-hover/50 transition">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground font-medium">
                               {new Date(record.date).toLocaleDateString(undefined, {
                                 weekday: 'short',
                                 year: 'numeric',
@@ -684,26 +684,26 @@ export default async function StudentDetailPage({
                                 day: 'numeric',
                               })}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                               {record.batch.name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span
                                 className={`inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                                   record.status === 'PRESENT'
-                                    ? 'bg-green-50 text-green-700 ring-green-600/20'
+                                    ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                                     : record.status === 'ABSENT'
-                                    ? 'bg-red-50 text-red-700 ring-red-600/20'
-                                    : 'bg-amber-50 text-amber-700 ring-amber-600/20'
+                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
+                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
                                 }`}
                               >
                                 <span
                                   className={`h-1.5 w-1.5 rounded-full ${
                                     record.status === 'PRESENT'
-                                      ? 'bg-green-600'
+                                      ? 'bg-green-500'
                                       : record.status === 'ABSENT'
-                                      ? 'bg-red-600'
-                                      : 'bg-amber-600'
+                                      ? 'bg-red-500'
+                                      : 'bg-amber-500'
                                   }`}
                                 />
                                 {record.status.charAt(0) + record.status.slice(1).toLowerCase()}

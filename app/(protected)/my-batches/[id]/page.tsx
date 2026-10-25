@@ -96,7 +96,7 @@ export default function StudentBatchDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading batch details...</span>
       </div>
     );
@@ -124,9 +124,9 @@ export default function StudentBatchDetailPage() {
       {/* Navigation Header */}
       <div className="border-b border-gray-200 pb-5">
         <nav className="flex text-sm text-gray-500 gap-x-2 mb-2">
-          <Link href="/dashboard" className="hover:text-accent font-medium">Dashboard</Link>
+          <Link href="/dashboard" className="hover:text-primary font-medium">Dashboard</Link>
           <span>/</span>
-          <Link href="/my-batches" className="hover:text-accent font-medium">My Batches</Link>
+          <Link href="/my-batches" className="hover:text-primary font-medium">My Batches</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">{batch.name}</span>
         </nav>
@@ -153,7 +153,7 @@ export default function StudentBatchDetailPage() {
           <div className="flex items-center gap-x-3">
             <Link
               href={`/batches/${batch.id}/tests`}
-              className="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90 transition"
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
             >
               <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -166,37 +166,37 @@ export default function StudentBatchDetailPage() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Subject</span>
-          <p className="mt-2 text-xl font-bold text-gray-900">{batch.subject.name}</p>
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Subject</span>
+          <p className="mt-2 text-xl font-bold text-foreground">{batch.subject.name}</p>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Assigned Teacher</span>
-          <p className="mt-2 text-xl font-bold text-gray-900">{batch.teacher?.name || 'Unassigned'}</p>
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Assigned Teacher</span>
+          <p className="mt-2 text-xl font-bold text-foreground">{batch.teacher?.name || 'Unassigned'}</p>
           {batch.teacher?.email && (
-            <p className="text-xs text-gray-500 mt-1">{batch.teacher.email}</p>
+            <p className="text-xs text-muted-foreground mt-1">{batch.teacher.email}</p>
           )}
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Class Level & Billing</span>
-          <p className="mt-2 text-xl font-bold text-gray-900">{batch.classLevel || 'N/A'}</p>
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Class Level & Billing</span>
+          <p className="mt-2 text-xl font-bold text-foreground">{batch.classLevel || 'N/A'}</p>
           {batch.feeType && (
-            <p className="text-xs text-gray-500 mt-1">Billing structure: {batch.feeType}</p>
+            <p className="text-xs text-muted-foreground mt-1">Billing structure: {batch.feeType}</p>
           )}
         </div>
       </div>
 
       {/* Class Routine Section */}
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden space-y-4 p-6">
-        <div className="border-b border-gray-100 pb-4">
-          <h2 className="text-lg font-bold text-gray-900">Class Routine / Schedule</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Weekly class schedule for {batch.name}</p>
+      <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden space-y-4 p-6">
+        <div className="border-b border-border pb-4">
+          <h2 className="text-lg font-bold text-foreground">Class Routine / Schedule</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Weekly class schedule for {batch.name}</p>
         </div>
 
         {routine.length === 0 ? (
-          <p className="text-sm text-gray-400 italic text-center py-6">
+          <p className="text-sm text-muted-foreground italic text-center py-6">
             No class routine schedule published yet for this batch.
           </p>
         ) : (
@@ -204,17 +204,17 @@ export default function StudentBatchDetailPage() {
             {routine.map((slot) => (
               <div
                 key={slot.id}
-                className="p-4 rounded-xl border border-gray-100 bg-gray-50/60 flex items-center justify-between"
+                className="p-4 rounded-xl border border-border bg-surface-hover/50 flex items-center justify-between"
               >
                 <div>
-                  <span className="text-xs font-bold text-accent uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wider block">
                     {slot.dayOfWeek}
                   </span>
-                  <span className="text-sm font-semibold text-gray-800">
+                  <span className="text-sm font-semibold text-foreground">
                     {slot.startTime} – {slot.endTime}
                   </span>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold text-xs">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
                   📅
                 </div>
               </div>
@@ -227,24 +227,24 @@ export default function StudentBatchDetailPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Link
           href={`/batches/${batch.id}/tests`}
-          className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:border-accent hover:shadow-md transition flex items-center justify-between"
+          className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card hover:border-primary/50 transition flex items-center justify-between"
         >
           <div>
-            <h3 className="text-base font-bold text-gray-900">Batch Tests</h3>
-            <p className="text-xs text-gray-500 mt-1">Take online tests, view upcoming schedules and results</p>
+            <h3 className="text-base font-bold text-foreground">Batch Tests</h3>
+            <p className="text-xs text-muted-foreground mt-1">Take online tests, view upcoming schedules and results</p>
           </div>
-          <span className="text-accent font-semibold text-sm">Open →</span>
+          <span className="text-primary font-semibold text-sm">Open →</span>
         </Link>
 
         <Link
           href="/attendance"
-          className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:border-accent hover:shadow-md transition flex items-center justify-between"
+          className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card hover:border-primary/50 transition flex items-center justify-between"
         >
           <div>
-            <h3 className="text-base font-bold text-gray-900">My Attendance</h3>
-            <p className="text-xs text-gray-500 mt-1">Review your attendance records and statistics</p>
+            <h3 className="text-base font-bold text-foreground">My Attendance</h3>
+            <p className="text-xs text-muted-foreground mt-1">Review your attendance records and statistics</p>
           </div>
-          <span className="text-accent font-semibold text-sm">Open →</span>
+          <span className="text-primary font-semibold text-sm">Open →</span>
         </Link>
       </div>
     </div>

@@ -279,7 +279,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading question builder...</span>
       </div>
     );
@@ -292,7 +292,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error Loading Builder</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg || 'Parameters not found or access denied.'}</p>
         </div>
-        <Link href={`/batches/${batchId}/tests`} className="text-accent hover:underline text-sm font-medium">
+        <Link href={`/batches/${batchId}/tests`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to tests list
         </Link>
       </div>
@@ -307,11 +307,11 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
         <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-accent font-medium">{batch.name}</Link>
+          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch.name}</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}/tests`} className="hover:text-accent font-medium">Tests</Link>
+          <Link href={`/batches/${batchId}/tests`} className="hover:text-primary font-medium">Tests</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">{test.title}</span>
         </nav>
@@ -325,13 +325,13 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
           <div className="flex gap-x-3">
             <Link
               href={`/batches/${batchId}/tests/${testId}/results`}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
             >
               View Results
             </Link>
             <Link
               href={`/batches/${batchId}/tests`}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
             >
               Back to Tests
             </Link>
@@ -349,15 +349,15 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
           {/* Left Column: Test Details & Question Form */}
           <div className="lg:col-span-1 space-y-6">
             {/* Test Summary Card */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Exam Information</h2>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+              <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Exam Information</h2>
               <div className="space-y-2 text-sm">
-                <p><span className="text-gray-400 font-medium">Format:</span> <span className="font-semibold text-gray-900">{test.type}</span></p>
-                <p><span className="text-gray-400 font-medium">Target Marks:</span> <span className="font-semibold text-gray-900">{test.totalMarks} Marks</span></p>
-                <p><span className="text-gray-400 font-medium">MCQ Penalty:</span> <span className="font-semibold text-red-600">-{test.negativeMarkingValue} per error</span></p>
+                <p><span className="text-muted-foreground font-medium">Format:</span> <span className="font-semibold text-foreground">{test.type}</span></p>
+                <p><span className="text-muted-foreground font-medium">Target Marks:</span> <span className="font-semibold text-foreground">{test.totalMarks} Marks</span></p>
+                <p><span className="text-muted-foreground font-medium">MCQ Penalty:</span> <span className="font-semibold text-red-600 dark:text-red-400">-{test.negativeMarkingValue} per error</span></p>
                 <p>
-                  <span className="text-gray-400 font-medium">Duration:</span>{' '}
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-muted-foreground font-medium">Duration:</span>{' '}
+                  <span className="font-semibold text-foreground">
                     {test.durationMinutes ? `${test.durationMinutes} mins` : 'Untimed'}
                   </span>
                 </p>
@@ -365,13 +365,13 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
             </div>
 
             {/* Form Card */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+              <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">
                 {editingQuestionId ? 'Edit Question' : 'Add Question'}
               </h2>
 
               {formError && (
-                <div className="rounded-md bg-red-50 p-3 border border-red-200 text-xs text-red-600">
+                <div className="rounded-md bg-red-50 dark:bg-red-950/40 p-3 border border-red-200 dark:border-red-900/50 text-xs text-red-600 dark:text-red-300">
                   {formError}
                 </div>
               )}
@@ -379,7 +379,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
               <form onSubmit={handleSubmitQuestion} className="space-y-4">
                 {/* Text */}
                 <div>
-                  <label htmlFor="qText" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label htmlFor="qText" className="block text-xs font-semibold text-foreground mb-1.5">
                     Question Text
                   </label>
                   <textarea
@@ -388,14 +388,14 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                     onChange={(e) => setText(e.target.value)}
                     placeholder="e.g. Solve the equation 3x - 7 = 11"
                     rows={3}
-                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                    className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                     required
                   />
                 </div>
 
                 {/* Type */}
                 <div>
-                  <label htmlFor="qType" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label htmlFor="qType" className="block text-xs font-semibold text-foreground mb-1.5">
                     Question Format
                   </label>
                   <select
@@ -403,7 +403,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                     value={type}
                     disabled={!!editingQuestionId} // Format should not change during edit for database constraint safety
                     onChange={(e) => setType(e.target.value as any)}
-                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                    className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                     required
                   >
                     <option value="MCQ">MCQ (Multiple Choice Options)</option>
@@ -414,7 +414,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                 {/* Marks & Order */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="qMarks" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label htmlFor="qMarks" className="block text-xs font-semibold text-foreground mb-1.5">
                       Marks Value
                     </label>
                     <input
@@ -424,12 +424,12 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                       onChange={(e) => setMarks(e.target.value)}
                       placeholder="e.g. 5"
                       min="1"
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="qOrder" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label htmlFor="qOrder" className="block text-xs font-semibold text-foreground mb-1.5">
                       Display Order
                     </label>
                     <input
@@ -438,7 +438,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                       value={order}
                       onChange={(e) => setOrder(e.target.value)}
                       placeholder="e.g. 1"
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                       required
                     />
                   </div>
@@ -448,11 +448,11 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                 {type === 'MCQ' && (
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between">
-                      <span className="block text-xs font-semibold text-gray-600">Configure MCQ Options</span>
+                      <span className="block text-xs font-semibold text-foreground">Configure MCQ Options</span>
                       <button
                         type="button"
                         onClick={handleAddOption}
-                        className="text-[11px] font-bold text-accent hover:underline"
+                        className="text-[11px] font-bold text-primary hover:underline"
                       >
                         + Add Choice
                       </button>
@@ -467,14 +467,14 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                             checked={opt.isCorrect}
                             onChange={() => handleMarkCorrect(i)}
                             title="Mark as correct answer"
-                            className="h-4 w-4 text-accent focus:ring-accent border-gray-300"
+                            className="h-4 w-4 text-primary focus:ring-primary border-border bg-surface"
                           />
                           <input
                             type="text"
                             value={opt.text}
                             onChange={(e) => handleOptionTextChange(i, e.target.value)}
                             placeholder={`Option ${i + 1}`}
-                            className="block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-xs"
+                            className="block w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-xs"
                             required
                           />
                           {options.length > 2 && (
@@ -499,7 +499,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="w-1/2 inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+                      className="w-1/2 inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
                     >
                       Cancel Edit
                     </button>
@@ -507,7 +507,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition ${
+                    className={`inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition ${
                       editingQuestionId ? 'w-1/2' : 'w-full'
                     }`}
                   >
@@ -528,8 +528,8 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
             <div
               className={`rounded-2xl border p-5 flex items-center justify-between ${
                 isMarksMatching
-                  ? 'bg-green-50 border-green-200 text-green-800'
-                  : 'bg-amber-50 border-amber-200 text-amber-800'
+                  ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+                  : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-300'
               }`}
             >
               <div>
@@ -549,13 +549,13 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
             </div>
 
             {/* Questions List */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-6">
+              <h3 className="text-lg font-bold text-foreground border-b border-border pb-3">
                 Exam Paper Questions ({test.questions.length})
               </h3>
 
               {test.questions.length === 0 ? (
-                <div className="p-12 text-center text-gray-400 italic text-sm">
+                <div className="p-12 text-center text-muted-foreground italic text-sm">
                   No questions added to this test yet. Use the question builder panel to add MCQ or written items.
                 </div>
               ) : (
@@ -563,22 +563,22 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                   {test.questions.map((q, idx) => (
                     <div
                       key={q.id}
-                      className="rounded-xl border border-gray-200 p-5 bg-gray-50/20 hover:bg-gray-50/50 transition-colors flex flex-col md:flex-row justify-between gap-y-4"
+                      className="rounded-xl border border-border p-5 bg-surface-hover/30 hover:bg-surface-hover/60 transition-colors flex flex-col md:flex-row justify-between gap-y-4"
                     >
                       <div className="space-y-3 flex-1">
                         <div className="flex items-center gap-x-2">
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                             {idx + 1}
                           </span>
-                          <span className="text-sm font-semibold text-gray-900">
+                          <span className="text-sm font-semibold text-foreground">
                             Order {q.order} — {q.type === 'MCQ' ? 'MCQ Choice Item' : 'Subjective Essay'}
                           </span>
-                          <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
+                          <span className="inline-flex items-center rounded-md bg-surface-hover px-2 py-0.5 text-xs font-bold text-foreground border border-border">
                             {q.marks} Marks
                           </span>
                         </div>
 
-                        <p className="text-sm text-gray-800 font-medium whitespace-pre-wrap pl-8">
+                        <p className="text-sm text-foreground/90 font-medium whitespace-pre-wrap pl-8">
                           {q.text}
                         </p>
 
@@ -590,18 +590,18 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                                 key={optIdx}
                                 className={`flex items-center gap-x-2.5 text-xs font-medium py-1 px-2.5 rounded-lg border max-w-md ${
                                   o.isCorrect
-                                    ? 'bg-green-50 border-green-200 text-green-700'
-                                    : 'bg-white border-gray-200 text-gray-600'
+                                    ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+                                    : 'bg-surface border-border text-foreground'
                                 }`}
                               >
                                 <span
                                   className={`h-2 w-2 rounded-full ${
-                                    o.isCorrect ? 'bg-green-600' : 'bg-gray-300'
+                                    o.isCorrect ? 'bg-green-600 dark:bg-green-400' : 'bg-muted-foreground/40'
                                   }`}
                                 />
                                 <span className="flex-1">{o.text}</span>
                                 {o.isCorrect && (
-                                  <span className="text-[10px] uppercase font-bold text-green-700 tracking-wider">
+                                  <span className="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 tracking-wider">
                                     Correct answer
                                   </span>
                                 )}
@@ -616,14 +616,14 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                         <button
                           type="button"
                           onClick={() => handleEditClick(q)}
-                          className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+                          className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
                         >
                           Edit Question
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteQuestion(q.id)}
-                          className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100/70 transition"
+                          className="inline-flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition"
                         >
                           Delete
                         </button>

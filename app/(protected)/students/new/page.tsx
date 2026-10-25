@@ -84,7 +84,7 @@ export default function NewStudentPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/students" className="hover:text-accent font-medium">Students</Link>
+          <Link href="/students" className="hover:text-primary font-medium">Students</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">New Student</span>
         </nav>
@@ -105,11 +105,11 @@ export default function NewStudentPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-8 space-y-6">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* Student Name */}
             <div className="sm:col-span-2">
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">
                 Full Name *
               </label>
               <input
@@ -118,14 +118,14 @@ export default function NewStudentPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Tanvir Rahman"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
                 required
               />
             </div>
 
             {/* Phone Number */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="phone" className="block text-sm font-semibold text-foreground mb-2">
                 Student Phone Number
               </label>
               <input
@@ -134,13 +134,13 @@ export default function NewStudentPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="e.g. 01712345678"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
               />
             </div>
 
             {/* Email Address */}
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
                 Student Email (Optional)
               </label>
               <input
@@ -149,19 +149,19 @@ export default function NewStudentPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. tanvir@example.com"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
               />
             </div>
 
-            <div className="sm:col-span-2 pt-2 border-t border-gray-100">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className="sm:col-span-2 pt-2 border-t border-border">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Guardian Information
               </span>
             </div>
 
             {/* Guardian Name */}
             <div>
-              <label htmlFor="guardianName" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="guardianName" className="block text-sm font-semibold text-foreground mb-2">
                 Guardian Name (Optional)
               </label>
               <input
@@ -170,13 +170,13 @@ export default function NewStudentPage() {
                 value={guardianName}
                 onChange={(e) => setGuardianName(e.target.value)}
                 placeholder="e.g. Rafiqul Islam"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
               />
             </div>
 
             {/* Guardian Phone */}
             <div>
-              <label htmlFor="guardianPhone" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="guardianPhone" className="block text-sm font-semibold text-foreground mb-2">
                 Guardian Phone (Optional)
               </label>
               <input
@@ -185,23 +185,23 @@ export default function NewStudentPage() {
                 value={guardianPhone}
                 onChange={(e) => setGuardianPhone(e.target.value)}
                 placeholder="e.g. 01812345678"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
               />
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-x-4 border-t border-gray-100 pt-6">
+          <div className="flex justify-end gap-x-4 border-t border-border pt-6">
             <Link
               href="/students"
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
             >
               {isSubmitting ? 'Provisioning...' : 'Provision Student'}
             </button>
@@ -219,28 +219,28 @@ export default function NewStudentPage() {
       >
         {createdCreds && (
           <div className="space-y-4 pt-2">
-            <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4 space-y-3">
+            <div className="rounded-lg border border-border bg-surface-hover/40 p-4 space-y-3">
               <div>
-                <span className="text-[11px] text-gray-500 uppercase font-semibold">Student Name</span>
-                <p className="text-sm font-bold text-gray-900">{createdCreds.name}</p>
+                <span className="text-[11px] text-muted-foreground uppercase font-semibold">Student Name</span>
+                <p className="text-sm font-bold text-foreground">{createdCreds.name}</p>
               </div>
 
               {createdCreds.studentCode && (
                 <div>
-                  <span className="text-[11px] text-gray-500 uppercase font-semibold">Student ID</span>
-                  <p className="font-mono text-base font-bold text-accent">{createdCreds.studentCode}</p>
+                  <span className="text-[11px] text-muted-foreground uppercase font-semibold">Student ID</span>
+                  <p className="font-mono text-base font-bold text-primary">{createdCreds.studentCode}</p>
                 </div>
               )}
 
               <div>
-                <span className="text-[11px] text-gray-500 uppercase font-semibold">Login Identifier</span>
-                <p className="font-mono text-sm font-semibold text-gray-800">{createdCreds.identifier}</p>
+                <span className="text-[11px] text-muted-foreground uppercase font-semibold">Login Identifier</span>
+                <p className="font-mono text-sm font-semibold text-foreground">{createdCreds.identifier}</p>
               </div>
 
               <div>
-                <span className="text-[11px] text-gray-500 uppercase font-semibold">Temporary Password</span>
-                <div className="flex items-center justify-between gap-2 bg-white p-2.5 rounded border border-gray-200 mt-1">
-                  <span className="font-mono text-sm font-bold tracking-wider text-red-600">
+                <span className="text-[11px] text-muted-foreground uppercase font-semibold">Temporary Password</span>
+                <div className="flex items-center justify-between gap-2 bg-surface p-2.5 rounded border border-border mt-1">
+                  <span className="font-mono text-sm font-bold tracking-wider text-red-500">
                     {createdCreds.temporaryPassword}
                   </span>
                   <Button
@@ -262,7 +262,7 @@ export default function NewStudentPage() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-gray-100">
+            <div className="flex justify-end pt-2 border-t border-border">
               <Button
                 type="button"
                 variant="primary"

@@ -56,15 +56,15 @@ export default async function BatchesPage() {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-5">
+        <div className="flex items-center justify-between border-b border-border pb-5">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Batches</h1>
-            <p className="mt-2 text-sm text-gray-500">View and manage coaching classes and cohorts</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Batches</h1>
+            <p className="mt-2 text-sm text-muted-foreground">View and manage coaching classes and cohorts</p>
           </div>
           {isAdmin && (
             <Link
               href="/batches/new"
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition"
             >
               Create Batch
             </Link>
@@ -80,19 +80,19 @@ export default async function BatchesPage() {
         )}
 
         {/* Batches Table Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
           {batches.length === 0 ? (
             <div className="p-12 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+              <svg className="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              <h3 className="mt-4 text-sm font-semibold text-gray-900">No batches found</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by creating a new batch definition.</p>
+              <h3 className="mt-4 text-sm font-semibold text-foreground">No batches found</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Get started by creating a new batch definition.</p>
               {isAdmin && (
                 <div className="mt-6">
                   <Link
                     href="/batches/new"
-                    className="inline-flex items-center rounded-md bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover"
                   >
                     Add Batch
                   </Link>
@@ -101,49 +101,49 @@ export default async function BatchesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-surface-hover/50">
                   <tr>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Name</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Class Level</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Subject</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Teacher</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Students</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Class Level</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Subject</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Teacher</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Students</th>
                     <th scope="col" className="relative px-6 py-3.5"><span className="sr-only">Details</span></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-surface divide-y divide-border">
                   {batches.map((batch) => (
-                    <tr key={batch.id} className="hover:bg-gray-50/70 transition-colors">
+                    <tr key={batch.id} className="hover:bg-surface-hover/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Link href={`/batches/${batch.id}`} className="text-sm font-semibold text-accent hover:underline">
+                        <Link href={`/batches/${batch.id}`} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
                           {batch.name}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                           batch.type === 'ACADEMIC'
-                            ? 'bg-blue-50 text-blue-700 ring-blue-700/10'
-                            : 'bg-amber-50 text-amber-700 ring-amber-700/10'
+                            ? 'bg-blue-50 text-blue-700 ring-blue-700/10 dark:bg-blue-950/40 dark:text-blue-300 dark:ring-blue-400/20'
+                            : 'bg-amber-50 text-amber-700 ring-amber-700/10 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-400/20'
                         }`}>
                           {batch.type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {batch.classLevel || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground font-medium">
                         {batch.subject?.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {batch.teacher?.name || <span className="text-gray-400 italic">Unassigned</span>}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                        {batch.teacher?.name || <span className="text-muted-foreground/60 italic">Unassigned</span>}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         <span className="font-semibold">{batch._count?.enrollments || 0}</span> students
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link href={`/batches/${batch.id}`} className="text-accent hover:text-indigo-900">
+                        <Link href={`/batches/${batch.id}`} className="text-primary hover:text-primary-hover font-medium">
                           View details
                         </Link>
                       </td>

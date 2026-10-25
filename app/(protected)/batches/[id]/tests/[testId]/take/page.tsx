@@ -199,7 +199,7 @@ export default function TakeTestPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Preparing test paper...</span>
       </div>
     );
@@ -212,7 +212,7 @@ export default function TakeTestPage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
         </div>
-        <Link href={`/batches/${batchId}/tests`} className="text-accent hover:underline text-sm font-medium">
+        <Link href={`/batches/${batchId}/tests`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to tests list
         </Link>
       </div>
@@ -224,17 +224,17 @@ export default function TakeTestPage({ params }: PageProps) {
       <div className="mx-auto max-w-3xl space-y-6">
         {/* Header card with details and timer */}
         {test && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900">{test.title}</h1>
-              <div className="flex flex-wrap gap-2 items-center text-xs text-gray-500 mt-2 font-medium">
-                <span className="bg-gray-100 rounded-md px-2 py-0.5">{test.type} Exam</span>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{test.title}</h1>
+              <div className="flex flex-wrap gap-2 items-center text-xs text-muted-foreground mt-2 font-medium">
+                <span className="bg-surface-hover rounded-md px-2 py-0.5 border border-border text-foreground">{test.type} Exam</span>
                 <span>•</span>
                 <span>Total: {test.totalMarks} Marks</span>
                 {test.negativeMarkingValue > 0 && (
                   <>
                     <span>•</span>
-                    <span className="text-red-500 font-semibold">
+                    <span className="text-red-600 dark:text-red-400 font-semibold">
                       Negative Marking: -{test.negativeMarkingValue} marks per MCQ error
                     </span>
                   </>
@@ -244,7 +244,7 @@ export default function TakeTestPage({ params }: PageProps) {
 
             {/* Timer component */}
             {secondsLeft !== null && (
-              <div className="flex items-center gap-x-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-2 flex-shrink-0">
+              <div className="flex items-center gap-x-2 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl px-4 py-2 flex-shrink-0">
                 <svg className="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -255,7 +255,7 @@ export default function TakeTestPage({ params }: PageProps) {
         )}
 
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200 text-sm text-red-600">
+          <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 border border-red-200 dark:border-red-900/50 text-sm text-red-600 dark:text-red-300">
             {errorMsg}
           </div>
         )}
@@ -265,18 +265,18 @@ export default function TakeTestPage({ params }: PageProps) {
             {/* Questions paper */}
             <div className="space-y-6">
               {test.questions.map((q, idx) => (
-                <div key={q.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                <div key={q.id} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
                   <div className="flex justify-between items-start gap-x-4">
-                    <span className="inline-flex items-center gap-x-2 text-sm font-semibold text-gray-900">
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
+                    <span className="inline-flex items-center gap-x-2 text-sm font-semibold text-foreground">
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                         {idx + 1}
                       </span>
                       Question {idx + 1} ({q.type})
                     </span>
-                    <span className="text-xs text-gray-400 font-bold">{q.marks} Marks</span>
+                    <span className="text-xs text-muted-foreground font-bold">{q.marks} Marks</span>
                   </div>
 
-                  <p className="text-sm font-medium text-gray-800 whitespace-pre-wrap pl-8">
+                  <p className="text-sm font-medium text-foreground/90 whitespace-pre-wrap pl-8">
                     {q.text}
                   </p>
 
@@ -290,10 +290,10 @@ export default function TakeTestPage({ params }: PageProps) {
                           return (
                             <label
                               key={o.id}
-                              className={`flex items-center gap-x-3 text-xs font-medium p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors ${
+                              className={`flex items-center gap-x-3 text-xs font-medium p-3 rounded-lg border cursor-pointer hover:bg-surface-hover/50 transition-colors ${
                                 isSelected
-                                  ? 'border-accent bg-accent/5 text-accent'
-                                  : 'border-gray-200 bg-white text-gray-700'
+                                  ? 'border-primary bg-primary/10 text-primary font-semibold'
+                                  : 'border-border bg-surface text-foreground'
                               }`}
                             >
                               <input
@@ -301,7 +301,7 @@ export default function TakeTestPage({ params }: PageProps) {
                                 name={`q-${q.id}`}
                                 checked={isSelected}
                                 onChange={() => handleMCQChange(q.id, o.id)}
-                                className="h-4 w-4 text-accent border-gray-300 focus:ring-accent"
+                                className="h-4 w-4 text-primary border-border bg-surface focus:ring-primary"
                               />
                               <span>{o.text}</span>
                             </label>
@@ -315,7 +315,7 @@ export default function TakeTestPage({ params }: PageProps) {
                         onChange={(e) => handleWrittenChange(q.id, e.target.value)}
                         placeholder="Write your explanation here..."
                         rows={4}
-                        className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                        className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                       />
                     )}
                   </div>
@@ -324,14 +324,14 @@ export default function TakeTestPage({ params }: PageProps) {
             </div>
 
             {/* Submit Exam Panel */}
-            <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-              <span className="text-xs text-gray-500 font-medium">
+            <div className="flex items-center justify-between border-t border-border pt-6">
+              <span className="text-xs text-muted-foreground font-medium">
                 Make sure you have reviewed all answers before submitting.
               </span>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
               >
                 {isSubmitting ? 'Submitting Answers...' : 'Submit Test'}
               </button>

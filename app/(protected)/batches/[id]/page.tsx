@@ -356,7 +356,7 @@ export default function BatchDetailPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading batch details...</span>
       </div>
     );
@@ -369,7 +369,7 @@ export default function BatchDetailPage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error Loading Batch</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
         </div>
-        <Link href="/batches" className="text-accent hover:underline text-sm font-medium">
+        <Link href="/batches" className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to batches list
         </Link>
       </div>
@@ -384,54 +384,53 @@ export default function BatchDetailPage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+        <nav className="flex text-sm text-muted-foreground gap-x-2">
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">{batch.name}</span>
+          <span className="text-foreground font-semibold">{batch.name}</span>
         </nav>
 
         {/* Title Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">{batch.name}</h1>
-            <p className="mt-2 text-sm text-gray-500">Batch details, routines, attendance, fees, and student list</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{batch.name}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Batch details, routines, attendance, fees, and student list</p>
           </div>
           {/* Quick Links */}
           <div className="flex gap-x-3 flex-wrap gap-y-2">
             <Link
               href={`/batches/${batchId}/resources`}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
             >
               Study Materials
             </Link>
             <Link
               href={`/batches/${batchId}/routine`}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
             >
               Class Routine
             </Link>
             {userRole === 'ADMIN' && (
               <Link
                 href={`/batches/${batchId}/payments`}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
               >
                 Fee Payments
               </Link>
             )}
             <Link
               href={`/batches/${batchId}/analytics`}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
             >
               Analytics
             </Link>
             <Link
               href={`/batches/${batchId}/attendance`}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
             >
               Mark Attendance
             </Link>
           </div>
-
         </div>
 
         {/* Content Columns */}
@@ -439,44 +438,44 @@ export default function BatchDetailPage({ params }: PageProps) {
           {/* Left Column: Details & Fee Settings & Enrollment */}
           <div className="space-y-6 lg:col-span-1">
             {/* Details Card */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Batch Information</h2>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+              <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Batch Information</h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-400 font-medium block">Type</span>
+                  <span className="text-muted-foreground font-medium block">Type</span>
                   <span className={`inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold ring-1 ring-inset ${
                     batch.type === 'ACADEMIC'
-                      ? 'bg-blue-50 text-blue-700 ring-blue-700/10'
-                      : 'bg-amber-50 text-amber-700 ring-amber-700/10'
+                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 ring-blue-700/10'
+                      : 'bg-primary/10 text-primary ring-primary/20'
                   }`}>
                     {batch.type}
                   </span>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-medium block">Class Level</span>
-                  <span className="text-gray-900 font-semibold">{batch.classLevel || 'N/A'}</span>
+                  <span className="text-muted-foreground font-medium block">Class Level</span>
+                  <span className="text-foreground font-semibold">{batch.classLevel || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-medium block">Subject</span>
-                  <span className="text-gray-900 font-semibold">{batch.subject.name}</span>
+                  <span className="text-muted-foreground font-medium block">Subject</span>
+                  <span className="text-foreground font-semibold">{batch.subject.name}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-medium block">Assigned Teacher</span>
-                  <span className="text-gray-900 font-semibold">
-                    {batch.teacher?.name || <span className="text-gray-400 italic font-normal">Unassigned</span>}
+                  <span className="text-muted-foreground font-medium block">Assigned Teacher</span>
+                  <span className="text-foreground font-semibold">
+                    {batch.teacher?.name || <span className="text-muted-foreground italic font-normal">Unassigned</span>}
                   </span>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-medium block">Total Enrolled</span>
-                  <span className="text-gray-900 font-semibold">{enrolledStudents.length} Students</span>
+                  <span className="text-muted-foreground font-medium block">Total Enrolled</span>
+                  <span className="text-foreground font-semibold">{enrolledStudents.length} Students</span>
                 </div>
               </div>
             </div>
 
             {/* Fee Settings Section */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                <h2 className="text-lg font-bold text-gray-900">Fee Settings</h2>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <h2 className="text-lg font-bold text-foreground">Fee Settings</h2>
                 {userRole === 'ADMIN' && (
                   <button
                     onClick={() => {
@@ -486,7 +485,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                       setBatchFeeError(null);
                       setBatchFeeSuccess(null);
                     }}
-                    className="text-xs font-semibold text-accent hover:underline"
+                    className="text-xs font-semibold text-primary hover:text-primary-hover hover:underline"
                   >
                     {isEditingBatchFee ? 'Cancel' : 'Edit'}
                   </button>
@@ -494,12 +493,12 @@ export default function BatchDetailPage({ params }: PageProps) {
               </div>
 
               {batchFeeSuccess && (
-                <div className="rounded-md bg-green-50 p-3 border border-green-200 text-xs text-green-600">
+                <div className="rounded-md bg-green-500/10 p-3 border border-green-500/20 text-xs text-green-600 dark:text-green-400">
                   {batchFeeSuccess}
                 </div>
               )}
               {batchFeeError && (
-                <div className="rounded-md bg-red-50 p-3 border border-red-200 text-xs text-red-600">
+                <div className="rounded-md bg-red-500/10 p-3 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
                   {batchFeeError}
                 </div>
               )}
@@ -507,14 +506,14 @@ export default function BatchDetailPage({ params }: PageProps) {
               {!isEditingBatchFee ? (
                 <div className="space-y-3 text-sm">
                   <div>
-                    <span className="text-gray-400 font-medium block">Fee Type</span>
-                    <span className="inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
+                    <span className="text-muted-foreground font-medium block">Fee Type</span>
+                    <span className="inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
                       {batch.feeType || 'MONTHLY'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-400 font-medium block">Base Fee Amount</span>
-                    <span className="text-gray-900 font-bold text-lg">
+                    <span className="text-muted-foreground font-medium block">Base Fee Amount</span>
+                    <span className="text-foreground font-bold text-lg">
                       ৳{batch.feeAmount !== undefined ? batch.feeAmount.toLocaleString() : '0'}
                     </span>
                   </div>
@@ -522,20 +521,20 @@ export default function BatchDetailPage({ params }: PageProps) {
               ) : (
                 <form onSubmit={handleUpdateBatchFee} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
                       Fee Type
                     </label>
                     <select
                       value={feeTypeInput}
                       onChange={(e) => setFeeTypeInput(e.target.value as 'MONTHLY' | 'ONE_TIME')}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                     >
                       <option value="MONTHLY">MONTHLY</option>
                       <option value="ONE_TIME">ONE_TIME</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
                       Base Fee Amount (৳)
                     </label>
                     <input
@@ -544,7 +543,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                       step="any"
                       value={feeAmountInput}
                       onChange={(e) => setFeeAmountInput(e.target.value === '' ? '' : Number(e.target.value))}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                       required
                     />
                   </div>
@@ -552,14 +551,14 @@ export default function BatchDetailPage({ params }: PageProps) {
                     <button
                       type="submit"
                       disabled={savingBatchFee}
-                      className="flex-1 inline-flex justify-center items-center rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                      className="flex-1 inline-flex justify-center items-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
                     >
                       {savingBatchFee ? 'Saving...' : 'Save Fee'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsEditingBatchFee(false)}
-                      className="px-3 py-2 text-xs font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                      className="px-3 py-2 text-xs font-semibold text-foreground border border-border rounded-lg hover:bg-surface-hover transition"
                     >
                       Cancel
                     </button>
@@ -569,23 +568,23 @@ export default function BatchDetailPage({ params }: PageProps) {
             </div>
 
             {/* Enroll Form Card */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Enroll Student</h2>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+              <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Enroll Student</h2>
 
               {enrollError && (
-                <div className="rounded-md bg-red-50 p-3 border border-red-200 text-xs text-red-600">
+                <div className="rounded-md bg-red-500/10 p-3 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
                   {enrollError}
                 </div>
               )}
               {enrollSuccess && (
-                <div className="rounded-md bg-green-50 p-3 border border-green-200 text-xs text-green-600">
+                <div className="rounded-md bg-green-500/10 p-3 border border-green-500/20 text-xs text-green-600 dark:text-green-400">
                   {enrollSuccess}
                 </div>
               )}
 
               <form onSubmit={handleEnrollStudent} className="space-y-4">
                 <div>
-                  <label htmlFor="studentSelect" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  <label htmlFor="studentSelect" className="block text-xs font-semibold text-muted-foreground mb-1.5">
                     Select student from branch list
                   </label>
                   {nonEnrolledStudents.length === 0 ? (
@@ -599,7 +598,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                       id="studentSelect"
                       value={selectedStudentId}
                       onChange={(e) => setSelectedStudentId(e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                       required
                     >
                       <option value="">Select a student</option>
@@ -614,7 +613,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                 <button
                   type="submit"
                   disabled={enrolling || nonEnrolledStudents.length === 0}
-                  className="w-full inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="w-full inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
                 >
                   {enrolling ? 'Enrolling...' : 'Enroll Student'}
                 </button>
@@ -624,63 +623,63 @@ export default function BatchDetailPage({ params }: PageProps) {
 
           {/* Right Column: Enrolled Students List */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">Enrolled Students</h2>
-                <p className="text-xs text-gray-500 mt-1">Students registered and active in this batch</p>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+              <div className="p-6 border-b border-border">
+                <h2 className="text-lg font-bold text-foreground">Enrolled Students</h2>
+                <p className="text-xs text-muted-foreground mt-1">Students registered and active in this batch</p>
               </div>
 
               {enrolledStudents.length === 0 ? (
-                <div className="p-12 text-center text-gray-500">
-                  <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <div className="p-12 text-center text-muted-foreground">
+                  <svg className="mx-auto h-12 w-12 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857" />
                   </svg>
                   <p className="mt-4 text-sm font-medium">No students enrolled yet</p>
-                  <p className="text-xs text-gray-400">Use the enrollment panel to add students to this class.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Use the enrollment panel to add students to this class.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-surface-hover/50">
                       <tr>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student Info</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</th>
-                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Fee Breakdown</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student Info</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone</th>
+                        <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fee Breakdown</th>
                         {userRole === 'ADMIN' && (
-                          <th scope="col" className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                          <th scope="col" className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
                         )}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-surface divide-y divide-border">
                       {enrolledStudents.map((student) => {
                         const netFeeInfo = student.enrollmentId ? netFeeMap[student.enrollmentId] : null;
 
                         return (
-                          <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                          <tr key={student.id} className="hover:bg-surface-hover/50 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-semibold text-gray-900">{student.name}</div>
-                              <div className="text-xs text-gray-500">{student.email}</div>
+                              <div className="text-sm font-semibold text-foreground">{student.name}</div>
+                              <div className="text-xs text-muted-foreground">{student.email}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {student.phone || <span className="text-gray-400 italic">None</span>}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                              {student.phone || <span className="text-muted-foreground italic">None</span>}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               {netFeeInfo ? (
                                 <div>
-                                  <div className="text-sm font-bold text-gray-900">
+                                  <div className="text-sm font-bold text-foreground">
                                     ৳{netFeeInfo.netFee.toLocaleString()}
                                   </div>
-                                  <div className="text-xs text-gray-500 mt-0.5 flex flex-wrap items-center gap-1">
+                                  <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1">
                                     <span>
                                       Base: ৳{(netFeeInfo.customFeeAmount ?? netFeeInfo.baseFee).toLocaleString()}
                                     </span>
                                     {netFeeInfo.customFeeAmount != null && (
-                                      <span className="inline-flex items-center rounded bg-amber-50 px-1 py-0.2 text-[10px] font-semibold text-amber-700 border border-amber-200">
+                                      <span className="inline-flex items-center rounded bg-amber-500/10 px-1 py-0.2 text-[10px] font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                         Custom
                                       </span>
                                     )}
                                     {netFeeInfo.discountType && netFeeInfo.discountValue && (
-                                      <span className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+                                      <span className="inline-flex items-center rounded bg-emerald-500/10 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                         -{netFeeInfo.discountType === 'FIXED' ? `৳${netFeeInfo.discountValue}` : `${netFeeInfo.discountValue}%`}
                                         {netFeeInfo.discountReason ? ` (${netFeeInfo.discountReason})` : ''}
                                       </span>
@@ -688,7 +687,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-xs text-gray-400 italic">Loading fee...</span>
+                                <span className="text-xs text-muted-foreground italic">Loading fee...</span>
                               )}
                             </td>
                             {userRole === 'ADMIN' && (
@@ -696,7 +695,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                                 <div className="flex items-center justify-end gap-x-2">
                                   <button
                                     onClick={() => openSetStudentFeeModal(student)}
-                                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                    className="inline-flex items-center justify-center rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                                   >
                                     Set Fee / Discount
                                   </button>
@@ -705,7 +704,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                                       setUnenrollStudentTarget(student);
                                       setUnenrollError(null);
                                     }}
-                                    className="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+                                    className="inline-flex items-center justify-center rounded-md border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition"
                                   >
                                     Unenroll
                                   </button>
@@ -726,30 +725,30 @@ export default function BatchDetailPage({ params }: PageProps) {
 
       {/* Set Student Fee / Discount Modal */}
       {selectedStudentForFee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-surface rounded-2xl border border-border shadow-xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Set Fee & Discount</h3>
-                <p className="text-xs text-gray-500">{selectedStudentForFee.name}</p>
+                <h3 className="text-base font-bold text-foreground">Set Fee & Discount</h3>
+                <p className="text-xs text-muted-foreground">{selectedStudentForFee.name}</p>
               </div>
               <button
                 onClick={() => setSelectedStudentForFee(null)}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                className="text-muted-foreground hover:text-foreground text-lg leading-none"
               >
                 &times;
               </button>
             </div>
 
             {studentFeeError && (
-              <div className="rounded-md bg-red-50 p-3 border border-red-200 text-xs text-red-600">
+              <div className="rounded-md bg-red-500/10 p-3 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
                 {studentFeeError}
               </div>
             )}
 
             <form onSubmit={handleSaveStudentFee} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Custom Fee Override (৳)
                 </label>
                 <input
@@ -759,13 +758,13 @@ export default function BatchDetailPage({ params }: PageProps) {
                   placeholder={`Default: ৳${batch.feeAmount ?? 0}`}
                   value={studentCustomFeeInput}
                   onChange={(e) => setStudentCustomFeeInput(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                  className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-[11px] text-gray-400 mt-1">Leave empty to use batch default fee.</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Leave empty to use batch default fee.</p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Discount Type
                 </label>
                 <select
@@ -773,7 +772,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                   onChange={(e) =>
                     setStudentDiscountTypeInput(e.target.value as 'NONE' | 'FIXED' | 'PERCENTAGE')
                   }
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                  className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                 >
                   <option value="NONE">No Discount</option>
                   <option value="FIXED">FIXED (Amount off)</option>
@@ -783,7 +782,7 @@ export default function BatchDetailPage({ params }: PageProps) {
 
               {studentDiscountTypeInput !== 'NONE' && (
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
                     Discount Value {studentDiscountTypeInput === 'PERCENTAGE' ? '(%)' : '(৳)'}
                   </label>
                   <input
@@ -793,14 +792,14 @@ export default function BatchDetailPage({ params }: PageProps) {
                     placeholder={studentDiscountTypeInput === 'PERCENTAGE' ? 'e.g. 20' : 'e.g. 500'}
                     value={studentDiscountValueInput}
                     onChange={(e) => setStudentDiscountValueInput(e.target.value)}
-                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                    className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                     required
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Discount Reason (Optional)
                 </label>
                 <input
@@ -808,22 +807,22 @@ export default function BatchDetailPage({ params }: PageProps) {
                   placeholder="e.g. Merit scholarship, Sibling discount"
                   value={studentDiscountReasonInput}
                   onChange={(e) => setStudentDiscountReasonInput(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                  className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
-              <div className="flex gap-x-2 pt-2 border-t border-gray-100">
+              <div className="flex gap-x-2 pt-2 border-t border-border">
                 <button
                   type="submit"
                   disabled={savingStudentFee}
-                  className="flex-1 inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
                 >
                   {savingStudentFee ? 'Saving...' : 'Save Fee Configuration'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedStudentForFee(null)}
-                  className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="px-4 py-2 text-sm font-semibold text-foreground border border-border rounded-lg hover:bg-surface-hover transition"
                 >
                   Cancel
                 </button>
@@ -835,24 +834,24 @@ export default function BatchDetailPage({ params }: PageProps) {
 
       {/* Unenroll Confirmation Modal */}
       {unenrollStudentTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl space-y-4">
-            <h3 className="text-lg font-bold text-gray-900">Confirm Unenrollment</h3>
-            <p className="text-sm text-gray-600">
-              Are you sure you want to unenroll <span className="font-semibold text-gray-900">{unenrollStudentTarget.name}</span> from this batch?
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-surface border border-border rounded-2xl p-6 shadow-xl space-y-4">
+            <h3 className="text-lg font-bold text-foreground">Confirm Unenrollment</h3>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to unenroll <span className="font-semibold text-foreground">{unenrollStudentTarget.name}</span> from this batch?
             </p>
 
             {unenrollError && (
-              <div className="p-3 bg-red-50 text-xs text-red-600 rounded-lg border border-red-200">
+              <div className="p-3 bg-red-500/10 text-xs text-red-600 dark:text-red-400 rounded-lg border border-red-500/20">
                 {unenrollError}
               </div>
             )}
 
-            <div className="flex justify-end gap-x-3 pt-3 border-t border-gray-100">
+            <div className="flex justify-end gap-x-3 pt-3 border-t border-border">
               <button
                 type="button"
                 onClick={() => setUnenrollStudentTarget(null)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50"
+                className="px-4 py-2 rounded-lg border border-border text-foreground text-xs font-semibold hover:bg-surface-hover"
               >
                 Cancel
               </button>

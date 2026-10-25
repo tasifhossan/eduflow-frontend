@@ -48,7 +48,7 @@ export default function StudentsTable({
           {isAdmin && (
             <Link
               href="/students/new"
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition self-start md:self-auto"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition self-start md:self-auto"
             >
               Add Student
             </Link>
@@ -64,9 +64,9 @@ export default function StudentsTable({
         )}
 
         {/* Search Input */}
-        <div className="flex items-center max-w-md bg-white rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-accent focus-within:border-accent">
+        <div className="flex items-center max-w-md bg-surface rounded-lg border border-border px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-ring focus-within:border-ring">
           <svg
-            className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0"
+            className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -79,16 +79,16 @@ export default function StudentsTable({
             placeholder="Search students by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-sm text-gray-900 placeholder-gray-400 outline-none border-none p-0 bg-transparent focus:ring-0 focus:border-transparent"
+            className="w-full text-sm text-foreground placeholder:text-muted-foreground outline-none border-none p-0 bg-transparent focus:ring-0 focus:border-transparent"
           />
         </div>
 
         {/* Students Table Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
           {filteredStudents.length === 0 ? (
             <div className="p-12 text-center">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-muted-foreground"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -100,15 +100,15 @@ export default function StudentsTable({
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
-              <h3 className="mt-4 text-sm font-semibold text-gray-900">No students found</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="mt-4 text-sm font-semibold text-foreground">No students found</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {searchQuery ? 'Try adjusting your search criteria.' : 'Create a student record to get started.'}
               </p>
               {isAdmin && !searchQuery && (
                 <div className="mt-6">
                   <Link
                     href="/students/new"
-                    className="inline-flex items-center rounded-md bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover"
                   >
                     Add Student
                   </Link>
@@ -117,36 +117,36 @@ export default function StudentsTable({
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-surface-hover/50">
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       Name
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       Email
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       Phone
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       Enrolled Batches
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                      className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       Recent Attendance
                     </th>
@@ -155,24 +155,24 @@ export default function StudentsTable({
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-surface divide-y divide-border">
                   {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50/70 transition-colors">
+                    <tr key={student.id} className="hover:bg-surface-hover/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           href={`/students/${student.id}`}
-                          className="text-sm font-semibold text-accent hover:underline"
+                          className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
                         >
                           {student.name}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {student.email}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student.phone || <span className="text-gray-400 italic">N/A</span>}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                        {student.phone || <span className="text-muted-foreground/60 italic">N/A</span>}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         <span className="font-semibold">{student.enrolledBatchesCount}</span> batches
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -181,10 +181,10 @@ export default function StudentsTable({
                             <span
                               className={`inline-flex items-center gap-x-1.5 rounded-full px-2 py-1 text-xs font-semibold ring-1 ring-inset ${
                                 student.recentAttendance.status === 'PRESENT'
-                                  ? 'bg-green-50 text-green-700 ring-green-600/20'
+                                  ? 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-950/40 dark:text-green-300 dark:ring-green-400/20'
                                   : student.recentAttendance.status === 'ABSENT'
-                                  ? 'bg-red-50 text-red-700 ring-red-600/20'
-                                  : 'bg-amber-50 text-amber-700 ring-amber-600/20'
+                                  ? 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-400/20'
+                                  : 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-400/20'
                               }`}
                             >
                               <span
@@ -199,19 +199,19 @@ export default function StudentsTable({
                               {student.recentAttendance.status.charAt(0) +
                                 student.recentAttendance.status.slice(1).toLowerCase()}
                             </span>
-                            <span className="text-[10px] text-gray-400 font-medium ml-1.5">
+                            <span className="text-[10px] text-muted-foreground font-medium ml-1.5">
                               {student.recentAttendance.batchName} ({new Date(student.recentAttendance.date).toLocaleDateString()})
                             </span>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-x-1.5 rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                            <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                          <span className="inline-flex items-center gap-x-1.5 rounded-full bg-surface-hover px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border">
+                            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                             No record
                           </span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link href={`/students/${student.id}`} className="text-accent hover:text-indigo-900">
+                        <Link href={`/students/${student.id}`} className="text-primary hover:text-primary-hover font-medium">
                           View profile
                         </Link>
                       </td>

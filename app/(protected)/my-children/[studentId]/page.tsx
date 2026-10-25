@@ -184,7 +184,7 @@ export default function ChildDetailPage({ params }: PageProps) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-accent animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-sm font-medium text-gray-500">Loading student performance records...</p>
         </div>
       </div>
@@ -195,36 +195,36 @@ export default function ChildDetailPage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/my-children" className="hover:text-accent font-medium">My Children</Link>
+        <nav className="flex text-sm text-muted-foreground gap-x-2">
+          <Link href="/my-children" className="hover:text-primary font-medium">My Children</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">{studentInfo?.name || 'Child Records'}</span>
+          <span className="text-foreground font-semibold">{studentInfo?.name || 'Child Records'}</span>
         </nav>
 
         {/* Header */}
-        <div className="border-b border-gray-200 pb-5">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <div className="border-b border-border pb-5">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             {studentInfo?.name || 'Child Details'}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Attendance history, exam results, and fee payment records
           </p>
         </div>
 
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200 text-sm text-red-700">
+          <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 border border-red-200 dark:border-red-900/50 text-sm text-red-700 dark:text-red-300">
             {errorMsg}
           </div>
         )}
 
         {/* Tab Selection */}
-        <div className="flex border-b border-gray-200 gap-x-8">
+        <div className="flex border-b border-border gap-x-8">
           <button
             onClick={() => setActiveTab('attendance')}
             className={`pb-3 text-sm font-semibold flex items-center gap-x-2 border-b-2 transition ${
               activeTab === 'attendance'
-                ? 'border-accent text-accent'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <Calendar className="w-4 h-4" /> Attendance ({attendance.length})
@@ -233,8 +233,8 @@ export default function ChildDetailPage({ params }: PageProps) {
             onClick={() => setActiveTab('results')}
             className={`pb-3 text-sm font-semibold flex items-center gap-x-2 border-b-2 transition ${
               activeTab === 'results'
-                ? 'border-accent text-accent'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <Award className="w-4 h-4" /> Test Results ({results.length})
@@ -243,8 +243,8 @@ export default function ChildDetailPage({ params }: PageProps) {
             onClick={() => setActiveTab('payments')}
             className={`pb-3 text-sm font-semibold flex items-center gap-x-2 border-b-2 transition ${
               activeTab === 'payments'
-                ? 'border-accent text-accent'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <CreditCard className="w-4 h-4" /> Fee Payments ({payments.length})
@@ -253,23 +253,23 @@ export default function ChildDetailPage({ params }: PageProps) {
 
         {/* Tab 1: Attendance History */}
         {activeTab === 'attendance' && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
             {attendance.length === 0 ? (
-              <div className="p-12 text-center text-gray-500 text-sm">
+              <div className="p-12 text-center text-muted-foreground text-sm">
                 No attendance records found for this student.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {attendance.map((record) => (
                   <div key={record.id} className="p-4 sm:p-5 flex items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-x-2">
-                        <span className="font-bold text-gray-900 text-base">
+                        <span className="font-bold text-foreground text-base">
                           {new Date(record.date).toLocaleDateString(undefined, { dateStyle: 'full' })}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 flex items-center gap-x-1">
-                        <BookOpen className="w-3.5 h-3.5 text-gray-400" /> Batch: {record.batch.name}
+                      <p className="text-xs text-muted-foreground flex items-center gap-x-1">
+                        <BookOpen className="w-3.5 h-3.5 text-muted-foreground" /> Batch: {record.batch.name}
                       </p>
                     </div>
                     {getAttendanceBadge(record.status)}
@@ -282,21 +282,21 @@ export default function ChildDetailPage({ params }: PageProps) {
 
         {/* Tab 2: Test Results */}
         {activeTab === 'results' && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
             {results.length === 0 ? (
-              <div className="p-12 text-center text-gray-500 text-sm">
+              <div className="p-12 text-center text-muted-foreground text-sm">
                 No exam or test result records found.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {results.map((res) => (
                   <div key={res.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <h3 className="font-bold text-gray-900 text-base">{res.test.title}</h3>
-                      <div className="flex items-center gap-x-3 text-xs text-gray-500 flex-wrap">
-                        <span>Batch: <strong className="text-gray-700">{res.test.batch.name}</strong></span>
+                      <h3 className="font-bold text-foreground text-base">{res.test.title}</h3>
+                      <div className="flex items-center gap-x-3 text-xs text-muted-foreground flex-wrap">
+                        <span>Batch: <strong className="text-foreground">{res.test.batch.name}</strong></span>
                         <span>•</span>
-                        <span>Type: <span className="uppercase font-semibold text-gray-700">{res.test.type}</span></span>
+                        <span>Type: <span className="uppercase font-semibold text-foreground">{res.test.type}</span></span>
                         <span>•</span>
                         <span>Submitted: {new Date(res.submittedAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
                       </div>
@@ -304,15 +304,15 @@ export default function ChildDetailPage({ params }: PageProps) {
 
                     <div className="flex items-center gap-x-4 shrink-0">
                       {res.rank && (
-                        <span className="inline-flex items-center rounded-lg bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-700/10">
+                        <span className="inline-flex items-center rounded-lg bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                           Rank #{res.rank}
                         </span>
                       )}
                       <div className="text-right">
-                        <span className="text-xl font-extrabold text-accent">
+                        <span className="text-xl font-extrabold text-primary">
                           {res.totalMarksObtained}
                         </span>
-                        <span className="text-xs text-gray-400 font-semibold"> / {res.test.totalMarks} marks</span>
+                        <span className="text-xs text-muted-foreground font-semibold"> / {res.test.totalMarks} marks</span>
                       </div>
                     </div>
                   </div>
@@ -324,36 +324,36 @@ export default function ChildDetailPage({ params }: PageProps) {
 
         {/* Tab 3: Payment History */}
         {activeTab === 'payments' && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
             {payments.length === 0 ? (
-              <div className="p-12 text-center text-gray-500 text-sm">
+              <div className="p-12 text-center text-muted-foreground text-sm">
                 No fee payment records found.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {payments.map((p) => (
                   <div key={p.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-x-3">
-                        <h3 className="font-bold text-gray-900 text-base">Period: {p.period}</h3>
+                        <h3 className="font-bold text-foreground text-base">Period: {p.period}</h3>
                         {getPaymentBadge(p.status)}
                       </div>
-                      <p className="text-xs text-gray-500">
-                        Batch: <strong className="text-gray-700">{p.batch.name}</strong>
+                      <p className="text-xs text-muted-foreground">
+                        Batch: <strong className="text-foreground">{p.batch.name}</strong>
                       </p>
                       {p.paidAt && (
-                        <p className="text-xs text-emerald-600 font-medium">
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                           Paid on: {new Date(p.paidAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                         </p>
                       )}
                     </div>
 
                     <div className="text-right space-y-0.5 shrink-0">
-                      <div className="text-sm font-semibold text-gray-500">
+                      <div className="text-sm font-semibold text-muted-foreground">
                         Due: ৳{p.amountDue}
                       </div>
-                      <div className="text-lg font-bold text-gray-900">
-                        Paid: <span className="text-emerald-600">৳{p.amountPaid}</span>
+                      <div className="text-lg font-bold text-foreground">
+                        Paid: <span className="text-emerald-600 dark:text-emerald-400">৳{p.amountPaid}</span>
                       </div>
                     </div>
                   </div>
