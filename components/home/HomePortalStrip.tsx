@@ -34,7 +34,7 @@ export function HomePortalStrip() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                <span>Payment Receipts</span>
+                <span>Fee and payment history</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />

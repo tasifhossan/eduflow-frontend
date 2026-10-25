@@ -96,10 +96,10 @@ export function Footer() {
                   Stay In The Loop
                 </span>
                 <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mt-1">
-                  Subscribe to {center.name} Updates
+                  Get updates from {center.name}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                  Get monthly admission alerts, exam tips, syllabus updates, and academic guides directly to your inbox.
+                  Stay informed about admissions, academic notices, and center announcements.
                 </p>
               </div>
               <div className="lg:col-span-7">
