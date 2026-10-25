@@ -24,7 +24,7 @@ const PORTAL_BENEFITS = [
   {
     icon: CalendarCheck,
     title: 'Class-by-class attendance records',
-    description: 'Daily presence and entry logs',
+    description: 'Daily presence for each class',
   },
   {
     icon: Award,
@@ -44,7 +44,7 @@ const PORTAL_BENEFITS = [
   {
     icon: Clock,
     title: 'Weekly class routine and batch timings',
-    description: 'Daily schedules, batch timings, and classroom allocations',
+    description: 'Daily schedules and batch timings',
   },
 ];
 
@@ -63,11 +63,11 @@ export function AuthShell({ children }: AuthShellProps) {
   return (
     <div className="flex min-h-dvh w-full bg-background text-foreground antialiased selection:bg-primary/20 selection:text-foreground">
       {/* =========================================================================
-          LEFT BRAND PANEL (Desktop lg and up: equal height, min-h-dvh)
+          LEFT BRAND PANEL (Desktop lg and up: sticky, top 0, height 100dvh)
           ========================================================================= */}
       <aside
         aria-label="Brand Overview"
-        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-primary text-white border-r border-border/20 select-none min-h-dvh h-full"
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-primary text-white border-r border-border/20 select-none lg:sticky lg:top-0 lg:h-[100dvh] lg:self-start"
         style={{
           backgroundImage: `
             radial-gradient(circle at 85% 85%, rgba(0, 0, 0, 0.20) 0%, transparent 60%),
