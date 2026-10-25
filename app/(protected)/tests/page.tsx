@@ -185,7 +185,7 @@ export default function TestsHubPage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-base text-gray-500 font-medium">Loading tests…</span>
       </div>
     );
@@ -208,7 +208,7 @@ export default function TestsHubPage() {
           {isStaff && (
             <button
               onClick={() => { setSelectedBatchId(''); setShowCreateModal(true); }}
-              className="inline-flex items-center gap-x-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+              className="inline-flex items-center gap-x-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
             >
               <svg className="-ml-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
               Create Test
@@ -218,16 +218,16 @@ export default function TestsHubPage() {
 
         {/* Create Test Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">Create New Test</h2>
-              <p className="text-sm text-gray-500 mb-5">Select a batch to create a test in.</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-md p-6">
+              <h2 className="text-lg font-bold text-foreground mb-1">Create New Test</h2>
+              <p className="text-sm text-muted-foreground mb-5">Select a batch to create a test in.</p>
               <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Batch</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Batch</label>
                 <select
                   value={selectedBatchId}
                   onChange={(e) => setSelectedBatchId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="w-full rounded-lg border border-border bg-surface text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Select a batch…</option>
                   {allBatches.map((b) => (
@@ -240,14 +240,14 @@ export default function TestsHubPage() {
               <div className="flex justify-end gap-x-3">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                  className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
                 >
                   Cancel
                 </button>
                 <button
                   disabled={!selectedBatchId}
                   onClick={() => { if (selectedBatchId) router.push(`/batches/${selectedBatchId}/tests/new`); }}
-                  className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Continue
                 </button>
@@ -267,9 +267,9 @@ export default function TestsHubPage() {
 
         {/* Empty state */}
         {!errorMsg && groups.filter(g => g.tests.length > 0).length === 0 && !isStaff && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-12 text-center">
             <svg
-              className="mx-auto h-12 w-12 text-gray-300"
+              className="mx-auto h-12 w-12 text-muted-foreground/40"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -281,8 +281,8 @@ export default function TestsHubPage() {
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <h3 className="mt-4 text-sm font-semibold text-gray-900">No tests found</h3>
-            <p className="text-xs text-gray-400 mt-1">No tests have been scheduled in your batches yet.</p>
+            <h3 className="mt-4 text-sm font-semibold text-foreground">No tests found</h3>
+            <p className="text-xs text-muted-foreground mt-1">No tests have been scheduled in your batches yet.</p>
           </div>
         )}
 
@@ -290,39 +290,39 @@ export default function TestsHubPage() {
         {!errorMsg && groups.filter(g => isStaff || g.tests.length > 0).map(({ batch, tests, myResults }) => (
           <div
             key={batch.id}
-            className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+            className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden"
           >
             {/* Batch header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-hover/30">
               <div className="flex items-center gap-x-3">
                 <span
                   className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                     batch.type === 'ACADEMIC'
-                      ? 'bg-blue-50 text-blue-700 ring-blue-700/10'
-                      : 'bg-amber-50 text-amber-700 ring-amber-700/10'
+                      ? 'bg-blue-50 text-blue-700 ring-blue-700/10 dark:bg-blue-950/40 dark:text-blue-300 dark:ring-blue-400/20'
+                      : 'bg-amber-50 text-amber-700 ring-amber-700/10 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-400/20'
                   }`}
                 >
                   {batch.type}
                 </span>
                 <Link
                   href={`/batches/${batch.id}`}
-                  className="text-sm font-semibold text-gray-900 hover:text-accent transition-colors"
+                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
                 >
                   {batch.name}
                 </Link>
                 {batch.classLevel && (
-                  <span className="text-xs text-gray-400">· {batch.classLevel}</span>
+                  <span className="text-xs text-muted-foreground">· {batch.classLevel}</span>
                 )}
-                <span className="text-xs text-gray-400">· {batch.subject.name}</span>
+                <span className="text-xs text-muted-foreground">· {batch.subject.name}</span>
               </div>
               <div className="flex items-center gap-x-3">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-muted-foreground">
                   {tests.length} test{tests.length !== 1 ? 's' : ''}
                 </span>
                 {isStaff && (
                   <Link
                     href={`/batches/${batch.id}/tests/new`}
-                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                    className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                   >
                     + New Test
                   </Link>
@@ -332,19 +332,19 @@ export default function TestsHubPage() {
 
             {/* Tests table */}
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-white">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-surface">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Title
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Marks
                     </th>
                     <th className="relative px-6 py-3">
@@ -352,11 +352,11 @@ export default function TestsHubPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border bg-surface">
                   {tests.map((test) => {
                     const submitted = myResults?.[test.id] === true;
                     const primaryUrl = isStaff
-                      ? `/batches/${batch.id}/tests/${test.id}/manage`
+                       ? `/batches/${batch.id}/tests/${test.id}/manage`
                       : submitted
                       ? `/batches/${batch.id}/tests/${test.id}/result`
                       : `/batches/${batch.id}/tests/${test.id}/take`;
@@ -367,11 +367,11 @@ export default function TestsHubPage() {
                       : 'Take Test';
 
                     return (
-                      <tr key={test.id} className="hover:bg-gray-50/60 transition-colors">
+                      <tr key={test.id} className="hover:bg-surface-hover/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Link
                             href={primaryUrl}
-                            className="text-sm font-semibold text-accent hover:underline"
+                            className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
                           >
                             {test.title}
                           </Link>
@@ -383,10 +383,10 @@ export default function TestsHubPage() {
                             {test.type}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {formatDate(test.testDate)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">
                           {test.totalMarks}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -394,7 +394,7 @@ export default function TestsHubPage() {
                             {isStaff && (
                               <Link
                                 href={`/batches/${batch.id}/tests/${test.id}/results`}
-                                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                               >
                                 {test.type === 'OFFLINE' ? 'Enter Marks' : 'Results'}
                               </Link>
@@ -403,7 +403,7 @@ export default function TestsHubPage() {
                               test.type !== 'OFFLINE' && (
                                 <Link
                                   href={primaryUrl}
-                                  className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                  className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                                 >
                                   {primaryLabel}
                                 </Link>
@@ -413,8 +413,8 @@ export default function TestsHubPage() {
                                 href={primaryUrl}
                                 className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
                                   !submitted
-                                    ? 'bg-accent text-white border-transparent hover:bg-indigo-500'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                    ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary-hover'
+                                    : 'bg-surface text-foreground border-border hover:bg-surface-hover'
                                 }`}
                               >
                                 {primaryLabel}

@@ -54,6 +54,42 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
+  /* Sidebar Tokens */
+  --color-sidebar: var(--sidebar-bg);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+  --color-sidebar-active-bar: var(--sidebar-active-bar);
+
+  /* Semantic Status Tokens */
+  --color-status-success: var(--status-success);
+  --color-status-success-fg: var(--status-success-fg);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-success-text: var(--status-success-text);
+  --color-status-success-border: var(--status-success-border);
+
+  --color-status-warning: var(--status-warning);
+  --color-status-warning-fg: var(--status-warning-fg);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-warning-text: var(--status-warning-text);
+  --color-status-warning-border: var(--status-warning-border);
+
+  --color-status-danger: var(--status-danger);
+  --color-status-danger-fg: var(--status-danger-fg);
+  --color-status-danger-bg: var(--status-danger-bg);
+  --color-status-danger-text: var(--status-danger-text);
+  --color-status-danger-border: var(--status-danger-border);
+
+  --color-status-info: var(--status-info);
+  --color-status-info-fg: var(--status-info-fg);
+  --color-status-info-bg: var(--status-info-bg);
+  --color-status-info-text: var(--status-info-text);
+  --color-status-info-border: var(--status-info-border);
+
   /* Legacy aliases for backwards compatibility with existing pages */
   --color-text-body: var(--muted-foreground);
   --color-highlight: var(--accent);
@@ -101,6 +137,16 @@
   --accent-hover: #D97706;
   --accent-subtle: #FFFBEB;
 
+  /* Sidebar Tokens (Light mode default) */
+  --sidebar-bg: #151f23;
+  --sidebar-fg: #f4f5f6;
+  --sidebar-muted: #a4b1b7;
+  --sidebar-border: #233239;
+  --sidebar-hover: #202e34;
+  --sidebar-active-bg: #132f3c;
+  --sidebar-active-fg: #fafafa;
+  --sidebar-active-bar: #0a7aae;
+
   /* Semantic State Colors */
   --danger: #DC2626;
   --danger-foreground: #FFFFFF;
@@ -113,6 +159,31 @@
   --warning-foreground: #0F172A;
   --info: #4338CA;
   --info-foreground: #FFFFFF;
+
+  /* Semantic Status Tokens (Light mode, AA-safe) */
+  --status-success: #0d7348;
+  --status-success-fg: #ffffff;
+  --status-success-bg: #ecfdf5;
+  --status-success-text: #065f46;
+  --status-success-border: #a7f3d0;
+
+  --status-warning: #b45309;
+  --status-warning-fg: #ffffff;
+  --status-warning-bg: #fffbeb;
+  --status-warning-text: #78350f;
+  --status-warning-border: #fde68a;
+
+  --status-danger: #dc2626;
+  --status-danger-fg: #ffffff;
+  --status-danger-bg: #fef2f2;
+  --status-danger-text: #991b1b;
+  --status-danger-border: #fecaca;
+
+  --status-info: #0284c7;
+  --status-info-fg: #ffffff;
+  --status-info-bg: #f0f9ff;
+  --status-info-text: #075985;
+  --status-info-border: #bae6fd;
 
   /* Radius Tokens */
   --radius-card: 1rem;
@@ -168,6 +239,16 @@
   --accent-hover: #FCD34D;
   --accent-subtle: rgba(251, 191, 36, 0.12);
 
+  /* Sidebar Tokens (Dark mode default) */
+  --sidebar-bg: #1a2226;
+  --sidebar-fg: #f4f5f6;
+  --sidebar-muted: #a4b1b7;
+  --sidebar-border: #283439;
+  --sidebar-hover: #253035;
+  --sidebar-active-bg: #17323e;
+  --sidebar-active-fg: #fafafa;
+  --sidebar-active-bar: #0a7aae;
+
   /* Semantic State Colors */
   --danger: #F87171;
   --danger-foreground: #0B1020;
@@ -180,6 +261,31 @@
   --warning-foreground: #0B1020;
   --info: #818CF8;
   --info-foreground: #0B1020;
+
+  /* Semantic Status Tokens (Dark mode, AA-safe) */
+  --status-success: #10b981;
+  --status-success-fg: #0b1020;
+  --status-success-bg: rgba(16, 185, 129, 0.16);
+  --status-success-text: #34d399;
+  --status-success-border: rgba(16, 185, 129, 0.35);
+
+  --status-warning: #f59e0b;
+  --status-warning-fg: #0b1020;
+  --status-warning-bg: rgba(245, 158, 11, 0.16);
+  --status-warning-text: #fbbf24;
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+
+  --status-danger: #ef4444;
+  --status-danger-fg: #0b1020;
+  --status-danger-bg: rgba(239, 68, 68, 0.16);
+  --status-danger-text: #f87171;
+  --status-danger-border: rgba(239, 68, 68, 0.35);
+
+  --status-info: #38bdf8;
+  --status-info-fg: #0b1020;
+  --status-info-bg: rgba(56, 189, 248, 0.16);
+  --status-info-text: #38bdf8;
+  --status-info-border: rgba(56, 189, 248, 0.35);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);

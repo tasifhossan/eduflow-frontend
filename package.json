@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:links": "node scripts/check-links.ts",
-    "check:theme": "npx tsx scripts/check-theme.ts"
+    "check:theme": "npx tsx scripts/check-theme.ts",
+    "check:colors": "npx tsx scripts/check-colors.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",

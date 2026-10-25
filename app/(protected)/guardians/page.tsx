@@ -170,7 +170,7 @@ export default function AdminGuardiansPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-accent animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-sm font-medium text-gray-500">Loading guardian accounts...</p>
         </div>
       </div>
@@ -196,16 +196,16 @@ export default function AdminGuardiansPage() {
                 setIsLinkOpen(!isLinkOpen);
                 if (isCreateOpen) setIsCreateOpen(false);
               }}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition gap-x-2"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-surface-hover transition gap-x-2"
             >
-              <LinkIcon className="w-4 h-4 text-accent" /> Link to Student
+              <LinkIcon className="w-4 h-4 text-primary" /> Link to Student
             </button>
             <button
               onClick={() => {
                 setIsCreateOpen(!isCreateOpen);
                 if (isLinkOpen) setIsLinkOpen(false);
               }}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition gap-x-2"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition gap-x-2"
             >
               <Plus className="w-4 h-4" /> Create Guardian
             </button>
@@ -231,25 +231,25 @@ export default function AdminGuardiansPage() {
 
         {/* Create Guardian Modal/Card */}
         {isCreateOpen && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-x-2">
-                <Plus className="w-5 h-5 text-accent" /> Create Guardian Account
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-x-2">
+                <Plus className="w-5 h-5 text-primary" /> Create Guardian Account
               </h2>
-              <button onClick={() => setIsCreateOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setIsCreateOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {createError && (
-              <div className="rounded-lg bg-red-50 p-3 border border-red-200 text-sm text-red-700">
+              <div className="rounded-lg bg-red-500/10 p-3 border border-red-500/20 text-sm text-red-600 dark:text-red-400">
                 {createError}
               </div>
             )}
 
             <form onSubmit={handleCreateGuardian} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -258,12 +258,12 @@ export default function AdminGuardiansPage() {
                   placeholder="e.g. Mr. Rafiqul Islam"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -272,12 +272,12 @@ export default function AdminGuardiansPage() {
                   placeholder="e.g. rafiqul@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Phone Number (Optional)
                 </label>
                 <input
@@ -285,12 +285,12 @@ export default function AdminGuardiansPage() {
                   placeholder="e.g. 01712345678"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Password <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -299,23 +299,23 @@ export default function AdminGuardiansPage() {
                   placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
-              <div className="sm:col-span-2 flex justify-end gap-x-3 pt-2">
+              <div className="sm:col-span-2 flex justify-end gap-x-3 pt-2 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
                   disabled={creating}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition"
+                  className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover disabled:opacity-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition"
                 >
                   {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                   Create Account
@@ -327,25 +327,25 @@ export default function AdminGuardiansPage() {
 
         {/* Link Guardian to Student Form */}
         {isLinkOpen && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-x-2">
-                <LinkIcon className="w-5 h-5 text-accent" /> Link Guardian to Student
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-x-2">
+                <LinkIcon className="w-5 h-5 text-primary" /> Link Guardian to Student
               </h2>
-              <button onClick={() => setIsLinkOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setIsLinkOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {linkError && (
-              <div className="rounded-lg bg-red-50 p-3 border border-red-200 text-sm text-red-700">
+              <div className="rounded-lg bg-red-500/10 p-3 border border-red-500/20 text-sm text-red-600 dark:text-red-400">
                 {linkError}
               </div>
             )}
 
             <form onSubmit={handleLinkGuardian} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Select Guardian <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -355,7 +355,7 @@ export default function AdminGuardiansPage() {
                     setSelectedGuardianId(e.target.value);
                     setSelectedStudentId('');
                   }}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent bg-white"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-surface text-foreground"
                 >
                   <option value="">-- Choose Guardian Account --</option>
                   {guardians.map((g) => (
@@ -367,7 +367,7 @@ export default function AdminGuardiansPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1">
                   Select Student <span className="text-red-500">*</span>
                 </label>
                 {(() => {
@@ -383,7 +383,7 @@ export default function AdminGuardiansPage() {
                       required
                       value={selectedStudentId}
                       onChange={(e) => setSelectedStudentId(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent bg-white"
+                      className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-surface text-foreground"
                     >
                       <option value="">-- Choose Student --</option>
                       {availableStudents.length === 0 && selectedGuardianId ? (
@@ -400,19 +400,19 @@ export default function AdminGuardiansPage() {
                 })()}
               </div>
 
-              <div className="sm:col-span-2 flex justify-end gap-x-3 pt-2">
+              <div className="sm:col-span-2 flex justify-end gap-x-3 pt-2 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsLinkOpen(false)}
                   disabled={linking}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition"
+                  className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover disabled:opacity-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={linking}
-                  className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition"
                 >
                   {linking ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                   Create Link
@@ -423,37 +423,37 @@ export default function AdminGuardiansPage() {
         )}
 
         {/* Guardians List */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-x-2">
-              <UserCheck className="w-4 h-4 text-accent" /> Registered Guardians ({guardians.length})
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-border bg-surface-hover/30 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-x-2">
+              <UserCheck className="w-4 h-4 text-primary" /> Registered Guardians ({guardians.length})
             </h2>
           </div>
 
           {guardians.length === 0 ? (
             <div className="p-12 text-center space-y-3">
-              <Shield className="w-10 h-10 text-gray-400 mx-auto" />
-              <h3 className="text-base font-semibold text-gray-900">No guardian accounts found</h3>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              <Shield className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+              <h3 className="text-base font-semibold text-foreground">No guardian accounts found</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 Click "Create Guardian" above to register a parent or guardian account.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {guardians.map((g) => (
-                <div key={g.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div key={g.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-hover/20 transition-colors">
                   <div className="space-y-2">
                     <div>
-                      <h3 className="font-bold text-gray-900 text-base">{g.name}</h3>
-                      <div className="flex items-center gap-x-4 text-xs text-gray-500 flex-wrap mt-0.5">
+                      <h3 className="font-bold text-foreground text-base">{g.name}</h3>
+                      <div className="flex items-center gap-x-4 text-xs text-muted-foreground flex-wrap mt-0.5">
                         <span className="flex items-center gap-x-1">
-                          <Mail className="w-3.5 h-3.5 text-gray-400" /> {g.email}
+                          <Mail className="w-3.5 h-3.5 text-muted-foreground" /> {g.email}
                         </span>
                         {g.phone && (
                           <>
                             <span>•</span>
                             <span className="flex items-center gap-x-1">
-                              <Phone className="w-3.5 h-3.5 text-gray-400" /> {g.phone}
+                              <Phone className="w-3.5 h-3.5 text-muted-foreground" /> {g.phone}
                             </span>
                           </>
                         )}
@@ -462,23 +462,23 @@ export default function AdminGuardiansPage() {
 
                     {/* Linked Students List */}
                     <div className="flex items-center gap-2 flex-wrap text-xs pt-1">
-                      <span className="text-gray-400 font-medium">Linked Students:</span>
+                      <span className="text-muted-foreground font-medium">Linked Students:</span>
                       {g.guardianLinks && g.guardianLinks.length > 0 ? (
                         g.guardianLinks.map((link) => (
                           <span
                             key={link.student.id}
-                            className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-accent ring-1 ring-inset ring-accent/10"
+                            className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/20"
                           >
                             {link.student.name} ({link.student.email})
                           </span>
                         ))
                       ) : (
-                        <span className="text-gray-400 italic">No linked students yet</span>
+                        <span className="text-muted-foreground italic">No linked students yet</span>
                       )}
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 ring-1 ring-inset ring-purple-700/10 shrink-0 self-start sm:self-center">
+                  <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-600/20 shrink-0 self-start sm:self-center">
                     GUARDIAN ACCOUNT
                   </span>
                 </div>

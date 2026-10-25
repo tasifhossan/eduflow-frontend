@@ -165,7 +165,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading class routine...</span>
       </div>
     );
@@ -178,7 +178,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error Loading Routine</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
         </div>
-        <Link href={`/batches/${batchId}`} className="text-accent hover:underline text-sm font-medium">
+        <Link href={`/batches/${batchId}`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to batch details
         </Link>
       </div>
@@ -198,38 +198,38 @@ export default function BatchRoutinePage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+        <nav className="flex text-sm text-muted-foreground gap-x-2">
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-accent font-medium">{batch?.name}</Link>
+          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch?.name}</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">Routine</span>
+          <span className="text-foreground font-semibold">Routine</span>
         </nav>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Class Routine</h1>
-            <p className="mt-2 text-sm text-gray-500">Weekly schedule slots for {batch?.name}</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Class Routine</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Weekly schedule slots for {batch?.name}</p>
           </div>
           <Link
             href={`/batches/${batchId}`}
-            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
           >
             Back to Batch Details
           </Link>
         </div>
 
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-            <p className="text-sm text-red-600">
-              <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+          <div className="rounded-lg bg-red-500/10 p-4 border border-red-500/20">
+            <p className="text-sm text-red-600 dark:text-red-400">
+              <span className="font-semibold text-red-700 dark:text-red-300">Error:</span> {errorMsg}
             </p>
           </div>
         )}
         {successMsg && (
-          <div className="rounded-lg bg-green-50 p-4 border border-green-200">
-            <p className="text-sm text-green-700 font-medium">
+          <div className="rounded-lg bg-green-500/10 p-4 border border-green-500/20">
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
               ✓ {successMsg}
             </p>
           </div>
@@ -238,8 +238,8 @@ export default function BatchRoutinePage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Group 1: Routine List / Grid (Col-Span-2) */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">Weekly Schedule</h2>
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-6">
+              <h2 className="text-lg font-bold text-foreground border-b border-border pb-3">Weekly Schedule</h2>
 
               <div className="space-y-4">
                 {DAYS_OF_WEEK.map((day) => {
@@ -248,23 +248,23 @@ export default function BatchRoutinePage({ params }: PageProps) {
                   return (
                     <div
                       key={day}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-gray-200 p-4 bg-gray-50/30 gap-y-3"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-border p-4 bg-surface-hover/30 gap-y-3"
                     >
                       <div className="w-32 flex-shrink-0">
-                        <span className="inline-flex items-center rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-inset ring-indigo-700/10 uppercase tracking-wider">
+                        <span className="inline-flex items-center rounded-md bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary ring-1 ring-inset ring-primary/20 uppercase tracking-wider">
                           {day.charAt(0) + day.slice(1).toLowerCase()}
                         </span>
                       </div>
 
                       <div className="flex-1 space-y-2">
                         {daySlots.length === 0 ? (
-                          <span className="text-xs text-gray-400 italic">No classes scheduled</span>
+                          <span className="text-xs text-muted-foreground italic">No classes scheduled</span>
                         ) : (
                           <div className="flex flex-wrap gap-2">
                             {daySlots.map((slot) => (
                               <div
                                 key={slot.id}
-                                className="inline-flex items-center gap-x-2 rounded-lg bg-white border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-sm"
+                                className="inline-flex items-center gap-x-2 rounded-lg bg-surface border border-border px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm"
                               >
                                 <span>
                                   {formatTime12h(slot.startTime)} - {formatTime12h(slot.endTime)}
@@ -294,19 +294,19 @@ export default function BatchRoutinePage({ params }: PageProps) {
           {/* Group 2: Add Slot Form (Col-Span-1) - Scoped to ADMIN */}
           {isAdmin ? (
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-                <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Add Schedule Slot</h2>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+                <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Add Schedule Slot</h2>
 
                 <form onSubmit={handleAddSlot} className="space-y-4">
                   <div>
-                    <label htmlFor="daySelect" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label htmlFor="daySelect" className="block text-xs font-semibold text-muted-foreground mb-1.5">
                       Select Day of Week
                     </label>
                     <select
                       id="daySelect"
                       value={dayOfWeek}
                       onChange={(e) => setDayOfWeek(e.target.value as typeof DAYS_OF_WEEK[number])}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                       required
                     >
                       {DAYS_OF_WEEK.map((day) => (
@@ -318,7 +318,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
                   </div>
 
                   <div>
-                    <label htmlFor="startInput" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label htmlFor="startInput" className="block text-xs font-semibold text-muted-foreground mb-1.5">
                       Start Time
                     </label>
                     <input
@@ -326,13 +326,13 @@ export default function BatchRoutinePage({ params }: PageProps) {
                       id="startInput"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
                       required
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="endInput" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                    <label htmlFor="endInput" className="block text-xs font-semibold text-muted-foreground mb-1.5">
                       End Time
                     </label>
                     <input
@@ -340,7 +340,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
                       id="endInput"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent text-sm font-medium"
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
                       required
                     />
                   </div>
@@ -348,7 +348,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                    className="w-full inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
                   >
                     {isSubmitting ? 'Adding...' : 'Add Slot'}
                   </button>
@@ -357,8 +357,8 @@ export default function BatchRoutinePage({ params }: PageProps) {
             </div>
           ) : (
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-center text-gray-500 text-xs">
-                <svg className="mx-auto h-8 w-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 text-center text-muted-foreground text-xs">
+                <svg className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 Class slot management actions are restricted to Administrators only. Teachers can read schedules.

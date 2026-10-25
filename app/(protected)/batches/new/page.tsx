@@ -121,7 +121,7 @@ export default function NewBatchPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Breadcrumb */}
         <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">New Batch</span>
         </nav>
@@ -142,14 +142,14 @@ export default function NewBatchPage() {
 
         {loadingLists ? (
           <div className="flex items-center justify-center p-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <span className="ml-3 text-sm text-gray-500">Loading form options...</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-8 space-y-6">
             {/* Batch Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">
                 Batch Name
               </label>
               <input
@@ -158,7 +158,7 @@ export default function NewBatchPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., HSC 2026 Physics Special"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
                 required
               />
             </div>
@@ -166,14 +166,14 @@ export default function NewBatchPage() {
             {/* Type & Class Level */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
-                <label htmlFor="type" className="block text-sm font-semibold text-gray-900 mb-2">
+                <label htmlFor="type" className="block text-sm font-semibold text-foreground mb-2">
                   Batch Type
                 </label>
                 <select
                   id="type"
                   value={type}
                   onChange={(e) => setType(e.target.value as 'ACADEMIC' | 'ADMISSION')}
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                  className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
                 >
                   <option value="ACADEMIC">Academic</option>
                   <option value="ADMISSION">Admission</option>
@@ -181,7 +181,7 @@ export default function NewBatchPage() {
               </div>
 
               <div>
-                <label htmlFor="classLevel" className="block text-sm font-semibold text-gray-900 mb-2">
+                <label htmlFor="classLevel" className="block text-sm font-semibold text-foreground mb-2">
                   Class Level (Optional)
                 </label>
                 <input
@@ -190,21 +190,21 @@ export default function NewBatchPage() {
                   value={classLevel}
                   onChange={(e) => setClassLevel(e.target.value)}
                   placeholder="e.g., Class 11, HSC"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                  className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
                 />
               </div>
             </div>
 
             {/* Subject */}
             <div>
-              <label htmlFor="subjectId" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="subjectId" className="block text-sm font-semibold text-foreground mb-2">
                 Subject
               </label>
               <select
                 id="subjectId"
                 value={subjectId}
                 onChange={(e) => setSubjectId(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
                 required
               >
                 <option value="">Select a subject</option>
@@ -218,14 +218,14 @@ export default function NewBatchPage() {
 
             {/* Teacher */}
             <div>
-              <label htmlFor="teacherId" className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor="teacherId" className="block text-sm font-semibold text-foreground mb-2">
                 Assigned Teacher (Optional)
               </label>
               <select
                 id="teacherId"
                 value={teacherId}
                 onChange={(e) => setTeacherId(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm"
+                className="block w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
               >
                 <option value="">Unassigned</option>
                 {teachers.map((teach) => (
@@ -237,17 +237,17 @@ export default function NewBatchPage() {
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-x-4 border-t border-gray-100 pt-6">
+            <div className="flex justify-end gap-x-4 border-t border-border pt-6">
               <Link
                 href="/batches"
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
               >
                 {isSubmitting ? 'Creating...' : 'Create Batch'}
               </button>

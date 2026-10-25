@@ -108,7 +108,7 @@ export default function BatchTestsPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading tests...</span>
       </div>
     );
@@ -121,7 +121,7 @@ export default function BatchTestsPage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error Loading Tests</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
         </div>
-        <Link href={`/batches/${batchId}`} className="text-accent hover:underline text-sm font-medium">
+        <Link href={`/batches/${batchId}`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to batch details
         </Link>
       </div>
@@ -134,19 +134,19 @@ export default function BatchTestsPage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+        <nav className="flex text-sm text-muted-foreground gap-x-2">
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-accent font-medium">{batch.name}</Link>
+          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch.name}</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">Tests</span>
+          <span className="text-foreground font-semibold">Tests</span>
         </nav>
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Exams & Tests</h1>
-            <p className="mt-2 text-sm text-gray-500">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Exams & Tests</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
               {isStaff
                 ? `Manage exams, questions, and grading metrics for ${batch.name}`
                 : `View and take exams scheduled for ${batch.name}`}
@@ -155,7 +155,7 @@ export default function BatchTestsPage({ params }: PageProps) {
           {isStaff && (
             <Link
               href={`/batches/${batchId}/tests/new`}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition self-start sm:self-auto"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition self-start sm:self-auto"
             >
               Create Test
             </Link>
@@ -163,11 +163,11 @@ export default function BatchTestsPage({ params }: PageProps) {
         </div>
 
         {/* Tests Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
           {tests.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
+            <div className="p-12 text-center text-muted-foreground">
               <svg
-                className="mx-auto h-12 w-12 text-gray-300"
+                className="mx-auto h-12 w-12 text-muted-foreground/40"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -179,13 +179,13 @@ export default function BatchTestsPage({ params }: PageProps) {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <h3 className="mt-4 text-sm font-semibold text-gray-900">No tests scheduled</h3>
-              <p className="text-xs text-gray-400 mt-1">There are no exams assigned for this batch yet.</p>
+              <h3 className="mt-4 text-sm font-semibold text-foreground">No tests scheduled</h3>
+              <p className="text-xs text-muted-foreground mt-1">There are no exams assigned for this batch yet.</p>
               {isStaff && (
                 <div className="mt-6">
                   <Link
                     href={`/batches/${batchId}/tests/new`}
-                    className="inline-flex items-center rounded-md bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover"
                   >
                     Create Test
                   </Link>
@@ -194,18 +194,18 @@ export default function BatchTestsPage({ params }: PageProps) {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-surface-hover/50">
                   <tr>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Test Title</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Test Date</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Total Marks</th>
-                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Questions</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Test Title</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Test Date</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Marks</th>
+                    <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Questions</th>
                     <th scope="col" className="relative px-6 py-3.5"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-surface divide-y divide-border">
                   {tests.map((test) => {
                     let targetUrl = `/batches/${batchId}/tests/${test.id}/manage`;
                     let actionText = 'Manage Questions';
@@ -219,45 +219,45 @@ export default function BatchTestsPage({ params }: PageProps) {
                     }
 
                     return (
-                      <tr key={test.id} className="hover:bg-gray-50/70 transition-colors">
+                      <tr key={test.id} className="hover:bg-surface-hover/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <Link href={targetUrl} className="text-sm font-semibold text-accent hover:underline">
+                          <Link href={targetUrl} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
                             {test.title}
                           </Link>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                             test.type === 'MCQ'
-                              ? 'bg-blue-50 text-blue-700 ring-blue-700/10'
+                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-blue-500/20'
                               : test.type === 'WRITTEN'
-                              ? 'bg-purple-50 text-purple-700 ring-purple-700/10'
-                              : 'bg-amber-50 text-amber-700 ring-amber-700/10'
+                              ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-purple-500/20'
+                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/20'
                           }`}>
                             {test.type}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {new Date(test.testDate).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
                           })}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground font-semibold">
                           {test.totalMarks} Marks
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {questionCounts[test.id] !== undefined ? (
                             `${questionCounts[test.id]} items`
                           ) : (
-                            <span className="text-gray-300">Loading...</span>
+                            <span className="text-muted-foreground/60">Loading...</span>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           {isStaff && (
                             <Link
                               href={`/batches/${batchId}/tests/${test.id}/results`}
-                              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition mr-2"
+                              className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition mr-2"
                             >
                               {test.type === 'OFFLINE' ? 'Enter Marks' : 'View Results'}
                             </Link>
@@ -266,7 +266,7 @@ export default function BatchTestsPage({ params }: PageProps) {
                             test.type !== 'OFFLINE' && (
                               <Link
                                 href={targetUrl}
-                                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                               >
                                 {actionText}
                               </Link>
@@ -276,8 +276,8 @@ export default function BatchTestsPage({ params }: PageProps) {
                               href={targetUrl}
                               className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
                                 myResults[test.id] === false
-                                  ? 'bg-accent text-white border-transparent hover:bg-indigo-500'
-                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                  ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary-hover'
+                                  : 'bg-surface text-foreground border-border hover:bg-surface-hover'
                               }`}
                             >
                               {actionText}

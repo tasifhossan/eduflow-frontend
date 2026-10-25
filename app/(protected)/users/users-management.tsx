@@ -835,7 +835,7 @@ export default function UsersManagementClient({
               <div>
                 <span className="text-[11px] text-muted-foreground uppercase font-semibold">Temporary Password</span>
                 <div className="flex items-center justify-between gap-2 bg-surface p-2.5 rounded border border-border mt-1">
-                  <span className="font-mono text-sm font-bold tracking-wider text-danger selection:bg-accent">
+                  <span className="font-mono text-sm font-bold tracking-wider text-danger selection:bg-primary/20">
                     {createdCreds.temporaryPassword}
                   </span>
                   <Button

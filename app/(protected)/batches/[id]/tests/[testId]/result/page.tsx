@@ -103,7 +103,7 @@ export default function TestResultPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading test results...</span>
       </div>
     );
@@ -116,7 +116,7 @@ export default function TestResultPage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error Loading Results</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg || 'Results not found or access denied.'}</p>
         </div>
-        <Link href={`/batches/${batchId}/tests`} className="text-accent hover:underline text-sm font-medium">
+        <Link href={`/batches/${batchId}/tests`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to tests list
         </Link>
       </div>
@@ -130,22 +130,22 @@ export default function TestResultPage({ params }: PageProps) {
       <div className="mx-auto max-w-3xl space-y-6">
         {/* Breadcrumb */}
         <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}/tests`} className="hover:text-accent font-medium">Tests</Link>
+          <Link href={`/batches/${batchId}/tests`} className="hover:text-primary font-medium">Tests</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">{result.test.title} Result</span>
         </nav>
 
         {/* Title Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Exam Performance</h1>
-            <p className="mt-2 text-sm text-gray-500">Graded report card for {result.test.title}</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Exam Performance</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Graded report card for {result.test.title}</p>
           </div>
           <Link
             href={`/batches/${batchId}/tests`}
-            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
           >
             Back to Tests
           </Link>
@@ -153,28 +153,28 @@ export default function TestResultPage({ params }: PageProps) {
 
         {/* Score Summary Metrics */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Score Obtained</span>
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Score Obtained</span>
             <div className="mt-2 flex items-baseline gap-x-2">
-              <span className="text-4xl font-extrabold text-accent">{result.totalMarksObtained}</span>
-              <span className="text-sm text-gray-400 font-medium">/ {result.test.totalMarks} Marks</span>
+              <span className="text-4xl font-extrabold text-primary">{result.totalMarksObtained}</span>
+              <span className="text-sm text-muted-foreground font-medium">/ {result.test.totalMarks} Marks</span>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Class Rank</span>
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Class Rank</span>
             <div className="mt-2 flex items-baseline gap-x-2">
-              <span className="text-4xl font-extrabold text-gray-900">
-                {result.rank ? `#${result.rank}` : <span className="text-gray-400 italic text-xl">Pending</span>}
+              <span className="text-4xl font-extrabold text-foreground">
+                {result.rank ? `#${result.rank}` : <span className="text-muted-foreground italic text-xl">Pending</span>}
               </span>
-              {result.rank && <span className="text-sm text-gray-400 font-medium">in batch</span>}
+              {result.rank && <span className="text-sm text-muted-foreground font-medium">in batch</span>}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Submitted At</span>
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Submitted At</span>
             <div className="mt-2 flex items-baseline gap-x-2">
-              <span className="text-xs font-semibold text-gray-700">
+              <span className="text-xs font-semibold text-foreground">
                 {new Date(result.submittedAt).toLocaleDateString(undefined, {
                   year: 'numeric',
                   month: 'short',
@@ -189,10 +189,10 @@ export default function TestResultPage({ params }: PageProps) {
 
         {/* Question-by-Question Graded Review */}
         <div className="space-y-6">
-          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">Questions Review</h2>
+          <h2 className="text-lg font-bold text-foreground border-b border-border pb-3">Questions Review</h2>
 
           {answers.length === 0 ? (
-            <p className="text-sm text-gray-400 italic text-center py-4 bg-white border border-gray-200 rounded-2xl">
+            <p className="text-sm text-muted-foreground italic text-center py-4 bg-surface border border-border rounded-[var(--radius-card)]">
               No questions found on this exam response.
             </p>
           ) : (
@@ -205,11 +205,11 @@ export default function TestResultPage({ params }: PageProps) {
                 const isGraded = ans.marksAwarded !== null && ans.marksAwarded !== undefined;
 
                 return (
-                  <div key={ans.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                  <div key={ans.id} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
                     {/* Header */}
                     <div className="flex justify-between items-start gap-x-4">
-                      <span className="inline-flex items-center gap-x-2 text-sm font-semibold text-gray-900">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
+                      <span className="inline-flex items-center gap-x-2 text-sm font-semibold text-foreground">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                           {idx + 1}
                         </span>
                         Question {idx + 1} ({q.type})
@@ -217,11 +217,11 @@ export default function TestResultPage({ params }: PageProps) {
                       
                       <span className="text-xs font-bold">
                         {isGraded ? (
-                          <span className={ans.marksAwarded! >= q.marks ? 'text-green-600' : ans.marksAwarded! > 0 ? 'text-amber-500' : 'text-red-500'}>
+                          <span className={ans.marksAwarded! >= q.marks ? 'text-green-600 dark:text-green-400' : ans.marksAwarded! > 0 ? 'text-amber-500' : 'text-red-500 dark:text-red-400'}>
                             {ans.marksAwarded} / {q.marks} Marks
                           </span>
                         ) : (
-                          <span className="text-amber-500 italic bg-amber-50 rounded-md px-2 py-0.5 border border-amber-200">
+                          <span className="text-amber-500 italic bg-amber-500/10 rounded-md px-2 py-0.5 border border-amber-500/20">
                             Pending grading
                           </span>
                         )}
@@ -229,7 +229,7 @@ export default function TestResultPage({ params }: PageProps) {
                     </div>
 
                     {/* Question Text */}
-                    <p className="text-sm font-medium text-gray-800 whitespace-pre-wrap pl-8">
+                    <p className="text-sm font-medium text-foreground/90 whitespace-pre-wrap pl-8">
                       {q.text}
                     </p>
 
@@ -241,10 +241,10 @@ export default function TestResultPage({ params }: PageProps) {
                           {q.options.map((o) => {
                             const isSelectedOption = ans.selectedOptionId === o.id;
                             const optionStyle = o.isCorrect
-                              ? 'border-green-200 bg-green-50 text-green-700 font-bold'
+                              ? 'border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300 font-bold'
                               : isSelectedOption
-                              ? 'border-red-200 bg-red-50 text-red-700 font-bold'
-                              : 'border-gray-200 bg-white text-gray-600';
+                              ? 'border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-300 font-bold'
+                              : 'border-border bg-surface text-foreground';
 
                             return (
                               <div
@@ -253,22 +253,22 @@ export default function TestResultPage({ params }: PageProps) {
                               >
                                 <span
                                   className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                                    o.isCorrect ? 'bg-green-600' : isSelectedOption ? 'bg-red-600' : 'bg-gray-300'
+                                    o.isCorrect ? 'bg-green-600 dark:bg-green-400' : isSelectedOption ? 'bg-red-600 dark:bg-red-400' : 'bg-muted-foreground/40'
                                   }`}
                                 />
                                 <span className="flex-1">{o.text}</span>
                                 {o.isCorrect && (
-                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-green-700">
+                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-green-700 dark:text-green-400">
                                     Correct Answer
                                   </span>
                                 )}
                                 {isSelectedOption && !o.isCorrect && (
-                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-red-700">
+                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-red-700 dark:text-red-400">
                                     Your Choice (Wrong)
                                   </span>
                                 )}
                                 {isSelectedOption && o.isCorrect && (
-                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-green-700">
+                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-green-700 dark:text-green-400">
                                     Your Choice (Correct)
                                   </span>
                                 )}
@@ -278,7 +278,7 @@ export default function TestResultPage({ params }: PageProps) {
                         </div>
                         
                         {!ans.selectedOptionId && (
-                          <p className="text-xs text-gray-400 italic">
+                          <p className="text-xs text-muted-foreground italic">
                             ⚠️ Question was left unanswered (0 marks).
                           </p>
                         )}
@@ -286,12 +286,12 @@ export default function TestResultPage({ params }: PageProps) {
                     ) : (
                       /* Written Details */
                       <div className="pl-8 space-y-2">
-                        <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4">
-                          <span className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        <div className="rounded-lg border border-border bg-surface-hover/50 p-4">
+                          <span className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                             Your Written Response
                           </span>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {ans.writtenAnswerText || <span className="text-gray-400 italic">No answer submitted</span>}
+                          <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                            {ans.writtenAnswerText || <span className="text-muted-foreground italic">No answer submitted</span>}
                           </p>
                         </div>
                       </div>

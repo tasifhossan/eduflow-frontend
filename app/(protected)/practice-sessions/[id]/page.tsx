@@ -210,12 +210,12 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
               </Link>
             )}
             <span>/</span>
-            <span className="text-gray-900 font-semibold">Practice Session</span>
+            <span className="text-foreground font-semibold">Practice Session</span>
           </nav>
           {user && (
             <Link
               href={`/students/${user.id}`}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
             >
               Back to Profile
             </Link>
@@ -297,18 +297,18 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                 return (
                   <div
                     key={q.id}
-                    className={`bg-white rounded-2xl border shadow-sm p-6 space-y-4 transition ${
+                    className={`rounded-[var(--radius-card)] border bg-surface shadow-card p-6 space-y-4 transition ${
                       review
                         ? review.correct
-                          ? 'border-emerald-200'
-                          : 'border-rose-200'
-                        : 'border-gray-200'
+                          ? 'border-emerald-500/30'
+                          : 'border-rose-500/30'
+                        : 'border-border'
                     }`}
                   >
                     {/* Question Header */}
                     <div className="flex justify-between items-start gap-x-4">
-                      <span className="inline-flex items-center gap-x-2 text-sm font-bold text-gray-900">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
+                      <span className="inline-flex items-center gap-x-2 text-sm font-bold text-foreground">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                           {idx + 1}
                         </span>
                         Question {idx + 1}
@@ -319,19 +319,19 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                         <span
                           className={`inline-flex items-center gap-x-1 rounded-md px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
                             review.correct
-                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-                              : 'bg-rose-50 text-rose-700 ring-rose-600/20'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-emerald-500/20'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 ring-rose-500/20'
                           }`}
                         >
                           {review.correct ? '✓ Correct' : '✗ Incorrect'}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-400 font-medium">{q.marks} Mark(s)</span>
+                        <span className="text-xs text-muted-foreground font-medium">{q.marks} Mark(s)</span>
                       )}
                     </div>
 
                     {/* Question Text */}
-                    <p className="text-sm font-semibold text-gray-800 pl-8 whitespace-pre-wrap">
+                    <p className="text-sm font-semibold text-foreground/90 pl-8 whitespace-pre-wrap">
                       {q.text}
                     </p>
 
@@ -342,18 +342,18 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                         const isCorrectOption = review && review.correctOptionId === o.id;
                         const isUserWrongSelection = review && isSelected && !review.correct;
 
-                        let optionStyle = 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50';
+                        let optionStyle = 'border-border bg-surface text-foreground hover:bg-surface-hover/50';
 
                         if (review) {
                           if (isCorrectOption) {
-                            optionStyle = 'border-emerald-500 bg-emerald-50/90 text-emerald-900 font-semibold ring-1 ring-emerald-500';
+                            optionStyle = 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold ring-1 ring-emerald-500/30';
                           } else if (isUserWrongSelection) {
-                            optionStyle = 'border-rose-500 bg-rose-50/90 text-rose-900 font-semibold ring-1 ring-rose-500';
+                            optionStyle = 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold ring-1 ring-rose-500/30';
                           } else {
-                            optionStyle = 'border-gray-100 bg-gray-50 text-gray-400 opacity-70';
+                            optionStyle = 'border-border/60 bg-surface text-muted-foreground/50 opacity-60';
                           }
                         } else if (isSelected) {
-                          optionStyle = 'border-indigo-600 bg-indigo-50/60 text-indigo-900 font-semibold ring-1 ring-indigo-600';
+                          optionStyle = 'border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/30';
                         }
 
                         return (
@@ -371,7 +371,7 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                                 checked={Boolean(isSelected)}
                                 onChange={() => handleOptionSelect(q.id, o.id)}
                                 disabled={Boolean(submissionResult)}
-                                className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 disabled:opacity-50"
+                                className="h-4 w-4 text-primary border-border bg-surface focus:ring-primary disabled:opacity-50"
                               />
                               <span>{o.text}</span>
                             </div>
@@ -380,10 +380,10 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                             {review && (
                               <div>
                                 {isCorrectOption && (
-                                  <span className="text-emerald-600 font-bold text-xs">✓ Correct Answer</span>
+                                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">✓ Correct Answer</span>
                                 )}
                                 {isUserWrongSelection && (
-                                  <span className="text-rose-600 font-bold text-xs">Your Choice</span>
+                                  <span className="text-rose-600 dark:text-rose-400 font-bold text-xs">Your Choice</span>
                                 )}
                               </div>
                             )}
@@ -398,19 +398,19 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
 
             {/* Bottom Actions Bar */}
             {!submissionResult ? (
-              <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-                <span className="text-xs text-gray-500 font-medium">
+              <div className="flex items-center justify-between border-t border-border pt-6">
+                <span className="text-xs text-muted-foreground font-medium">
                   Select your answers above and click submit when ready.
                 </span>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition cursor-pointer disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition cursor-pointer disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
                       <svg
-                        className="mr-2 h-4 w-4 animate-spin text-white"
+                        className="mr-2 h-4 w-4 animate-spin text-primary-foreground"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -426,11 +426,11 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-end border-t border-gray-200 pt-6 gap-x-4">
+              <div className="flex items-center justify-end border-t border-border pt-6 gap-x-4">
                 {user && (
                   <Link
                     href={`/students/${user.id}`}
-                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+                    className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
                   >
                     Return to Profile
                   </Link>

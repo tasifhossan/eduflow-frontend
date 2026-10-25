@@ -237,7 +237,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading test results...</span>
       </div>
     );
@@ -250,7 +250,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-red-800">Error Loading Results</h3>
           <p className="text-sm text-red-700 mt-1">{errorMsg || 'Parameters not found or access denied.'}</p>
         </div>
-        <Link href={`/batches/${batchId}/tests`} className="text-accent hover:underline text-sm font-medium">
+        <Link href={`/batches/${batchId}/tests`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to tests list
         </Link>
       </div>
@@ -285,11 +285,11 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
         <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-accent font-medium">Batches</Link>
+          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-accent font-medium">{batch.name}</Link>
+          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch.name}</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}/tests`} className="hover:text-accent font-medium">Tests</Link>
+          <Link href={`/batches/${batchId}/tests`} className="hover:text-primary font-medium">Tests</Link>
           <span>/</span>
           <span className="text-gray-900 font-semibold">{test.title} Results</span>
         </nav>
@@ -297,21 +297,21 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Exam Results</h1>
-            <p className="mt-2 text-sm text-gray-500">Grading center and cohort performance leaderboard for {test.title}</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Exam Results</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Grading center and cohort performance leaderboard for {test.title}</p>
           </div>
           <div className="flex gap-x-3">
             {test.type !== 'OFFLINE' && (
               <Link
                 href={`/batches/${batchId}/tests/${testId}/manage`}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
               >
                 Configure Questions
               </Link>
             )}
             <Link
               href={`/batches/${batchId}/tests`}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
             >
               Back to Tests
             </Link>
@@ -331,7 +331,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
             onClick={() => setActiveTab('leaderboard')}
             className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all ${
               activeTab === 'leaderboard'
-                ? 'border-accent text-accent'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -342,7 +342,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
               onClick={() => setActiveTab('grading')}
               className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all flex items-center gap-x-2 ${
                 activeTab === 'grading'
-                  ? 'border-accent text-accent'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-gray-500 hover:text-gray-900'
               }`}
             >
@@ -358,7 +358,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
             onClick={() => setActiveTab('manual')}
             className={`py-4 px-6 text-sm font-semibold border-b-2 transition-all ${
               activeTab === 'manual'
-                ? 'border-accent text-accent'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -368,71 +368,71 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
 
         {/* Tab 1: Leaderboard */}
         {activeTab === 'leaderboard' && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
             {results.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 italic text-sm">
+              <div className="p-12 text-center text-muted-foreground italic text-sm">
                 No submissions recorded for this exam yet.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-surface-hover/50">
                     <tr>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Rank</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student Info</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Marks Obtained</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Leaderboard Percentile</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Submission Date</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rank</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student Info</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Marks Obtained</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Leaderboard Percentile</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submission Date</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-surface divide-y divide-border">
                     {results.map((res) => {
                       const isTop3 = res.rank && res.rank <= 3;
                       const borderAccent =
                         res.rank === 1
-                          ? 'border-l-4 border-l-yellow-400 bg-yellow-50/10'
+                          ? 'border-l-4 border-l-amber-500 bg-amber-500/5'
                           : res.rank === 2
-                          ? 'border-l-4 border-l-slate-300 bg-slate-50/10'
+                          ? 'border-l-4 border-l-slate-400 bg-slate-400/5'
                           : res.rank === 3
-                          ? 'border-l-4 border-l-amber-600 bg-amber-50/10'
+                          ? 'border-l-4 border-l-amber-700 bg-amber-700/5'
                           : '';
 
                       return (
-                        <tr key={res.id} className={`hover:bg-gray-50/70 transition-colors ${borderAccent}`}>
+                        <tr key={res.id} className={`hover:bg-surface-hover/50 transition-colors ${borderAccent}`}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {isTop3 ? (
                               <span className={`inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold leading-none ring-1 ring-inset ${
                                 res.rank === 1
-                                  ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
+                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/20'
                                   : res.rank === 2
-                                  ? 'bg-slate-50 text-slate-800 ring-slate-600/20'
-                                  : 'bg-amber-50 text-amber-800 ring-amber-600/20'
+                                  ? 'bg-slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/20'
+                                  : 'bg-amber-700/10 text-amber-700 dark:text-amber-300 ring-amber-700/20'
                               }`}>
                                 👑 Rank {res.rank}
                               </span>
                             ) : (
-                              <span className="text-sm font-semibold text-gray-500 pl-2">
+                              <span className="text-sm font-semibold text-muted-foreground pl-2">
                                 #{res.rank || '-'}
                               </span>
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-semibold text-gray-900">{res.student.name}</div>
-                            <div className="text-xs text-gray-500">{res.student.email}</div>
+                            <div className="text-sm font-semibold text-foreground">{res.student.name}</div>
+                            <div className="text-xs text-muted-foreground">{res.student.email}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                            {res.totalMarksObtained} <span className="text-xs font-medium text-gray-400">/ {test.totalMarks} Marks</span>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-foreground">
+                            {res.totalMarksObtained} <span className="text-xs font-medium text-muted-foreground">/ {test.totalMarks} Marks</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-x-2">
-                              <span className="text-xs font-semibold text-gray-700">
+                              <span className="text-xs font-semibold text-foreground">
                                 {Math.round((res.totalMarksObtained / test.totalMarks) * 100)}%
                               </span>
-                              <div className="w-24 bg-gray-100 rounded-full h-1.5">
+                              <div className="w-24 bg-surface-hover rounded-full h-1.5">
                                 <div
                                   className={`h-1.5 rounded-full ${
                                     res.totalMarksObtained >= test.totalMarks * 0.8
-                                      ? 'bg-green-600'
+                                      ? 'bg-green-600 dark:bg-green-400'
                                       : res.totalMarksObtained >= test.totalMarks * 0.5
                                       ? 'bg-amber-500'
                                       : 'bg-red-500'
@@ -442,7 +442,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
                             {new Date(res.submittedAt).toLocaleDateString(undefined, {
                               year: 'numeric',
                               month: 'short',
@@ -465,8 +465,8 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
         {activeTab === 'grading' && isWrittenExam && (
           <div className="space-y-6">
             {/* Written capture notice database check */}
-            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex gap-x-3 text-indigo-800 text-xs">
-              <svg className="h-5 w-5 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 flex gap-x-3 text-indigo-700 dark:text-indigo-300 text-xs">
+              <svg className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <div>
@@ -475,7 +475,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
             </div>
 
             {ungradedSubmissions.length === 0 ? (
-              <div className="p-12 text-center text-gray-500 bg-white rounded-2xl border border-gray-200 shadow-sm italic text-sm">
+              <div className="p-12 text-center text-muted-foreground rounded-[var(--radius-card)] border border-border bg-surface shadow-card italic text-sm">
                 🎉 All written submissions have been fully graded!
               </div>
             ) : (
@@ -483,39 +483,39 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
                 {ungradedSubmissions.map(({ studentName, studentEmail, answer }) => (
                   <div
                     key={answer.id}
-                    className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4"
+                    className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4"
                   >
                     {/* Student details header */}
-                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                    <div className="flex justify-between items-center border-b border-border pb-3">
                       <div>
-                        <span className="block text-sm font-bold text-gray-900">{studentName}</span>
-                        <span className="block text-xs text-gray-500">{studentEmail}</span>
+                        <span className="block text-sm font-bold text-foreground">{studentName}</span>
+                        <span className="block text-xs text-muted-foreground">{studentEmail}</span>
                       </div>
-                      <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-700/10">
+                      <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                         Max: {answer.question.marks} Marks
                       </span>
                     </div>
 
                     {/* Question description */}
                     <div className="space-y-1">
-                      <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Question Prompt</span>
-                      <p className="text-sm font-medium text-gray-800">{answer.question.text}</p>
+                      <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Question Prompt</span>
+                      <p className="text-sm font-medium text-foreground">{answer.question.text}</p>
                     </div>
 
                     {/* Student response */}
-                    <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4">
-                      <span className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    <div className="rounded-lg border border-border bg-surface-hover/50 p-4">
+                      <span className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                         Student Submission Response
                       </span>
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                        {answer.writtenAnswerText || <span className="text-gray-400 italic">No response submitted</span>}
+                      <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                        {answer.writtenAnswerText || <span className="text-muted-foreground italic">No response submitted</span>}
                       </p>
                     </div>
 
                     {/* Grade input actions */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-y-4 border-t border-gray-100 pt-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-y-4 border-t border-border pt-4">
                       <div className="flex items-center gap-x-2">
-                        <label htmlFor={`score-${answer.id}`} className="text-xs font-bold text-gray-700">
+                        <label htmlFor={`score-${answer.id}`} className="text-xs font-bold text-foreground">
                           Awarded Score:
                         </label>
                         <div className="relative rounded-md shadow-sm w-32">
@@ -530,10 +530,10 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
                             min="0"
                             max={answer.question.marks}
                             step="0.5"
-                            className="block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-gray-900 focus:border-accent focus:ring-1 focus:ring-accent text-xs font-semibold"
+                            className="block w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-foreground focus:border-primary focus:ring-1 focus:ring-primary text-xs font-semibold"
                           />
                         </div>
-                        <span className="text-xs text-gray-400 font-bold">/ {answer.question.marks}</span>
+                        <span className="text-xs text-muted-foreground font-bold">/ {answer.question.marks}</span>
                       </div>
 
                       <div className="flex items-center gap-x-4 self-end sm:self-auto">
@@ -546,7 +546,7 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
                           type="button"
                           disabled={gradingSubmitting[answer.id]}
                           onClick={() => handleSaveGrade(answer.id, answer.question.marks)}
-                          className="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
                         >
                           {gradingSubmitting[answer.id] ? 'Saving...' : 'Save Grade'}
                         </button>
@@ -561,48 +561,48 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
 
         {/* Tab 3: Manual Score Entry */}
         {activeTab === 'manual' && (
-          <form onSubmit={handleSaveManualMarks} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 gap-y-2">
+          <form onSubmit={handleSaveManualMarks} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-y-2">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Offline / Paper Exam Score Entry</h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h3 className="text-lg font-bold text-foreground">Offline / Paper Exam Score Entry</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Enter student marks manually for physical exam papers out of <strong>{test.totalMarks} Marks</strong>.
                 </p>
               </div>
               <button
                 type="submit"
                 disabled={savingManual}
-                className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
               >
                 {savingManual ? 'Saving Scores...' : 'Save All Scores'}
               </button>
             </div>
 
             {batchStudents.length === 0 ? (
-              <div className="p-8 text-center text-gray-400 italic text-sm">
+              <div className="p-8 text-center text-muted-foreground italic text-sm">
                 No students enrolled in this batch yet.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-surface-hover/50">
                     <tr>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student Name</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Email</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Marks Obtained</th>
-                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student Name</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Marks Obtained</th>
+                      <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-surface divide-y divide-border">
                     {batchStudents.map((student) => {
                       const currentVal = manualMarks[student.id] || '';
                       const isGraded = currentVal !== '';
                       return (
-                        <tr key={student.id} className="hover:bg-gray-50/70 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        <tr key={student.id} className="hover:bg-surface-hover/50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">
                             {student.name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {student.email}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -620,17 +620,17 @@ export default function TestResultsDashboardPage({ params }: PageProps) {
                                   }))
                                 }
                                 placeholder="0"
-                                className="block w-28 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-bold text-gray-900 focus:border-accent focus:ring-1 focus:ring-accent"
+                                className="block w-28 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-bold text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
                               />
-                              <span className="text-xs font-bold text-gray-400">/ {test.totalMarks}</span>
+                              <span className="text-xs font-bold text-muted-foreground">/ {test.totalMarks}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                                 isGraded
-                                  ? 'bg-green-50 text-green-700 ring-green-600/20'
-                                  : 'bg-gray-50 text-gray-600 ring-gray-500/20'
+                                  ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
+                                  : 'bg-surface-hover text-muted-foreground ring-border'
                               }`}
                             >
                               {isGraded ? 'Graded' : 'Pending Entry'}

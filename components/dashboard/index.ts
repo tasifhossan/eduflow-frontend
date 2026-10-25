@@ -1,0 +1,9 @@
+export { DashboardShell, type DashboardShellProps } from './dashboard-shell';
+export { DashboardSidebar, type DashboardSidebarProps } from './sidebar';
+export { DashboardHeader, type DashboardHeaderProps } from './header';
+export { PageHeader, type PageHeaderProps, type BreadcrumbItem } from './page-header';
+export { StatCard, type StatCardProps } from './stat-card';
+export { SectionCard, type SectionCardProps } from './section-card';
+export { StatusBadge, type StatusBadgeProps, type StatusVariant } from './status-badge';
+export { EmptyState, type EmptyStateProps } from '@/components/ui/empty-state';
+export { ErrorState, type ErrorStateProps } from '@/components/ui/error-state';

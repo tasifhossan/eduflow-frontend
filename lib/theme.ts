@@ -238,6 +238,115 @@ export function computeThemeTokens(primaryHex: string): ThemeColors {
   };
 }
 
+export interface SidebarTokens {
+  bg: string;
+  fg: string;
+  muted: string;
+  border: string;
+  hover: string;
+  activeBg: string;
+  activeFg: string;
+  activeBar: string;
+  ratios: {
+    fg: number;
+    muted: number;
+    activeFg: number;
+    activeBar: number;
+  };
+}
+
+export function computeSidebarTokens(primaryHex: string, isDark: boolean): SidebarTokens {
+  const sanitized = sanitizeHex(primaryHex);
+  const { color } = enforceWcagAA(sanitized);
+  const pRgb = hexToRgb(color);
+  const pHsl = rgbToHsl(pRgb);
+
+  // Very dark, slightly desaturated shade of the primary hue in light mode;
+  // in dark mode a slightly lighter step than the page background (#0B1020).
+  const bgHsl: HSL = isDark
+    ? { h: pHsl.h, s: Math.round(Math.min(pHsl.s * 0.25, 18)), l: 12.5 }
+    : { h: pHsl.h, s: Math.round(Math.min(pHsl.s * 0.35, 24)), l: 11 };
+  const bgRgb = hslToRgb(bgHsl);
+  const bgHex = rgbToHex(bgRgb);
+
+  // Border: slightly lighter than bg
+  const borderHsl: HSL = { ...bgHsl, l: bgHsl.l + (isDark ? 6.5 : 7.0) };
+  const borderHex = rgbToHex(hslToRgb(borderHsl));
+
+  // Hover: slightly lighter than bg
+  const hoverHsl: HSL = { ...bgHsl, l: bgHsl.l + (isDark ? 5.0 : 5.5) };
+  const hoverHex = rgbToHex(hslToRgb(hoverHsl));
+
+  // Active BG: primary at ~18% over the sidebar
+  const activeBgRgb: RGB = {
+    r: Math.round(pRgb.r * 0.18 + bgRgb.r * 0.82),
+    g: Math.round(pRgb.g * 0.18 + bgRgb.g * 0.82),
+    b: Math.round(pRgb.b * 0.18 + bgRgb.b * 0.82),
+  };
+  const activeBgHex = rgbToHex(activeBgRgb);
+
+  // Active bar: primary, force WCAG AA 3:1 against sidebar bg
+  let barRgb = pRgb;
+  let barRatio = getContrastRatio(barRgb, bgRgb);
+  let curL = pHsl.l;
+  while (barRatio < 3.0 && curL < 90) {
+    curL += 2;
+    barRgb = hslToRgb({ ...pHsl, l: curL });
+    barRatio = getContrastRatio(barRgb, bgRgb);
+  }
+  const activeBarHex = rgbToHex(barRgb);
+
+  // FG: text on sidebar bg, force WCAG AA 4.5:1
+  const fgHsl: HSL = { h: pHsl.h, s: 8, l: 96 };
+  let fgRgb = hslToRgb(fgHsl);
+  let fgRatio = getContrastRatio(fgRgb, bgRgb);
+  while (fgRatio < 4.5 && fgHsl.l < 100) {
+    fgHsl.l += 1;
+    fgRgb = hslToRgb(fgHsl);
+    fgRatio = getContrastRatio(fgRgb, bgRgb);
+  }
+  const fgHex = rgbToHex(fgRgb);
+
+  // Muted: text on sidebar bg, force WCAG AA 4.5:1
+  const mutedHsl: HSL = { h: pHsl.h, s: 12, l: 68 };
+  let mutedRgb = hslToRgb(mutedHsl);
+  let mutedRatio = getContrastRatio(mutedRgb, bgRgb);
+  while (mutedRatio < 4.5 && mutedHsl.l < 95) {
+    mutedHsl.l += 2;
+    mutedRgb = hslToRgb(mutedHsl);
+    mutedRatio = getContrastRatio(mutedRgb, bgRgb);
+  }
+  const mutedHex = rgbToHex(mutedRgb);
+
+  // Active FG: text on activeBg, force WCAG AA 4.5:1
+  const actFgHsl: HSL = { h: pHsl.h, s: 6, l: 98 };
+  let actFgRgb = hslToRgb(actFgHsl);
+  let actFgRatio = getContrastRatio(actFgRgb, activeBgRgb);
+  while (actFgRatio < 4.5 && actFgHsl.l < 100) {
+    actFgHsl.l += 1;
+    actFgRgb = hslToRgb(actFgHsl);
+    actFgRatio = getContrastRatio(actFgRgb, activeBgRgb);
+  }
+  const actFgHex = rgbToHex(actFgRgb);
+
+  return {
+    bg: bgHex,
+    fg: fgHex,
+    muted: mutedHex,
+    border: borderHex,
+    hover: hoverHex,
+    activeBg: activeBgHex,
+    activeFg: actFgHex,
+    activeBar: activeBarHex,
+    ratios: {
+      fg: Number(fgRatio.toFixed(2)),
+      muted: Number(mutedRatio.toFixed(2)),
+      activeFg: Number(actFgRatio.toFixed(2)),
+      activeBar: Number(barRatio.toFixed(2)),
+    },
+  };
+}
+
 /**
  * Generates runtime CSS string for <style id="center-theme"> injection.
  * Strictly validates that primaryHex is exactly #RRGGBB; rejects anything else and
@@ -246,6 +355,9 @@ export function computeThemeTokens(primaryHex: string): ThemeColors {
 export function generateThemeCss(primaryHex?: string | null): string {
   const safeHex = isValidHex(primaryHex) ? primaryHex.trim().toLowerCase() : DEFAULT_PRIMARY;
   const tokens = computeThemeTokens(safeHex);
+  const lightSidebar = computeSidebarTokens(safeHex, false);
+  const darkSidebar = computeSidebarTokens(safeHex, true);
+
   return `
     :root {
       --primary: ${tokens.primary};
@@ -253,12 +365,28 @@ export function generateThemeCss(primaryHex?: string | null): string {
       --primary-hover: ${tokens.primaryHover};
       --primary-rgb: ${tokens.primaryRgb};
       --ring: ${tokens.primary};
+      --sidebar-bg: ${lightSidebar.bg};
+      --sidebar-fg: ${lightSidebar.fg};
+      --sidebar-muted: ${lightSidebar.muted};
+      --sidebar-border: ${lightSidebar.border};
+      --sidebar-hover: ${lightSidebar.hover};
+      --sidebar-active-bg: ${lightSidebar.activeBg};
+      --sidebar-active-fg: ${lightSidebar.activeFg};
+      --sidebar-active-bar: ${lightSidebar.activeBar};
     }
     .dark {
       --primary: ${tokens.primaryDark};
       --primary-foreground: #ffffff;
       --primary-hover: ${tokens.primary};
       --ring: ${tokens.primaryDark};
+      --sidebar-bg: ${darkSidebar.bg};
+      --sidebar-fg: ${darkSidebar.fg};
+      --sidebar-muted: ${darkSidebar.muted};
+      --sidebar-border: ${darkSidebar.border};
+      --sidebar-hover: ${darkSidebar.hover};
+      --sidebar-active-bg: ${darkSidebar.activeBg};
+      --sidebar-active-fg: ${darkSidebar.activeFg};
+      --sidebar-active-bar: ${darkSidebar.activeBar};
     }
   `;
 }

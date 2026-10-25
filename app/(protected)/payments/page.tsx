@@ -78,7 +78,7 @@ export default function MyPaymentsPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <span className="ml-3 text-lg text-gray-500 font-medium">Loading payment history...</span>
       </div>
     );
@@ -87,107 +87,107 @@ export default function MyPaymentsPage() {
   return (
     <div className="p-8 space-y-6 max-w-6xl mx-auto">
       {/* Breadcrumb & Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-3">
         <div>
-          <nav className="flex text-sm text-gray-500 gap-x-2 mb-1">
-            <Link href="/dashboard" className="hover:text-accent font-medium">Dashboard</Link>
+          <nav className="flex text-sm text-muted-foreground gap-x-2 mb-1">
+            <Link href="/dashboard" className="hover:text-primary font-medium">Dashboard</Link>
             <span>/</span>
-            <span className="text-gray-900 font-semibold">My Payments</span>
+            <span className="text-foreground font-semibold">My Payments</span>
           </nav>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Fee Payments</h1>
-          <p className="mt-1 text-sm text-gray-500">View your payment history and outstanding fee details across all batches</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">My Fee Payments</h1>
+          <p className="mt-1 text-sm text-muted-foreground">View your payment history and outstanding fee details across all batches</p>
         </div>
       </div>
 
       {/* Error state */}
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <p className="text-sm text-red-600">
-            <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+        <div className="rounded-lg bg-red-500/10 p-4 border border-red-500/20">
+          <p className="text-sm text-red-600 dark:text-red-400">
+            <span className="font-semibold text-red-700 dark:text-red-300">Error:</span> {errorMsg}
           </p>
         </div>
       )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider block">Total Amount Paid</span>
-            <div className="mt-2 text-3xl font-extrabold text-emerald-700">৳{totalPaid.toLocaleString()}</div>
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Total Amount Paid</span>
+            <div className="mt-2 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">৳{totalPaid.toLocaleString()}</div>
           </div>
-          <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl font-bold">
+          <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl font-bold">
             ✓
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider block">Total Outstanding Due</span>
-            <div className="mt-2 text-3xl font-extrabold text-amber-700">৳{totalOutstanding.toLocaleString()}</div>
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Total Outstanding Due</span>
+            <div className="mt-2 text-3xl font-extrabold text-amber-600 dark:text-amber-400">৳{totalOutstanding.toLocaleString()}</div>
           </div>
-          <div className="h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 text-xl font-bold">
+          <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xl font-bold">
             !
           </div>
         </div>
       </div>
 
       {/* Payments Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Payment Records ({payments.length})</h2>
+      <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border">
+          <h2 className="text-lg font-bold text-foreground">Payment Records ({payments.length})</h2>
         </div>
 
         {payments.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="p-12 text-center text-muted-foreground">
+            <svg className="mx-auto h-12 w-12 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="mt-4 text-sm font-medium">No payment history found</p>
-            <p className="text-xs text-gray-400 mt-1">You have no active fee or installment records assigned.</p>
+            <p className="text-xs text-muted-foreground mt-1">You have no active fee or installment records assigned.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border text-sm">
+              <thead className="bg-surface-hover/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Batch Name</th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Period</th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Amount Due</th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Amount Paid</th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Due Date</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Batch Name</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Period</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount Due</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount Paid</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Due Date</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-surface divide-y divide-border">
                 {payments.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-gray-50/50 transition">
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                  <tr key={payment.id} className="hover:bg-surface-hover/50 transition">
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
                       {payment.batch?.name || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-700 font-mono text-xs">
+                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground font-mono text-xs">
                       {payment.period}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
                       ৳{payment.amountDue.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
                       ৳{payment.amountPaid.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                           payment.status === 'PAID'
-                            ? 'bg-green-50 text-green-700 ring-green-600/20'
+                            ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                             : payment.status === 'PARTIAL'
-                            ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                            : 'bg-red-50 text-red-700 ring-red-600/20'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
+                            : 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
                         }`}
                       >
                         {payment.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
-                      {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : <span className="text-gray-400 italic">N/A</span>}
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
+                      {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : <span className="text-muted-foreground italic">N/A</span>}
                     </td>
                   </tr>
                 ))}
