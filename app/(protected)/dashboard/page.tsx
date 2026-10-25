@@ -20,6 +20,11 @@ import {
   ArrowRight,
   HeartHandshake,
 } from 'lucide-react';
+import {
+  StudentAcademicsCards,
+  TeacherAcademicsCards,
+  AdminAcademicsSummaryCard,
+} from '@/components/dashboard/academic-dashboard-cards';
 
 // ─── Response Types ────────────────────────────────────────────────────────
 
@@ -338,6 +343,13 @@ function AdminTeacherDashboard({
         <FeeCollectionCard dueSummary={dueSummary} />
       )}
 
+      {/* Academics summary (Admin) or Teacher cards */}
+      {isAdmin ? (
+        <AdminAcademicsSummaryCard />
+      ) : (
+        <TeacherAcademicsCards />
+      )}
+
       {/* Attendance summary */}
       <SectionCard
         title="Today's Attendance"
@@ -464,6 +476,9 @@ function StudentDashboard({ data }: { data: StudentSummary }) {
         </SectionCard>
       )}
 
+      {/* Academics: Today's classes, Upcoming assignments & Syllabus progress */}
+      <StudentAcademicsCards />
+
       {/* Upcoming tests */}
       <StudentUpcomingTestsList tests={upcomingTests} />
 
@@ -574,6 +589,11 @@ function GuardianDashboard({ data }: { data: GuardianSummary }) {
           </div>
         )}
       </SectionCard>
+
+      {/* Academics cards for linked student */}
+      {children.length > 0 && (
+        <StudentAcademicsCards studentId={children[0]?.id} />
+      )}
     </div>
   );
 }

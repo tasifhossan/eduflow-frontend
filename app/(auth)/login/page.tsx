@@ -10,6 +10,7 @@ import { useAuth } from '@/components/providers/auth-provider';
 import { useCenter } from '@/components/providers/center-provider';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import dynamic from 'next/dynamic';
 import {
   AlertCircle,
   Eye,
@@ -17,9 +18,13 @@ import {
   Loader2,
   Phone,
   MessageCircle,
-  Sparkles,
   ArrowUp,
 } from 'lucide-react';
+
+const DevShortcuts =
+  process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_DEV_SHORTCUTS === 'true'
+    ? dynamic(() => import('./dev-shortcuts'), { ssr: false })
+    : null;
 
 interface LoginResponse {
   success: boolean;
@@ -366,65 +371,13 @@ export default function LoginPage() {
         )}
       </div>
 
-      {/* Collapsed Developer Shortcuts (NODE_ENV !== 'production' only) */}
-      {process.env.NODE_ENV !== 'production' && (
-        <details className="mt-6 rounded-[var(--radius-control)] border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground group">
-          <summary className="cursor-pointer font-medium text-foreground/80 hover:text-foreground flex items-center justify-between select-none py-0.5">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-              <span>Developer shortcuts</span>
-            </span>
-            <span className="text-[10px] text-muted-foreground transition-transform group-open:rotate-180">
-              ▼
-            </span>
-          </summary>
-          <div className="mt-3 grid grid-cols-2 gap-2 pt-2 border-t border-border/50">
-            <Button
-              type="button"
-              id="demo-student-login-btn"
-              variant="outline"
-              size="sm"
-              disabled={loading || countdown > 0}
-              onClick={() => handleDemoLogin('STUDENT')}
-              className="text-xs justify-start h-9"
-            >
-              Student
-            </Button>
-            <Button
-              type="button"
-              id="demo-teacher-login-btn"
-              variant="outline"
-              size="sm"
-              disabled={loading || countdown > 0}
-              onClick={() => handleDemoLogin('TEACHER')}
-              className="text-xs justify-start h-9"
-            >
-              Teacher
-            </Button>
-            <Button
-              type="button"
-              id="demo-admin-login-btn"
-              variant="outline"
-              size="sm"
-              disabled={loading || countdown > 0}
-              onClick={() => handleDemoLogin('ADMIN')}
-              className="text-xs justify-start h-9"
-            >
-              Branch Admin
-            </Button>
-            <Button
-              type="button"
-              id="demo-guardian-login-btn"
-              variant="outline"
-              size="sm"
-              disabled={loading || countdown > 0}
-              onClick={() => handleDemoLogin('GUARDIAN')}
-              className="text-xs justify-start h-9"
-            >
-              Guardian
-            </Button>
-          </div>
-        </details>
+      {/* Optional dev login helpers */}
+      {DevShortcuts && (
+        <DevShortcuts
+          loading={loading}
+          countdown={countdown}
+          onDemoLogin={handleDemoLogin}
+        />
       )}
     </div>
   );

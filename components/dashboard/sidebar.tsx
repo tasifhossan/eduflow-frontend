@@ -20,15 +20,18 @@ import {
   Building2,
   ShieldAlert,
   Settings,
+  Video,
+  ClipboardCheck,
   X,
 } from 'lucide-react';
-import type { CenterPublicData } from '@/lib/types/center';
+import type { CenterPublicData, CenterFeatures } from '@/lib/types/center';
 
 export interface NavItem {
   name: string;
   href: string;
   roles: string[];
   icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
+  featureFlag?: keyof CenterFeatures;
 }
 
 export interface NavGroup {
@@ -57,6 +60,20 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Academics',
     items: [
+      {
+        name: 'Lectures',
+        href: '/lectures',
+        roles: ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN', 'SUPER_ADMIN'],
+        icon: Video,
+        featureFlag: 'lectures',
+      },
+      {
+        name: 'Assignments',
+        href: '/assignments',
+        roles: ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN', 'SUPER_ADMIN'],
+        icon: ClipboardCheck,
+        featureFlag: 'assignments',
+      },
       {
         name: 'Batches',
         href: '/batches',
@@ -294,9 +311,11 @@ export function DashboardSidebar({
         }}
       >
         {NAV_GROUPS.map((group) => {
-          const visibleItems = group.items.filter((item) =>
-            item.roles.includes(userRole)
-          );
+          const visibleItems = group.items.filter((item) => {
+            if (!item.roles.includes(userRole)) return false;
+            if (item.featureFlag && center.features?.[item.featureFlag] === false) return false;
+            return true;
+          });
           if (visibleItems.length === 0) return null;
 
           return (

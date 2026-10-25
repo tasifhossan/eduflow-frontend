@@ -9,6 +9,7 @@ import { apiPost } from '@/lib/api';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { NotificationBell } from './notification-bell';
 
 export interface DashboardHeaderProps {
   user: {
@@ -161,8 +162,10 @@ export function DashboardHeader({
         </div>
       </div>
 
-      {/* Right: Theme toggle + User menu */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      {/* Right: Notification bell + Theme toggle + User menu */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <NotificationBell />
+
         <ThemeToggle />
 
         <div className="h-6 w-px bg-border hidden sm:block" aria-hidden="true" />

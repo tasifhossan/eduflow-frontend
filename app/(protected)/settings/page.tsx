@@ -28,7 +28,6 @@ import {
   Save,
   RotateCcw,
   Sparkles,
-  ExternalLink,
   Home,
   Plus,
   Trash2,
@@ -120,8 +119,8 @@ export default function SettingsPage() {
         } else {
           toast.error(res.message || 'Failed to load settings');
         }
-      } catch (err: any) {
-        toast.error(err.message || 'Error loading settings');
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : 'Error loading settings');
       } finally {
         setLoading(false);
       }
@@ -157,7 +156,7 @@ export default function SettingsPage() {
   }
 
   // Handle generic field change
-  const handleChange = (field: keyof FullCenterSettings, value: any) => {
+  const handleChange = (field: keyof FullCenterSettings, value: unknown) => {
     setFormData((prev) => (prev ? { ...prev, [field]: value } : prev));
     if (errors[field]) {
       setErrors((prev) => {
@@ -268,8 +267,8 @@ export default function SettingsPage() {
         handleHomepageChange('heroImageUrl', secureUrl);
       }
       toast.success(`${type === 'logo' ? 'Logo' : type === 'favicon' ? 'Favicon' : 'Hero banner image'} uploaded successfully`);
-    } catch (err: any) {
-      toast.error(err.message || 'Upload failed');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setUploading(false);
     }
@@ -289,7 +288,7 @@ export default function SettingsPage() {
     });
   };
 
-  const handleAnnouncementChange = (field: keyof AnnouncementSettings, value: any) => {
+  const handleAnnouncementChange = (field: keyof AnnouncementSettings, value: unknown) => {
     setFormData((prev) => {
       if (!prev) return prev;
       const current = prev.homepage?.announcement || { enabled: false, text: '', linkLabel: '', linkUrl: '' };
@@ -461,11 +460,12 @@ export default function SettingsPage() {
       } else {
         toast.error(res.message || 'Failed to update settings');
       }
-    } catch (err: any) {
-      if (err.validationErrors) {
-        setErrors(err.validationErrors);
+    } catch (err: unknown) {
+      const apiErr = err as { validationErrors?: Record<string, string>; message?: string };
+      if (apiErr.validationErrors) {
+        setErrors(apiErr.validationErrors);
       }
-      toast.error(err.message || 'Validation error while saving settings');
+      toast.error(err instanceof Error ? err.message : 'Validation error while saving settings');
     } finally {
       setSaving(false);
     }
@@ -520,7 +520,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
-            <span className="font-medium">You have unsaved changes. Remember to click "Save Changes" to publish them.</span>
+            <span className="font-medium">You have unsaved changes. Remember to click &quot;Save Changes&quot; to publish them.</span>
           </div>
           <button
             type="button"
@@ -1068,7 +1068,7 @@ export default function SettingsPage() {
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Public Website (Landing & Explore)</h4>
                 <p className="text-xs text-muted-foreground">
-                  When disabled, visitors to "/" are redirected to the Login page and the public navbar collapses to "Log in".
+                  When disabled, visitors to &quot;/&quot; are redirected to the Login page and the public navbar collapses to &quot;Log in&quot;.
                 </p>
               </div>
               <input
@@ -1162,15 +1162,63 @@ export default function SettingsPage() {
             {/* Show Powered By EduFlow */}
             <div className="flex items-center justify-between py-4">
               <div>
-                <h4 className="text-sm font-semibold text-foreground">Show "Powered by EduFlow" Credit</h4>
+                <h4 className="text-sm font-semibold text-foreground">Show &quot;Powered by EduFlow&quot; Credit</h4>
                 <p className="text-xs text-muted-foreground">
-                  Displays a subtle "Powered by EduFlow" attribution link in the website footer.
+                  Displays a subtle &quot;Powered by EduFlow&quot; attribution link in the website footer.
                 </p>
               </div>
               <input
                 type="checkbox"
                 checked={formData.features?.showPoweredBy !== false}
                 onChange={(e) => handleFeatureToggle('showPoweredBy', e.target.checked)}
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* Lectures & Routine */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Lectures & Routine Planning</h4>
+                <p className="text-xs text-muted-foreground">
+                  Enables lecture planning, routine slot generation, lecture materials, and syllabus progress tracking.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.features?.lectures !== false}
+                onChange={(e) => handleFeatureToggle('lectures', e.target.checked)}
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* Assignments */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Assignments & Homework</h4>
+                <p className="text-xs text-muted-foreground">
+                  Enables online file/text submissions, offline marks entry grids, and teacher grading.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.features?.assignments !== false}
+                onChange={(e) => handleFeatureToggle('assignments', e.target.checked)}
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* Online Classes */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Online Classes & Meeting Links</h4>
+                <p className="text-xs text-muted-foreground">
+                  Enables Google Meet, Zoom, and live class links with automated 30-minute join-window gating.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.features?.onlineClasses !== false}
+                onChange={(e) => handleFeatureToggle('onlineClasses', e.target.checked)}
                 className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
               />
             </div>
@@ -1603,7 +1651,7 @@ export default function SettingsPage() {
 
             {(!formData.homepage?.whyChooseUs || formData.homepage.whyChooseUs.length === 0) ? (
               <p className="text-xs text-muted-foreground italic py-2">
-                No "Why Choose Us" items configured. The section will be hidden on the homepage.
+                No &quot;Why Choose Us&quot; items configured. The section will be hidden on the homepage.
               </p>
             ) : (
               <div className="space-y-4">
@@ -1799,7 +1847,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Show Course Fees</h4>
                   <p className="text-xs text-muted-foreground">
-                    When enabled, course fees are displayed on homepage batch cards and explore pages. When disabled, fees are hidden and replaced with "Contact for fee".
+                    When enabled, course fees are displayed on homepage batch cards and explore pages. When disabled, fees are hidden and replaced with &quot;Contact for fee&quot;.
                   </p>
                 </div>
                 <input

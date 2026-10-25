@@ -30,7 +30,7 @@ const getBaseUrl = () => {
     const raw = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
     return raw.replace(/\/api$/, '');
   }
-  return 'https://eduflow-backend-eu3i.onrender.com';
+  return 'http://localhost:5000';
 };
 
 async function handleResponse<T>(response: Response, path: string): Promise<T> {
