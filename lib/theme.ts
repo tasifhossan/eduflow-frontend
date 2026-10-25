@@ -26,15 +26,20 @@ export interface ThemeColors {
   isAdjusted: boolean;
 }
 
-const HEX_REGEX = /^#([0-9A-Fa-f]{6})$/;
+export const DEFAULT_PRIMARY = '#0ea5e9';
+export const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
-export function sanitizeHex(hex?: string | null, fallback = '#0ea5e9'): string {
-  if (!hex || typeof hex !== 'string') return fallback;
-  const trimmed = hex.trim();
-  if (HEX_REGEX.test(trimmed)) {
-    return trimmed.toLowerCase();
-  }
-  return fallback;
+/**
+ * Validates that an input is strictly a 6-digit hex color (#RRGGBB).
+ */
+export function isValidHex(hex?: string | null): hex is string {
+  if (!hex || typeof hex !== 'string') return false;
+  return HEX_COLOR_REGEX.test(hex.trim());
+}
+
+export function sanitizeHex(hex?: string | null, fallback = DEFAULT_PRIMARY): string {
+  if (!isValidHex(hex)) return fallback;
+  return hex.trim().toLowerCase();
 }
 
 export function hexToRgb(hex: string): RGB {
@@ -234,10 +239,13 @@ export function computeThemeTokens(primaryHex: string): ThemeColors {
 }
 
 /**
- * Generates runtime CSS string for <style id="center-theme"> injection
+ * Generates runtime CSS string for <style id="center-theme"> injection.
+ * Strictly validates that primaryHex is exactly #RRGGBB; rejects anything else and
+ * falls back to the default palette before building CSS.
  */
 export function generateThemeCss(primaryHex: string): string {
-  const tokens = computeThemeTokens(primaryHex);
+  const safeHex = isValidHex(primaryHex) ? primaryHex.trim().toLowerCase() : DEFAULT_PRIMARY;
+  const tokens = computeThemeTokens(safeHex);
   return `
     :root {
       --primary: ${tokens.primary};
