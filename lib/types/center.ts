@@ -6,6 +6,9 @@ export interface CenterFeatures {
   testimonials: boolean;
   newsletter: boolean;
   showPoweredBy?: boolean;
+  lectures?: boolean;
+  assignments?: boolean;
+  onlineClasses?: boolean;
 }
 
 export interface CenterSocials {
@@ -107,6 +110,9 @@ export const defaultCenterData: CenterPublicData = {
     testimonials: true,
     newsletter: false,
     showPoweredBy: true,
+    lectures: true,
+    assignments: true,
+    onlineClasses: true,
   },
   homepage: {
     heroBadge: '',

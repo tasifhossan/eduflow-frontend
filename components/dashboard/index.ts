@@ -7,3 +7,4 @@ export { SectionCard, type SectionCardProps } from './section-card';
 export { StatusBadge, type StatusBadgeProps, type StatusVariant } from './status-badge';
 export { EmptyState, type EmptyStateProps } from '@/components/ui/empty-state';
 export { ErrorState, type ErrorStateProps } from '@/components/ui/error-state';
+export { NotificationBell } from './notification-bell';

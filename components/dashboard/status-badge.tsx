@@ -8,10 +8,20 @@ export type StatusVariant =
   | 'absent'
   | 'late'
   | 'upcoming'
-  | 'closed';
+  | 'closed'
+  | 'completed'
+  | 'cancelled'
+  | 'draft'
+  | 'planned'
+  | 'submitted'
+  | 'graded'
+  | 'missing'
+  | 'overdue'
+  | 'in_progress';
 
 export interface StatusBadgeProps {
   variant: StatusVariant;
+  label?: string;
   children?: React.ReactNode;
   showDot?: boolean;
   className?: string;
@@ -35,6 +45,16 @@ const variantStyles: Record<
     dot: 'bg-status-success',
     defaultLabel: 'Present',
   },
+  completed: {
+    container: 'bg-status-success-bg text-status-success-text border-status-success-border',
+    dot: 'bg-status-success',
+    defaultLabel: 'Completed',
+  },
+  graded: {
+    container: 'bg-status-success-bg text-status-success-text border-status-success-border',
+    dot: 'bg-status-success',
+    defaultLabel: 'Graded',
+  },
   partial: {
     container: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',
     dot: 'bg-status-warning',
@@ -55,10 +75,45 @@ const variantStyles: Record<
     dot: 'bg-status-danger',
     defaultLabel: 'Absent',
   },
+  cancelled: {
+    container: 'bg-status-danger-bg text-status-danger-text border-status-danger-border',
+    dot: 'bg-status-danger',
+    defaultLabel: 'Cancelled',
+  },
+  missing: {
+    container: 'bg-status-danger-bg text-status-danger-text border-status-danger-border',
+    dot: 'bg-status-danger',
+    defaultLabel: 'Missing',
+  },
+  overdue: {
+    container: 'bg-status-danger-bg text-status-danger-text border-status-danger-border',
+    dot: 'bg-status-danger',
+    defaultLabel: 'Overdue',
+  },
   upcoming: {
     container: 'bg-status-info-bg text-status-info-text border-status-info-border',
     dot: 'bg-status-info',
     defaultLabel: 'Upcoming',
+  },
+  planned: {
+    container: 'bg-status-info-bg text-status-info-text border-status-info-border',
+    dot: 'bg-status-info',
+    defaultLabel: 'Planned',
+  },
+  submitted: {
+    container: 'bg-status-info-bg text-status-info-text border-status-info-border',
+    dot: 'bg-status-info',
+    defaultLabel: 'Submitted',
+  },
+  in_progress: {
+    container: 'bg-status-info-bg text-status-info-text border-status-info-border',
+    dot: 'bg-status-info',
+    defaultLabel: 'In Progress',
+  },
+  draft: {
+    container: 'bg-muted text-muted-foreground border-border',
+    dot: 'bg-muted-foreground',
+    defaultLabel: 'Draft',
   },
   closed: {
     container: 'bg-muted text-muted-foreground border-border',
@@ -69,6 +124,7 @@ const variantStyles: Record<
 
 export function StatusBadge({
   variant,
+  label,
   children,
   showDot = false,
   className = '',
@@ -85,7 +141,7 @@ export function StatusBadge({
           aria-hidden="true"
         />
       )}
-      <span>{children ?? config.defaultLabel}</span>
+      <span>{children ?? label ?? config.defaultLabel}</span>
     </span>
   );
 }
