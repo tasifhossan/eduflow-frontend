@@ -8,7 +8,7 @@ import { useAuth } from '@/components/providers/auth-provider';
 import { useApi } from '@/lib/use-api';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, GraduationCap, BookOpen, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export interface HomeHeroProps {
   center: CenterPublicData;
@@ -34,16 +34,22 @@ export function HomeHero({ center }: HomeHeroProps) {
     }
   };
 
+  const validHeroPoints = (center.homepage?.heroPoints || []).filter(
+    (p): p is string => typeof p === 'string' && p.trim().length > 0
+  );
+
   return (
     <section className="relative overflow-hidden bg-background py-14 sm:py-20 lg:py-24 border-b border-border/60">
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column: Headlines & Call to Actions */}
           <div className="lg:col-span-7 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Admissions & Academic Coaching</span>
-            </div>
+            {center.homepage?.heroBadge?.trim() ? (
+              <div className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{center.homepage.heroBadge.trim()}</span>
+              </div>
+            ) : null}
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
               {title}
@@ -82,24 +88,20 @@ export function HomeHero({ center }: HomeHeroProps) {
               </Button>
             </div>
 
-            {/* Micro feature checklist */}
-            <div className="pt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-secondary" />
-                <span>Structured Routine</span>
+            {/* Feature checklist from settings (nothing rendered if empty) */}
+            {validHeroPoints.length > 0 ? (
+              <div className="pt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground">
+                {validHeroPoints.map((point, idx) => (
+                  <div key={idx} className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
+                    <span>{point}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-secondary" />
-                <span>Weekly Assessments</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-secondary" />
-                <span>Real-Time Attendance</span>
-              </div>
-            </div>
+            ) : null}
           </div>
 
-          {/* Right Column: Hero Image or Tasteful Tokens-Only Illustration */}
+          {/* Right Column: Hero Image or Tasteful Tokens-Only Visual Card */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
             <div className="relative w-full max-w-md aspect-[4/3] rounded-[var(--radius-card)] overflow-hidden border border-border bg-surface shadow-card">
               {heroImage && !imgError ? (
@@ -113,20 +115,28 @@ export function HomeHero({ center }: HomeHeroProps) {
                   onError={() => setImgError(true)}
                 />
               ) : (
-                /* Tasteful tokens-only illustration when no custom hero image */
+                /* Tasteful visual card showing only center logo (or initial) and short name */
                 <div className="flex h-full w-full flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/10 via-surface to-secondary/10 text-center">
-                  <div className="relative flex h-20 w-20 items-center justify-center rounded-[var(--radius-card)] bg-primary/15 text-primary mb-4 shadow-sm">
-                    <GraduationCap className="h-10 w-10" aria-hidden="true" />
-                    <div className="absolute -top-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-[var(--radius-pill)] bg-secondary text-secondary-foreground shadow-sm">
-                      <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                  {center.logoUrl ? (
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[var(--radius-card)] bg-surface p-2 border border-border shadow-sm mb-4">
+                      <Image
+                        src={center.logoUrl}
+                        alt=""
+                        fill
+                        sizes="80px"
+                        className="object-contain"
+                        unoptimized
+                        priority
+                      />
                     </div>
-                  </div>
-                  <h2 className="text-lg font-bold text-foreground">
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-[var(--radius-card)] bg-primary/15 text-primary font-bold text-3xl mb-4 shadow-sm border border-primary/20 select-none">
+                      {center.shortName?.[0] || center.name?.[0] || 'C'}
+                    </div>
+                  )}
+                  <h2 className="text-xl font-bold text-foreground">
                     {center.shortName || center.name}
                   </h2>
-                  <p className="mt-1 text-xs text-muted-foreground max-w-xs">
-                    Committed to student mentorship, interactive classrooms, and exam success.
-                  </p>
                 </div>
               )}
             </div>

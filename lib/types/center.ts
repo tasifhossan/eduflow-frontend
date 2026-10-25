@@ -40,6 +40,8 @@ export interface AdmissionStepItem {
 }
 
 export interface HomepageSettings {
+  heroBadge?: string;
+  heroPoints?: string[];
   heroTitle?: string;
   heroSubtitle?: string;
   heroImageUrl?: string | null;
@@ -103,10 +105,12 @@ export const defaultCenterData: CenterPublicData = {
     blog: true,
     reviews: true,
     testimonials: true,
-    newsletter: true,
+    newsletter: false,
     showPoweredBy: true,
   },
   homepage: {
+    heroBadge: '',
+    heroPoints: [],
     heroTitle: '',
     heroSubtitle: '',
     heroImageUrl: null,
@@ -118,3 +122,4 @@ export const defaultCenterData: CenterPublicData = {
     showPhotoGallery: true,
   },
 };
+

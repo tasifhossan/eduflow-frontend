@@ -23,8 +23,8 @@ export interface AuthShellProps {
 const PORTAL_BENEFITS = [
   {
     icon: CalendarCheck,
-    title: 'Attendance tracking',
-    description: 'Real-time entry & exit records',
+    title: 'Class-by-class attendance records',
+    description: 'Daily presence and entry logs',
   },
   {
     icon: Award,
@@ -33,18 +33,18 @@ const PORTAL_BENEFITS = [
   },
   {
     icon: Receipt,
-    title: 'Fee statements & receipts',
-    description: 'Online invoices and complete payment history',
+    title: 'Your payment history and dues',
+    description: 'Recorded fees, balances, and payment timeline',
   },
   {
     icon: Bell,
     title: 'Notices & announcements',
-    description: 'Instant official updates directly from faculty',
+    description: 'Official center announcements and academic notices',
   },
   {
     icon: Clock,
-    title: 'Class routine & schedule',
-    description: 'Daily schedules, batch timings and room allocations',
+    title: 'Weekly class routine and batch timings',
+    description: 'Daily schedules, batch timings, and classroom allocations',
   },
 ];
 
@@ -67,12 +67,11 @@ export function AuthShell({ children }: AuthShellProps) {
           ========================================================================= */}
       <aside
         aria-label="Brand Overview"
-        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-primary text-primary-foreground border-r border-border/20 select-none"
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-8 xl:p-12 relative overflow-hidden bg-primary text-white border-r border-border/20 select-none min-h-dvh h-full"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.12) 0%, transparent 45%),
-            radial-gradient(circle at 85% 85%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-            linear-gradient(155deg, rgba(255, 255, 255, 0.06) 0%, transparent 45%, rgba(0, 0, 0, 0.14) 100%)
+            radial-gradient(circle at 85% 85%, rgba(0, 0, 0, 0.20) 0%, transparent 60%),
+            linear-gradient(155deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%)
           `,
         }}
       >
@@ -102,17 +101,17 @@ export function AuthShell({ children }: AuthShellProps) {
                 />
               </div>
             ) : (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-white/15 text-primary-foreground font-bold text-2xl shadow-sm border border-white/20">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-white/15 text-white font-bold text-2xl shadow-sm border border-white/20 select-none">
                 {center.shortName?.[0] || center.name?.[0] || 'C'}
               </div>
             )}
 
             <div className="space-y-1 min-w-0 flex-1">
-              <span className="block font-bold text-2xl xl:text-3xl tracking-tight leading-tight break-words hyphens-auto">
+              <span className="block font-bold text-2xl xl:text-3xl tracking-tight leading-tight break-words hyphens-auto text-white">
                 {center.name}
               </span>
               {center.tagline ? (
-                <p className="text-xs xl:text-sm text-primary-foreground/80 leading-relaxed break-words">
+                <p className="text-xs xl:text-sm text-white/90 leading-relaxed break-words">
                   {center.tagline}
                 </p>
               ) : null}
@@ -122,7 +121,7 @@ export function AuthShell({ children }: AuthShellProps) {
 
         {/* Middle: Short factual list of what the portal gives people */}
         <div className="relative z-10 my-8 xl:my-10 space-y-4 max-w-md">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-primary-foreground/75 mb-2">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-white/80 mb-2">
             Portal Access &amp; Services
           </div>
 
@@ -131,14 +130,14 @@ export function AuthShell({ children }: AuthShellProps) {
               const Icon = item.icon;
               return (
                 <div key={item.title} className="flex items-start gap-3.5 group">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-white/10 border border-white/15 text-primary-foreground shadow-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-white/10 border border-white/15 text-white shadow-xs">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="min-w-0 pt-0.5">
-                    <div className="text-sm font-semibold text-primary-foreground leading-snug">
+                    <div className="text-sm font-semibold text-white leading-snug">
                       {item.title}
                     </div>
-                    <div className="text-xs text-primary-foreground/75 leading-tight">
+                    <div className="text-xs text-white/88 leading-tight">
                       {item.description}
                     </div>
                   </div>
@@ -149,7 +148,7 @@ export function AuthShell({ children }: AuthShellProps) {
         </div>
 
         {/* Bottom: Copyright & Center Name */}
-        <div className="relative z-10 pt-4 border-t border-white/15 text-xs text-primary-foreground/70 flex items-center justify-between">
+        <div className="relative z-10 pt-4 border-t border-white/20 text-xs text-white/80 flex items-center justify-between">
           <span>&copy; {currentYear} {center.name}</span>
           <span className="text-[11px] opacity-75">Student &amp; Staff Portal</span>
         </div>

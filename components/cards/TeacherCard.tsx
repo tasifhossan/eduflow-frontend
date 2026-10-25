@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, BookOpen } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 export interface TeacherData {
   id: string;
@@ -22,6 +22,13 @@ export interface TeacherCardProps {
 
 export function TeacherCard({ teacher, className }: TeacherCardProps) {
   const [imgError, setImgError] = React.useState(false);
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'T';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
 
   return (
     <Card
@@ -43,8 +50,8 @@ export function TeacherCard({ teacher, className }: TeacherCardProps) {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-            <User className="h-10 w-10 text-primary/70" aria-hidden="true" />
+          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary font-bold text-lg sm:text-xl select-none">
+            <span>{getInitials(teacher.name)}</span>
           </div>
         )}
       </div>

@@ -422,6 +422,11 @@ export default function SettingsPage() {
         receiptFooter: formData.receiptFooter || null,
         features: formData.features,
         homepage: {
+          heroBadge: formData.homepage?.heroBadge?.trim() || undefined,
+          heroPoints: (formData.homepage?.heroPoints || [])
+            .map((p) => (typeof p === 'string' ? p.trim() : ''))
+            .filter((p) => p.length > 0)
+            .slice(0, 3),
           heroTitle: formData.homepage?.heroTitle || undefined,
           heroSubtitle: formData.homepage?.heroSubtitle || undefined,
           heroImageUrl: formData.homepage?.heroImageUrl?.trim() || null,
@@ -1187,6 +1192,13 @@ export default function SettingsPage() {
               </span>
             </div>
 
+            {formData.homepage?.heroBadge?.trim() && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 text-primary-200 border border-primary/30 rounded-full text-xs font-semibold">
+                <Sparkles className="h-3 w-3 text-primary" />
+                <span>{formData.homepage.heroBadge.trim()}</span>
+              </div>
+            )}
+
             {formData.homepage?.announcement?.enabled && formData.homepage?.announcement?.text && (
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-200 border border-primary/30 rounded-full text-xs">
                 <Sparkles className="h-3 w-3 text-primary" />
@@ -1216,6 +1228,18 @@ export default function SettingsPage() {
                 Student login / Go to dashboard
               </span>
             </div>
+
+            {(formData.homepage?.heroPoints || []).filter((p) => p && p.trim()).length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-slate-300">
+                {(formData.homepage?.heroPoints || [])
+                  .filter((p) => p && p.trim())
+                  .map((pt, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 text-[11px]">
+                      <CheckCircle2 className="h-3 w-3 text-primary" /> {pt}
+                    </span>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Section 1: Hero Banner */}
@@ -1228,6 +1252,66 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Hero Badge (Optional)
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {(formData.homepage?.heroBadge || '').length} / 40
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={formData.homepage?.heroBadge || ''}
+                  onChange={(e) => handleHomepageChange('heroBadge', e.target.value)}
+                  placeholder="e.g. Admissions Open • 2026 Batch"
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Appears as a prominent pill badge directly above the hero title. Leave empty to omit.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Hero Key Points (Optional • Up to 3 points, max 30 chars each)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[0, 1, 2].map((idx) => {
+                    const currentPoints = formData.homepage?.heroPoints || [];
+                    const val = currentPoints[idx] || '';
+                    return (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px] text-slate-400">
+                          <span>Point {idx + 1}</span>
+                          <span>{val.length} / 30</span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={30}
+                          value={val}
+                          onChange={(e) => {
+                            const next = [...(formData.homepage?.heroPoints || ['', '', ''])];
+                            while (next.length < 3) next.push('');
+                            next[idx] = e.target.value;
+                            handleHomepageChange('heroPoints', next);
+                          }}
+                          placeholder={
+                            idx === 0
+                              ? 'e.g. Structured Routine'
+                              : idx === 1
+                              ? 'e.g. Weekly Assessments'
+                              : 'e.g. Attendance Tracking'
+                          }
+                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">Checklist highlights displayed under the hero action buttons. Empty points are omitted.</p>
+              </div>
+
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
