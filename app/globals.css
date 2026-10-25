@@ -64,6 +64,7 @@
   --shadow-popover: var(--shadow-popover);
 
   /* Z-index */
+  --z-sticky: 40;
   --z-navbar: 40;
   --z-dropdown: 50;
   --z-modal: 60;
@@ -128,6 +129,13 @@
   --duration-normal: 200ms;
   --duration-slow: 300ms;
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index */
+  --z-sticky: 40;
+  --z-navbar: 40;
+  --z-dropdown: 50;
+  --z-modal: 60;
+  --z-toast: 100;
 }
 
 .dark {

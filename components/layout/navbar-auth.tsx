@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/components/providers/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
@@ -21,6 +21,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 export function NavbarAuth() {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const handleLogout = async () => {
@@ -134,11 +135,19 @@ export function NavbarAuth() {
   }
 
   // Logged-out state
+  const isAuthPage = pathname === '/login' || pathname === '/forgot-password' || pathname === '/reset-password';
+
   return (
     <div className="flex items-center gap-2 sm:gap-2.5">
-      <Button asChild variant="primary" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4 shadow-sm">
-        <Link href="/login">Log in</Link>
-      </Button>
+      {isAuthPage ? (
+        <Button asChild variant="outline" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4">
+          <Link href="/">Back to Home</Link>
+        </Button>
+      ) : (
+        <Button asChild variant="primary" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4 shadow-sm">
+          <Link href="/login">Log in</Link>
+        </Button>
+      )}
     </div>
   );
 }

@@ -68,7 +68,7 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4 py-12">
+    <div className="flex flex-1 min-h-[calc(100vh-16rem)] flex-col items-center justify-center bg-background px-4 py-8 sm:py-12">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <Link href="/" className="inline-block">

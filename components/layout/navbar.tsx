@@ -76,7 +76,7 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-[var(--z-sticky)] w-full transition-[background-color,border-color,box-shadow] duration-200',
+        'sticky top-0 z-40 w-full transition-[background-color,border-color,box-shadow] duration-200',
         'bg-surface/90 backdrop-blur-md',
         isScrolled
           ? 'border-b border-border shadow-xs'
