@@ -38,7 +38,7 @@ export interface BatchCardProps {
 export function BatchCard({ batch, href, className }: BatchCardProps) {
   const { center } = useCenter();
   const [imageError, setImageError] = React.useState(false);
-  const targetHref = href || `/batches/${batch.id}`;
+  const targetHref = href || `/explore/${batch.slug || batch.id}`;
 
   const symbol = center.currencySymbol || '৳';
   const hasFee = batch.feeAmount !== undefined && batch.feeAmount !== null;

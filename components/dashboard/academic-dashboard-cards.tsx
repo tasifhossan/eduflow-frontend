@@ -7,6 +7,8 @@ import {
   AlertTriangle,
   ChevronRight,
   Video,
+  ClipboardCheck,
+  Clock,
 } from 'lucide-react';
 import { apiGet } from '@/lib/api';
 import { formatDate, formatCenterTime, getTimezoneDisplay } from '@/lib/tz';
@@ -47,10 +49,21 @@ export function StudentAcademicsCards({ studentId }: { studentId?: string }) {
 
   const [classes, setClasses] = React.useState<LectureToday[]>([]);
   const [assignments, setAssignments] = React.useState<UpcomingAssignmentItem[]>([]);
+  const [summary, setSummary] = React.useState<AcademicSummaryData | null>(null);
   const [loadingClasses, setLoadingClasses] = React.useState(true);
   const [loadingAssignments, setLoadingAssignments] = React.useState(true);
 
   React.useEffect(() => {
+    let summaryUrl = '/api/dashboard/academic-summary';
+    if (studentId) {
+      summaryUrl += `?studentId=${encodeURIComponent(studentId)}`;
+    }
+    apiGet<{ success: boolean; data: AcademicSummaryData }>(summaryUrl)
+      .then((res) => {
+        if (res?.success && res.data) setSummary(res.data);
+      })
+      .catch(() => {});
+
     // Today's bounds
     const now = new Date();
     const startOfDay = new Date(now);
@@ -85,6 +98,39 @@ export function StudentAcademicsCards({ studentId }: { studentId?: string }) {
 
   return (
     <div className="space-y-6">
+      {/* Server Aggregate Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Classes Today</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{summary?.lecturesToday ?? 0}</p>
+          </div>
+          <Calendar className="h-6 w-6 text-primary/40 shrink-0" />
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">This Week</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{summary?.lecturesThisWeek ?? 0}</p>
+          </div>
+          <Calendar className="h-6 w-6 text-primary/40 shrink-0" />
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Upcoming</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{summary?.upcomingAssignments ?? 0}</p>
+          </div>
+          <Clock className="h-6 w-6 text-primary/40 shrink-0" />
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Overdue</p>
+            <p className={`text-xl font-bold mt-0.5 ${summary && summary.overdueAssignments > 0 ? 'text-status-danger-text' : 'text-foreground'}`}>
+              {summary?.overdueAssignments ?? 0}
+            </p>
+          </div>
+          <AlertTriangle className="h-6 w-6 text-status-warning-text/40 shrink-0" />
+        </div>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Today's Classes */}
         <SectionCard
@@ -244,9 +290,16 @@ export function TeacherAcademicsCards() {
     batch?: { name: string };
     counts?: { submitted: number; graded: number };
   }>>([]);
+  const [summary, setSummary] = React.useState<AcademicSummaryData | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
+    apiGet<{ success: boolean; data: AcademicSummaryData }>('/api/dashboard/academic-summary')
+      .then((res) => {
+        if (res?.success && res.data) setSummary(res.data);
+      })
+      .catch(() => {});
+
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
@@ -273,7 +326,42 @@ export function TeacherAcademicsCards() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      {/* Server Aggregate Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Lectures Today</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{summary?.lecturesToday ?? 0}</p>
+          </div>
+          <Calendar className="h-6 w-6 text-primary/40 shrink-0" />
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">This Week</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{summary?.lecturesThisWeek ?? 0}</p>
+          </div>
+          <Calendar className="h-6 w-6 text-primary/40 shrink-0" />
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Needs Grading</p>
+            <p className={`text-xl font-bold mt-0.5 ${summary && summary.needsGrading > 0 ? 'text-status-warning-text' : 'text-foreground'}`}>
+              {summary?.needsGrading ?? 0}
+            </p>
+          </div>
+          <ClipboardCheck className="h-6 w-6 text-status-warning-text/40 shrink-0" />
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-muted-foreground font-medium">Upcoming Deadlines</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{summary?.upcomingAssignments ?? 0}</p>
+          </div>
+          <Clock className="h-6 w-6 text-primary/40 shrink-0" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Today's Lectures */}
       <SectionCard
         title="Today's Lectures"
@@ -388,50 +476,46 @@ export function TeacherAcademicsCards() {
           </ul>
         )}
       </SectionCard>
+      </div>
     </div>
   );
 }
 
-// ─── Admin: Academics Summary ──────────────────────────────────────────────
+// ─── Academics Summary Cards (Server-side Aggregates) ──────────────────────
 
-export function AdminAcademicsSummaryCard() {
-  const [weekLecturesCount, setWeekLecturesCount] = React.useState<number | null>(null);
-  const [overdueAssignmentsCount, setOverdueAssignmentsCount] = React.useState<number | null>(null);
+export interface AcademicSummaryData {
+  lecturesToday: number;
+  lecturesThisWeek: number;
+  overdueAssignments: number;
+  needsGrading: number;
+  upcomingAssignments: number;
+  unreadNotifications: number;
+}
+
+export function AdminAcademicsSummaryCard({ branchId }: { branchId?: string }) {
+  const [summary, setSummary] = React.useState<AcademicSummaryData | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const now = new Date();
-    const day = now.getDay();
-    const sunday = new Date(now);
-    sunday.setDate(now.getDate() - day);
-    sunday.setHours(0, 0, 0, 0);
+    let url = '/api/dashboard/academic-summary';
+    if (branchId) {
+      url += `?branchId=${encodeURIComponent(branchId)}`;
+    }
 
-    const saturday = new Date(sunday);
-    saturday.setDate(sunday.getDate() + 6);
-    saturday.setHours(23, 59, 59, 999);
-
-    Promise.all([
-      apiGet<{ success: boolean; data: { pagination?: { total?: number }; items?: unknown[] } }>(
-        `/api/lectures?from=${sunday.toISOString()}&to=${saturday.toISOString()}`
-      ),
-      apiGet<{ success: boolean; data: { pagination?: { total?: number }; items?: unknown[] } }>(
-        `/api/assignments?status=overdue`
-      ),
-    ])
-      .then(([lecRes, assignRes]) => {
-        const totalLec = lecRes?.data?.pagination?.total ?? lecRes?.data?.items?.length ?? 0;
-        const totalOverdue = assignRes?.data?.pagination?.total ?? assignRes?.data?.items?.length ?? 0;
-        setWeekLecturesCount(totalLec);
-        setOverdueAssignmentsCount(totalOverdue);
+    apiGet<{ success: boolean; data: AcademicSummaryData }>(url)
+      .then((res) => {
+        if (res?.success && res.data) {
+          setSummary(res.data);
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [branchId]);
 
   return (
     <SectionCard
       title="Academics Summary"
-      description="Branch lecture schedules and assignment deadlines"
+      description="Branch lecture schedules, grading status, and assignment deadlines"
       actions={
         <div className="flex items-center gap-3 text-xs">
           <Link href="/lectures" className="font-semibold text-primary hover:underline">
@@ -443,25 +527,61 @@ export function AdminAcademicsSummaryCard() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Lectures This Week */}
         <div className="p-4 rounded-[var(--radius-control)] border border-border bg-surface-hover/30 flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground font-medium">Lectures This Week</p>
-            <p className="text-2xl font-bold text-foreground mt-1">
-              {loading ? <Skeleton className="h-7 w-12" /> : weekLecturesCount ?? 0}
+            <div className="text-2xl font-bold text-foreground mt-1">
+              {loading ? <Skeleton className="h-7 w-12" /> : summary?.lecturesThisWeek ?? 0}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {summary ? `${summary.lecturesToday} today` : 'Loading...'}
             </p>
           </div>
-          <Calendar className="h-8 w-8 text-primary/40" />
+          <Calendar className="h-8 w-8 text-primary/40 shrink-0" />
         </div>
 
+        {/* Needs Grading */}
+        <div className="p-4 rounded-[var(--radius-control)] border border-border bg-surface-hover/30 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Needs Grading</p>
+            <div className={`text-2xl font-bold mt-1 ${summary && summary.needsGrading > 0 ? 'text-status-warning-text' : 'text-foreground'}`}>
+              {loading ? <Skeleton className="h-7 w-12" /> : summary?.needsGrading ?? 0}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Submissions waiting
+            </p>
+          </div>
+          <ClipboardCheck className="h-8 w-8 text-status-warning-text/40 shrink-0" />
+        </div>
+
+        {/* Upcoming Assignments */}
+        <div className="p-4 rounded-[var(--radius-control)] border border-border bg-surface-hover/30 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Upcoming Assignments</p>
+            <div className="text-2xl font-bold text-foreground mt-1">
+              {loading ? <Skeleton className="h-7 w-12" /> : summary?.upcomingAssignments ?? 0}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Active student deadlines
+            </p>
+          </div>
+          <Clock className="h-8 w-8 text-primary/40 shrink-0" />
+        </div>
+
+        {/* Overdue Assignments */}
         <div className="p-4 rounded-[var(--radius-control)] border border-border bg-surface-hover/30 flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground font-medium">Overdue Assignments</p>
-            <p className="text-2xl font-bold text-status-warning-text mt-1">
-              {loading ? <Skeleton className="h-7 w-12" /> : overdueAssignmentsCount ?? 0}
+            <div className={`text-2xl font-bold mt-1 ${summary && summary.overdueAssignments > 0 ? 'text-status-danger-text' : 'text-foreground'}`}>
+              {loading ? <Skeleton className="h-7 w-12" /> : summary?.overdueAssignments ?? 0}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Past deadline
             </p>
           </div>
-          <AlertTriangle className="h-8 w-8 text-status-warning-text/40" />
+          <AlertTriangle className="h-8 w-8 text-status-warning-text/40 shrink-0" />
         </div>
       </div>
     </SectionCard>

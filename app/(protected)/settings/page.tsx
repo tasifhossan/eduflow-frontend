@@ -34,6 +34,7 @@ import {
   ArrowUp,
   ArrowDown,
   Eye,
+  FileText,
 } from 'lucide-react';
 
 const WHITELISTED_ICONS = [
@@ -80,10 +81,12 @@ const TIMEZONES = [
   'Asia/Tokyo',
 ];
 
+import { PagesSettingsTab } from '@/components/settings/pages-settings-tab';
+
 export default function SettingsPage() {
   const router = useRouter();
   const { updateCenter } = useCenter();
-  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'homepage'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'homepage' | 'pages'>('branding');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -417,6 +420,7 @@ export default function SettingsPage() {
         timezone: formData.timezone,
         defaultLocale: formData.defaultLocale,
         academicYearStartMonth: formData.academicYearStartMonth || 1,
+        weekStartsOn: typeof formData.weekStartsOn === 'number' ? formData.weekStartsOn : 6,
         receiptHeader: formData.receiptHeader || null,
         receiptFooter: formData.receiptFooter || null,
         features: formData.features,
@@ -449,6 +453,25 @@ export default function SettingsPage() {
           showFees: formData.homepage?.showFees !== false,
           showPhotoGallery: formData.homepage?.showPhotoGallery !== false,
         },
+        officeHours: formData.officeHours ? formData.officeHours.trim() : null,
+        about: formData.about
+          ? {
+              headline: formData.about.headline?.trim() || undefined,
+              body: formData.about.body?.trim() || undefined,
+              mission: formData.about.mission?.trim() || undefined,
+              vision: formData.about.vision?.trim() || undefined,
+              facilities: (formData.about.facilities || [])
+                .map((f) => (typeof f === 'string' ? f.trim() : ''))
+                .filter((f) => f.length > 0)
+                .slice(0, 8),
+            }
+          : undefined,
+        legal: formData.legal
+          ? {
+              privacyText: formData.legal.privacyText?.trim() || null,
+              termsText: formData.legal.termsText?.trim() || null,
+            }
+          : undefined,
       };
 
       const res = await apiPatch<ApiResponse<FullCenterSettings>>('/api/settings', payload);
@@ -611,6 +634,19 @@ export default function SettingsPage() {
         >
           <Home className="h-4 w-4" />
           Homepage
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('pages')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+            activeTab === 'pages'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <FileText className="h-4 w-4" />
+          Pages &amp; Content
         </button>
       </div>
 
@@ -1017,6 +1053,29 @@ export default function SettingsPage() {
                 <option value={7}>July (Month 7)</option>
                 <option value={9}>September (Month 9)</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Week Starts On *
+              </label>
+              <select
+                id="weekStartsOnSelect"
+                value={formData.weekStartsOn ?? 6}
+                onChange={(e) => handleChange('weekStartsOn', parseInt(e.target.value, 10))}
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-surface text-foreground"
+              >
+                <option value={6}>Saturday (Default)</option>
+                <option value={0}>Sunday</option>
+                <option value={1}>Monday</option>
+                <option value={2}>Tuesday</option>
+                <option value={3}>Wednesday</option>
+                <option value={4}>Thursday</option>
+                <option value={5}>Friday</option>
+              </select>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Anchors calendar views, lecture schedule headers, and weekly academic aggregates.
+              </p>
             </div>
           </div>
         </div>
@@ -1875,6 +1934,15 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Tab 7: Pages & Legal Overrides */}
+      {activeTab === 'pages' && (
+        <PagesSettingsTab
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+        />
       )}
     </div>
   );

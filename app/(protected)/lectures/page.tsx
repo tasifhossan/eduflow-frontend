@@ -122,31 +122,33 @@ export default function LecturesPage() {
   // Copied passcode tracking
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
-  // Compute week bounds for staff
+  // Compute week bounds using center.weekStartsOn (default 6 = Saturday)
+  const weekStartsOn = typeof center?.weekStartsOn === 'number' ? center.weekStartsOn : 6;
+
   const { weekStart, weekEnd, weekDays } = React.useMemo(() => {
     const now = new Date();
-    // Anchor to Sunday
     const day = now.getDay();
-    const sunday = new Date(now);
-    sunday.setDate(now.getDate() - day + weekOffset * 7);
-    sunday.setHours(0, 0, 0, 0);
+    const diff = (day - weekStartsOn + 7) % 7;
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - diff + weekOffset * 7);
+    startOfWeek.setHours(0, 0, 0, 0);
 
-    const saturday = new Date(sunday);
-    saturday.setDate(sunday.getDate() + 6);
-    saturday.setHours(23, 59, 59, 999);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
 
     const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(sunday);
-      d.setDate(sunday.getDate() + i);
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
       return d;
     });
 
     return {
-      weekStart: sunday.toISOString(),
-      weekEnd: saturday.toISOString(),
+      weekStart: startOfWeek.toISOString(),
+      weekEnd: endOfWeek.toISOString(),
       weekDays: days,
     };
-  }, [weekOffset]);
+  }, [weekOffset, weekStartsOn]);
 
   // Load filter options and guardian children
   React.useEffect(() => {
@@ -227,12 +229,13 @@ export default function LecturesPage() {
           }
         }
 
-        const res = await apiGet<{ success: boolean; data: LectureItem[] }>(
+        const res = await apiGet<{ success: boolean; data: { items?: LectureItem[] } | LectureItem[] }>(
           `/api/lectures?${params.toString()}`
         );
         if (!active) return;
         if (res?.success && res.data) {
-          setLectures(res.data);
+          const list = Array.isArray(res.data) ? res.data : (res.data.items || []);
+          setLectures(list);
           setError(null);
         } else {
           setError('Failed to load lectures');

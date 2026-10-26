@@ -91,3 +91,40 @@ export const siteConfig: SiteConfig = {
     ],
   },
 };
+
+export function isRouteVisible(
+  href: string,
+  features: { publicSite?: boolean; blog?: boolean },
+  content?: {
+    hasPublishedBatches?: boolean;
+    hasTeachers?: boolean;
+    hasBlog?: boolean;
+    hasFaq?: boolean;
+    hasTestimonials?: boolean;
+    hasAbout?: boolean;
+  }
+): boolean {
+  if (href === '/' || href === '/login' || href === '/dashboard') return true;
+  if (href === '/privacy' || href === '/terms') return true;
+
+  // Gated behind publicSite
+  if (features.publicSite === false) return false;
+
+  if (href === '/explore') {
+    return content ? (content.hasPublishedBatches ?? true) : true;
+  }
+  if (href === '/blog') {
+    return (features.blog !== false) && (content ? (content.hasBlog ?? true) : true);
+  }
+  if (href === '/about') {
+    return content ? (content.hasAbout ?? true) : true;
+  }
+  if (href === '/faq') {
+    return content ? (content.hasFaq ?? true) : true;
+  }
+  if (href === '/contact') {
+    return true;
+  }
+
+  return true;
+}

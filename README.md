@@ -24,6 +24,7 @@ Configure your local environment variables in `.env.local` (see `.env.example`):
 | Variable | Description | Example |
 | :--- | :--- | :--- |
 | `NEXT_PUBLIC_API_URL` | Base backend server URL (**without** `/api` suffix) | `http://localhost:5000` |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL for metadataBase, sitemap, and robots.txt | `http://localhost:3000` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID *(to be added later)* | `your-google-client-id.apps.googleusercontent.com` |
 | `NEXT_PUBLIC_APP_NAME` | Platform brand display name | `EduFlow` |
 | `NEXT_PUBLIC_DEV_SHORTCUTS` | Enable quick demo role login shortcuts on `/login` (active only when `NODE_ENV !== 'production'`) | `true` |

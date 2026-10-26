@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Mail, Phone, MapPin, Globe } from 'lucide-react';
-import { siteConfig } from '@/lib/site-config';
+import { siteConfig, isRouteVisible } from '@/lib/site-config';
 import { Container } from '@/components/ui/container';
 import { NewsletterForm } from '@/components/forms/newsletter-form';
 import { FooterBranches } from './footer-branches';
@@ -74,12 +74,12 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
   const { center, features } = useCenter();
 
-  // Filter links by feature flags
-  const filteredQuickLinks = siteConfig.footer.quickLinks.filter((link) => {
-    if (link.href === '/blog' && !features.blog) return false;
-    if (link.href === '/explore' && !features.publicSite) return false;
-    return true;
-  });
+  // Filter links by feature flags and content availability
+  const filteredQuickLinks = siteConfig.footer.quickLinks.filter((link) =>
+    isRouteVisible(link.href, features, center.content)
+  );
+
+  const showFaq = isRouteVisible('/faq', features, center.content);
 
   return (
     <footer
@@ -249,14 +249,16 @@ export function Footer() {
                 Resources
               </div>
               <ul className="space-y-2.5 text-xs">
-                <li>
-                  <Link
-                    href="/faq"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Help & FAQ
-                  </Link>
-                </li>
+                {showFaq && (
+                  <li>
+                    <Link
+                      href="/faq"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Help & FAQ
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link
                     href="/privacy"

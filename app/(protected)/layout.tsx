@@ -1,10 +1,18 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getCurrentUser } from '@/lib/auth';
 import { getCenterData } from '@/lib/center';
 import { apiGet } from '@/lib/api';
 import { DashboardShell } from '@/components/dashboard';
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function ProtectedLayout({
   children,
