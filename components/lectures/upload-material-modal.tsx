@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { apiPost } from '@/lib/api';
-import { uploadToCloudinary } from '@/lib/upload';
+import { uploadToCloudinary, getUploadLimits, type UploadLimits } from '@/lib/upload';
 import { toast } from 'sonner';
 import { Upload, Link as LinkIcon, X, RotateCcw, FileText } from 'lucide-react';
 
@@ -39,9 +39,29 @@ export function UploadMaterialModal({
   const [linkUrl, setLinkUrl] = React.useState('');
   const [isSubmittingLink, setIsSubmittingLink] = React.useState(false);
 
+  const [limits, setLimits] = React.useState<UploadLimits | null>(null);
+
+  React.useEffect(() => {
+    getUploadLimits('material').then(setLimits).catch(() => {});
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
+      const ext = selected.name.split('.').pop()?.toLowerCase() || '';
+
+      if (limits && limits.allowedFormats.length > 0 && !limits.allowedFormats.includes(ext)) {
+        setUploadError(`File format .${ext || 'unknown'} is not allowed. Allowed formats: ${limits.allowedFormats.join(', ')}`);
+        setFile(null);
+        return;
+      }
+
+      if (limits && selected.size > limits.maxBytes) {
+        setUploadError(`File size (${(selected.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum allowed limit of ${limits.maxMb}MB`);
+        setFile(null);
+        return;
+      }
+
       setFile(selected);
       if (!fileTitle) {
         setFileTitle(selected.name.replace(/\.[^/.]+$/, ''));
@@ -204,13 +224,15 @@ export function UploadMaterialModal({
                   Click to select file or drag and drop
                 </span>
                 <span className="text-[11px] text-muted-foreground mt-1">
-                  PDF, DOCX, PPTX, XLSX, ZIP, Images, Audio (Max 15MB)
+                  {limits
+                    ? `Allowed: ${limits.allowedFormats.map((f) => f.toUpperCase()).join(', ')} (Max ${limits.maxMb}MB)`
+                    : 'PDF, DOCX, PPTX, XLSX, Images (Max 15MB)'}
                 </span>
                 <input
                   type="file"
                   onChange={handleFileChange}
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.png,.jpg,.jpeg,.webp,.mp3,.m4a"
+                  accept={limits?.acceptString || '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.webp'}
                 />
               </label>
             ) : (

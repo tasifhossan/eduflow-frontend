@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api';
 import { formatDate, formatCenterTime, getTimezoneDisplay } from '@/lib/tz';
-import { uploadToCloudinary } from '@/lib/upload';
+import { uploadToCloudinary, getUploadLimits, type UploadLimits } from '@/lib/upload';
 import { useCenter } from '@/components/providers/center-provider';
 import { useAuth } from '@/components/providers/auth-provider';
 import { StatusBadge } from '@/components/dashboard/status-badge';
@@ -300,6 +300,13 @@ export default function AssignmentDetailPage() {
     }
   };
 
+  // Dynamic submission upload limits
+  const [submissionLimits, setSubmissionLimits] = React.useState<UploadLimits | null>(null);
+
+  React.useEffect(() => {
+    getUploadLimits('submission').then(setSubmissionLimits).catch(() => {});
+  }, []);
+
   // Student: Add files for submission
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -310,7 +317,26 @@ export default function AssignmentDetailPage() {
       return;
     }
 
-    const newItems: UploadFileState[] = files.map((file) => ({
+    const validFiles: File[] = [];
+    for (const f of files) {
+      const ext = f.name.split('.').pop()?.toLowerCase() || '';
+      if (submissionLimits && submissionLimits.allowedFormats.length > 0 && !submissionLimits.allowedFormats.includes(ext)) {
+        toast.error(`File "${f.name}" format .${ext || 'unknown'} is not allowed. Allowed formats: ${submissionLimits.allowedFormats.join(', ')}`);
+        continue;
+      }
+      if (submissionLimits && f.size > submissionLimits.maxBytes) {
+        toast.error(`File "${f.name}" exceeds maximum allowed size of ${submissionLimits.maxMb}MB`);
+        continue;
+      }
+      validFiles.push(f);
+    }
+
+    if (validFiles.length === 0) {
+      e.target.value = '';
+      return;
+    }
+
+    const newItems: UploadFileState[] = validFiles.map((file) => ({
       id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       file,
       progress: 0,
@@ -1137,7 +1163,7 @@ export default function AssignmentDetailPage() {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <label className="font-semibold text-foreground">
-                            Upload Solution Files (Up to 5 files, max 10MB each)
+                            Upload Solution Files (Up to 5 files, max {submissionLimits?.maxMb || 10}MB each)
                           </label>
                           <span className="text-muted-foreground">{stagedFiles.length}/5 files</span>
                         </div>
@@ -1150,7 +1176,7 @@ export default function AssignmentDetailPage() {
                               multiple
                               className="hidden"
                               onChange={handleFileSelect}
-                              accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp"
+                              accept={submissionLimits?.acceptString || '.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp'}
                             />
                             <label
                               htmlFor="submissionFileInput"
@@ -1161,7 +1187,9 @@ export default function AssignmentDetailPage() {
                                 Choose files to upload
                               </span>
                               <span className="text-[11px] text-muted-foreground">
-                                Supported: PDF, DOC, DOCX, TXT, PNG, JPG (10MB limit)
+                                {submissionLimits
+                                  ? `Supported: ${submissionLimits.allowedFormats.map((f) => f.toUpperCase()).join(', ')} (${submissionLimits.maxMb}MB limit)`
+                                  : 'Supported: PDF, DOC, DOCX, PNG, JPG (10MB limit)'}
                               </span>
                             </label>
                           </div>

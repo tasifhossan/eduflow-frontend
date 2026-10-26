@@ -72,6 +72,7 @@ export interface CenterPublicData {
   currencySymbol: string;
   timezone: string;
   defaultLocale: string;
+  weekStartsOn?: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday (default 6)
   features: CenterFeatures;
   homepage?: HomepageSettings;
 }
@@ -102,6 +103,7 @@ export const defaultCenterData: CenterPublicData = {
   currencySymbol: '৳',
   timezone: 'Asia/Dhaka',
   defaultLocale: 'en',
+  weekStartsOn: 6,
   features: {
     publicSite: true,
     aiAssistant: true,
