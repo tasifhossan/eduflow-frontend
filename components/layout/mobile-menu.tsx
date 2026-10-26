@@ -16,7 +16,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { siteConfig } from '@/lib/site-config';
+import { siteConfig, isRouteVisible } from '@/lib/site-config';
 import { useAuth } from '@/components/providers/auth-provider';
 import { useCenter } from '@/components/providers/center-provider';
 import { Button } from '@/components/ui/button';
@@ -108,7 +108,7 @@ export function MobileMenu() {
 
   const rawNavLinks = user ? siteConfig.nav.loggedIn : siteConfig.nav.loggedOut;
   const navLinks = (user || features.publicSite ? rawNavLinks : []).filter(
-    (item) => !(item.href === '/blog' && !features.blog)
+    (item) => isRouteVisible(item.href, features, center.content)
   );
 
   return (
@@ -271,7 +271,7 @@ export function MobileMenu() {
                   {isResourcesOpen && (
                     <div className="mt-1 space-y-1 pl-2 border-l-2 border-border/60 ml-3">
                       {siteConfig.nav.resourcesMenu
-                        .filter((item) => !(item.href === '/blog' && !features.blog))
+                        .filter((item) => isRouteVisible(item.href, features, center.content))
                         .map((item) => {
                           const Icon = item.iconName ? ICON_MAP[item.iconName] || HelpCircle : HelpCircle;
                           const isItemActive = pathname === item.href || pathname.startsWith(`${item.href}/`);

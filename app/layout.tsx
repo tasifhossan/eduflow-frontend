@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = `${center.name} coaching management portal. Manage batches, attendance, exams, and routines.`;
 
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
     title: {
       default: title,
       template: `%s | ${center.name}`,

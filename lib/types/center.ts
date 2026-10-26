@@ -56,6 +56,29 @@ export interface HomepageSettings {
   showPhotoGallery?: boolean;
 }
 
+export interface AboutSettings {
+  headline?: string | null;
+  body?: string | null;
+  mission?: string | null;
+  vision?: string | null;
+  facilities?: string[] | null;
+}
+
+export interface LegalSettings {
+  privacyText?: string | null;
+  termsText?: string | null;
+  updatedOn?: string | null;
+}
+
+export interface CenterContentSummary {
+  hasPublishedBatches: boolean;
+  hasTeachers: boolean;
+  hasBlog: boolean;
+  hasFaq: boolean;
+  hasTestimonials: boolean;
+  hasAbout: boolean;
+}
+
 export interface CenterPublicData {
   name: string;
   shortName: string;
@@ -67,6 +90,7 @@ export interface CenterPublicData {
   contactPhone: string;
   whatsapp: string | null;
   address: string | null;
+  officeHours?: string | null;
   socials: CenterSocials;
   currency: string;
   currencySymbol: string;
@@ -75,6 +99,9 @@ export interface CenterPublicData {
   weekStartsOn?: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday (default 6)
   features: CenterFeatures;
   homepage?: HomepageSettings;
+  about?: AboutSettings | null;
+  legal?: LegalSettings | null;
+  content?: CenterContentSummary;
 }
 
 export interface FullCenterSettings extends CenterPublicData {
@@ -98,6 +125,7 @@ export const defaultCenterData: CenterPublicData = {
   contactPhone: '',
   whatsapp: null,
   address: null,
+  officeHours: null,
   socials: {},
   currency: 'BDT',
   currencySymbol: '৳',
@@ -128,6 +156,16 @@ export const defaultCenterData: CenterPublicData = {
     admissionSteps: [],
     showFees: true,
     showPhotoGallery: true,
+  },
+  about: null,
+  legal: null,
+  content: {
+    hasPublishedBatches: true,
+    hasTeachers: true,
+    hasBlog: true,
+    hasFaq: true,
+    hasTestimonials: true,
+    hasAbout: true,
   },
 };
 

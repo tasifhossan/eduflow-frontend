@@ -11,7 +11,7 @@ import { NavbarAuth } from '@/components/layout/navbar-auth';
 import { MobileMenu } from '@/components/layout/mobile-menu';
 import { useAuth } from '@/components/providers/auth-provider';
 import { useCenter } from '@/components/providers/center-provider';
-import { siteConfig } from '@/lib/site-config';
+import { siteConfig, isRouteVisible } from '@/lib/site-config';
 import { cn } from '@/lib/cn';
 import {
   ChevronDown,
@@ -48,19 +48,13 @@ export function Navbar() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  // Filter nav links based on auth state and feature flags
+  // Filter nav links based on auth state, feature flags, and content availability
   const rawNavLinks = user ? siteConfig.nav.loggedIn : siteConfig.nav.loggedOut;
-  const navLinks = rawNavLinks.filter((item) => {
-    if (item.href === '/blog' && !features.blog) return false;
-    return true;
-  });
+  const navLinks = rawNavLinks.filter((item) => isRouteVisible(item.href, features, center.content));
 
   // Resources dropdown items for logged-out navigation
   const resourcesItems: DropdownMenuItem[] = siteConfig.nav.resourcesMenu
-    .filter((item) => {
-      if (item.href === '/blog' && !features.blog) return false;
-      return true;
-    })
+    .filter((item) => isRouteVisible(item.href, features, center.content))
     .map((item) => {
       const IconComponent = item.iconName ? ICON_MAP[item.iconName] || HelpCircle : HelpCircle;
       return {
