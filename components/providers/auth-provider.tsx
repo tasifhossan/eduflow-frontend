@@ -11,7 +11,7 @@ export interface AuthUser {
   email?: string | null;
   phone?: string | null;
   studentCode?: string | null;
-  role: 'SUPER_ADMIN' | 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'ACCOUNTANT';
   branchId?: string;
   avatarUrl?: string | null;
   mustChangePassword?: boolean;

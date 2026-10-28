@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:format": "npx tsx scripts/check-format.ts",
     "check:links": "npx tsx scripts/check-links.ts",
     "check:theme": "npx tsx scripts/check-theme.ts",
     "check:colors": "npx tsx scripts/check-colors.ts",

@@ -108,6 +108,7 @@ export interface FullCenterSettings extends CenterPublicData {
   id?: string;
   key?: string;
   academicYearStartMonth?: number;
+  feeDueDay?: number;
   receiptHeader?: string | null;
   receiptFooter?: string | null;
   createdAt?: string;

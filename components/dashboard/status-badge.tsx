@@ -17,7 +17,10 @@ export type StatusVariant =
   | 'graded'
   | 'missing'
   | 'overdue'
-  | 'in_progress';
+  | 'in_progress'
+  | 'waived'
+  | 'void'
+  | 'reversed';
 
 export interface StatusBadgeProps {
   variant: StatusVariant;
@@ -89,6 +92,21 @@ const variantStyles: Record<
     container: 'bg-status-danger-bg text-status-danger-text border-status-danger-border',
     dot: 'bg-status-danger',
     defaultLabel: 'Overdue',
+  },
+  waived: {
+    container: 'bg-status-info-bg text-status-info-text border-status-info-border',
+    dot: 'bg-status-info',
+    defaultLabel: 'Waived',
+  },
+  void: {
+    container: 'bg-muted text-muted-foreground border-border line-through',
+    dot: 'bg-muted-foreground',
+    defaultLabel: 'Void',
+  },
+  reversed: {
+    container: 'bg-status-danger-bg text-status-danger-text border-status-danger-border line-through',
+    dot: 'bg-status-danger',
+    defaultLabel: 'Reversed',
   },
   upcoming: {
     container: 'bg-status-info-bg text-status-info-text border-status-info-border',

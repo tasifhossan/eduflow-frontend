@@ -160,14 +160,15 @@ export default async function StudentDetailPage({
         studentProfile = summaryResponse.data.find((s) => s.id === studentId) || null;
       }
     } else if (isOwnProfile) {
+      const u = user as unknown as Record<string, string | null>;
       studentProfile = {
         id: user.id,
         name: user.name,
         email: user.email || '',
-        phone: (user as any).phone || null,
-        guardianName: (user as any).guardianName || null,
-        guardianPhone: (user as any).guardianPhone || null,
-        createdAt: (user as any).createdAt || new Date().toISOString(),
+        phone: u.phone || null,
+        guardianName: u.guardianName || null,
+        guardianPhone: u.guardianPhone || null,
+        createdAt: u.createdAt || new Date().toISOString(),
       };
     } else if (isLinkedChild && linkedChildInfo) {
       studentProfile = {
@@ -187,15 +188,15 @@ export default async function StudentDetailPage({
       if (user.role === 'GUARDIAN') {
         // Fetch guardian linked child data
         const [attRes, resRes, payRes] = await Promise.all([
-          apiGet<{ success: boolean; data: any[] }>(
+          apiGet<{ success: boolean; data: Array<{ id: string; date: string; status: string; batch?: { name: string } }> }>(
             `/api/guardians/students/${studentId}/attendance`,
             { headers: { Cookie: cookieHeader } }
           ).catch(() => ({ success: false, data: [] })),
-          apiGet<{ success: boolean; data: any[] }>(
+          apiGet<{ success: boolean; data: Array<{ id: string; submittedAt: string; totalMarksObtained: number; rank?: number | null; test?: { id: string; title: string; testDate?: string; totalMarks: number; batch?: { name: string } } }> }>(
             `/api/guardians/students/${studentId}/results`,
             { headers: { Cookie: cookieHeader } }
           ).catch(() => ({ success: false, data: [] })),
-          apiGet<{ success: boolean; data: any[] }>(
+          apiGet<{ success: boolean; data: Array<{ id: string; period?: string | null; amountDue: number; amountPaid: number; status: string; dueDate?: string | null; paidAt?: string | null; createdAt?: string; batch?: { id: string; name: string } }> }>(
             `/api/guardians/students/${studentId}/payments`,
             { headers: { Cookie: cookieHeader } }
           ).catch(() => ({ success: false, data: [] })),
@@ -205,26 +206,29 @@ export default async function StudentDetailPage({
           attendanceHistory = attRes.data.map((r) => ({
             id: r.id,
             date: r.date,
-            status: r.status,
+            status: r.status as 'PRESENT' | 'ABSENT' | 'LATE',
             batch: { name: r.batch?.name || 'Batch' },
           }));
         }
 
         if (resRes.success && resRes.data) {
-          scoreTrend = resRes.data.map((r) => ({
-            testId: r.test?.id || r.id,
-            testName: r.test?.title || 'Test',
-            testDate: r.test?.testDate || r.submittedAt,
-            submittedAt: r.submittedAt,
-            totalMarks: r.test?.totalMarks || 100,
-            score: r.totalMarksObtained,
-            percentage:
-              r.test?.totalMarks > 0
-                ? parseFloat(((r.totalMarksObtained / r.test.totalMarks) * 100).toFixed(2))
-                : null,
-            rank: r.rank || null,
-            batchName: r.test?.batch?.name || 'Batch',
-          }));
+          scoreTrend = resRes.data.map((r) => {
+            const total = r.test?.totalMarks ?? 100;
+            return {
+              testId: r.test?.id || r.id,
+              testName: r.test?.title || 'Test',
+              testDate: r.test?.testDate || r.submittedAt,
+              submittedAt: r.submittedAt,
+              totalMarks: total,
+              score: r.totalMarksObtained,
+              percentage:
+                total > 0
+                  ? parseFloat(((r.totalMarksObtained / total) * 100).toFixed(2))
+                  : null,
+              rank: r.rank || null,
+              batchName: r.test?.batch?.name || 'Batch',
+            };
+          });
         }
 
         if (payRes.success && payRes.data) {
@@ -232,12 +236,12 @@ export default async function StudentDetailPage({
             id: p.id,
             studentId,
             batchId: p.batch?.id || '',
-            period: p.period,
+            period: p.period || '',
             amountDue: p.amountDue,
             amountPaid: p.amountPaid,
-            status: p.status,
-            dueDate: p.dueDate,
-            paidAt: p.paidAt,
+            status: p.status as 'DUE' | 'PARTIAL' | 'PAID',
+            dueDate: p.dueDate || null,
+            paidAt: p.paidAt || null,
             createdAt: p.createdAt || new Date().toISOString(),
             batch: { id: p.batch?.id || '', name: p.batch?.name || 'Batch' },
           }));
@@ -294,8 +298,8 @@ export default async function StudentDetailPage({
         }
       }
     }
-  } catch (err: any) {
-    errorMsg = err.message || 'Failed to load student details';
+  } catch (err: unknown) {
+    errorMsg = err instanceof Error ? err.message : 'Failed to load student details';
   }
 
   // Summary totals for payment history
@@ -474,13 +478,21 @@ export default async function StudentDetailPage({
                 )}
               </div>
 
-              {/* Payment History (ADMIN Only) */}
-              {user.role === 'ADMIN' && (
+              {/* Payment History (Staff Only) */}
+              {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'ACCOUNTANT') && (
                 <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
                   <div className="px-6 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-foreground">Payment History</h3>
-                      <p className="text-xs text-muted-foreground">All payment records across enrolled batches</p>
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-bold text-foreground">Fee Account & Payments</h3>
+                        <Link
+                          href={`/fees/students/${studentId}`}
+                          className="rounded-[var(--radius-control)] bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+                        >
+                          View Full Ledger →
+                        </Link>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Append-only fee ledger and charges breakdown</p>
                     </div>
 
                     {/* Summary Totals */}
