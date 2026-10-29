@@ -27,19 +27,24 @@ interface PaymentRow {
   method: string;
   reference: string | null;
   note: string | null;
-  student: {
+  studentId?: string;
+  studentName?: string;
+  studentCode?: string | null;
+  student?: {
     id: string;
     name: string;
     studentCode: string | null;
-  };
-  receivedBy: {
-    id: string;
+  } | null;
+  receivedByName?: string;
+  receivedBy?: {
+    id?: string;
     name: string;
-  };
+  } | null;
   isReversed: boolean;
-  reversal: {
+  reversalReason?: string | null;
+  reversal?: {
     reason: string;
-    reversedAt: string;
+    reversedAt?: string;
   } | null;
   allocationsCount?: number;
 }
@@ -327,82 +332,96 @@ export default function PaymentsLedgerPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {data.items.map((p) => (
-                      <tr
-                        key={p.id}
-                        className={`hover:bg-surface-hover/50 transition ${
-                          p.isReversed ? 'opacity-60 bg-muted/20' : ''
-                        }`}
-                      >
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/fees/receipts/${p.id}`}
-                            className={`font-mono text-xs font-bold text-primary hover:underline ${
-                              p.isReversed ? 'line-through text-muted-foreground' : ''
-                            }`}
-                          >
-                            {p.receiptNumber}
-                          </Link>
-                          {p.reference && (
-                            <div className="text-xs text-muted-foreground">Ref: {p.reference}</div>
-                          )}
-                          {p.reversal && (
-                            <div className="text-xs text-status-danger-text italic mt-0.5">
-                              Reversed: {p.reversal.reason}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/fees/students/${p.student.id}`}
-                            className="font-semibold text-foreground hover:text-primary transition"
-                          >
-                            {p.student.name}
-                          </Link>
-                          {p.student.studentCode && (
-                            <div className="text-xs font-mono text-muted-foreground">
-                              {p.student.studentCode}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-xs font-bold text-foreground">
-                          <span className={p.isReversed ? 'line-through text-status-danger-text' : ''}>
-                            {formatMoney(p.amount, center.currency, center.currencySymbol)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-foreground font-medium">{p.method}</td>
-                        <td className="px-4 py-3 text-xs text-muted-foreground">
-                          {p.receivedBy?.name || 'Staff'}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                          {formatDate(p.receivedAt, center.timezone)}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {p.isReversed ? (
-                            <StatusBadge variant="reversed" />
-                          ) : (
-                            <StatusBadge variant="paid" />
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                    {data.items.map((p) => {
+                      const studentId = p.student?.id || p.studentId || '';
+                      const studentName = p.student?.name || p.studentName || 'Student';
+                      const studentCode = p.student?.studentCode ?? p.studentCode;
+                      const receivedByName = p.receivedBy?.name || p.receivedByName || 'Staff';
+                      const reversalReason = p.reversal?.reason || p.reversalReason;
+
+                      return (
+                        <tr
+                          key={p.id}
+                          className={`hover:bg-surface-hover/50 transition ${
+                            p.isReversed ? 'opacity-60 bg-muted/20' : ''
+                          }`}
+                        >
+                          <td className="px-4 py-3">
                             <Link
                               href={`/fees/receipts/${p.id}`}
-                              className="inline-flex items-center gap-1 rounded-[var(--radius-control)] border border-border px-2 py-1 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+                              className={`font-mono text-xs font-bold text-primary hover:underline ${
+                                p.isReversed ? 'line-through text-muted-foreground' : ''
+                              }`}
                             >
-                              <Printer className="h-3.5 w-3.5" />
-                              Receipt
+                              {p.receiptNumber}
                             </Link>
-                            <Link
-                              href={`/fees/students/${p.student.id}`}
-                              className="rounded-[var(--radius-control)] border border-border px-2 py-1 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
-                            >
-                              Ledger
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                            {p.reference && (
+                              <div className="text-xs text-muted-foreground">Ref: {p.reference}</div>
+                            )}
+                            {reversalReason && (
+                              <div className="text-xs text-status-danger-text italic mt-0.5">
+                                Reversed: {reversalReason}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {studentId ? (
+                              <Link
+                                href={`/fees/students/${studentId}`}
+                                className="font-semibold text-foreground hover:text-primary transition"
+                              >
+                                {studentName}
+                              </Link>
+                            ) : (
+                              <span className="font-semibold text-foreground">{studentName}</span>
+                            )}
+                            {studentCode && (
+                              <div className="text-xs font-mono text-muted-foreground">
+                                {studentCode}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-xs font-bold text-foreground">
+                            <span className={p.isReversed ? 'line-through text-status-danger-text' : ''}>
+                              {formatMoney(p.amount, center.currency, center.currencySymbol)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-foreground font-medium">{p.method}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {receivedByName}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDate(p.receivedAt, center.timezone)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {p.isReversed ? (
+                              <StatusBadge variant="reversed" />
+                            ) : (
+                              <StatusBadge variant="paid" />
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Link
+                                href={`/fees/receipts/${p.id}`}
+                                className="inline-flex items-center gap-1 rounded-[var(--radius-control)] border border-border px-2 py-1 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+                              >
+                                <Printer className="h-3.5 w-3.5" />
+                                Receipt
+                              </Link>
+                              {studentId && (
+                                <Link
+                                  href={`/fees/students/${studentId}`}
+                                  className="rounded-[var(--radius-control)] border border-border px-2 py-1 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+                                >
+                                  Ledger
+                                </Link>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
