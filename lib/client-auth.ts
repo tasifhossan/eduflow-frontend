@@ -30,3 +30,22 @@ export function parseJwt(token: string): Record<string, unknown> | null {
   void token;
   return null;
 }
+
+/**
+ * Removes any offline exam answer backups from localStorage upon logout or session termination.
+ */
+export function clearExamBackups(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('eduflow_answers_backup_')) {
+        keysToRemove.push(key);
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key);
+    }
+  } catch {}
+}

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { apiGet, apiPost } from '@/lib/api';
+import { clearExamBackups } from '@/lib/client-auth';
 
 export interface AuthUser {
   id: string;
@@ -85,12 +86,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = React.useCallback(async () => {
     try {
+      clearExamBackups();
       await apiPost('/api/auth/logout');
       setUser(null);
       toast.success('Logged out successfully');
       router.push('/');
       router.refresh();
     } catch {
+      clearExamBackups();
       setUser(null);
       toast.success('Logged out successfully');
       router.push('/');

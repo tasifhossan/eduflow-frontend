@@ -6,6 +6,7 @@ import { Menu, KeyRound, LogOut, ChevronDown, Building, Moon, Sun } from 'lucide
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { apiPost } from '@/lib/api';
+import { clearExamBackups } from '@/lib/client-auth';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -42,9 +43,11 @@ export function DashboardHeader({
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
+      clearExamBackups();
       await apiPost('/api/auth/logout');
       toast.success('Signed out successfully');
     } catch (err) {
+      clearExamBackups();
       console.warn('Backend logout warning:', err);
     } finally {
       router.push('/login');

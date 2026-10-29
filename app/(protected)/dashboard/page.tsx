@@ -318,6 +318,31 @@ function StudentFeeSummaryCard({ account }: { account: StudentFeeAccountSummary 
   );
 }
 
+function GuardianFeeSummaryCard({ childrenCount }: { childrenCount: number }) {
+  if (childrenCount === 0) return null;
+  return (
+    <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-[var(--radius-control)] bg-primary-subtle text-primary border border-border flex items-center justify-center shrink-0">
+          <CreditCard className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-foreground">Student Fees & Receipts</p>
+          <p className="text-xs text-muted-foreground">
+            Review detailed fee statements, pending balances, and download official payment receipts for your linked students.
+          </p>
+        </div>
+      </div>
+      <Link
+        href="/my-fees"
+        className="rounded-[var(--radius-control)] bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition whitespace-nowrap"
+      >
+        View Fees & Receipts →
+      </Link>
+    </div>
+  );
+}
+
 function UpcomingTestsList({ tests }: { tests: UpcomingTest[] }) {
   if (tests.length === 0) {
     return (
@@ -666,6 +691,9 @@ function GuardianDashboard({ data }: { data: GuardianSummary }) {
         />
       </div>
 
+      {/* Guardian Fee Summary Card */}
+      <GuardianFeeSummaryCard childrenCount={childrenCount} />
+
       {/* Linked children */}
       <SectionCard
         title="Linked Children"
@@ -707,7 +735,13 @@ function GuardianDashboard({ data }: { data: GuardianSummary }) {
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-border flex justify-end">
+                <div className="pt-2 border-t border-border flex items-center justify-end gap-2">
+                  <Link
+                    href="/my-fees"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-control)] border border-border hover:bg-surface-hover text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span>Fees</span>
+                  </Link>
                   <Link
                     href={`/my-children/${child.id}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-control)] bg-primary text-primary-foreground hover:bg-primary-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
