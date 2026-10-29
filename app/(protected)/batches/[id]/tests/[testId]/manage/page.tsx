@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiDelete, apiPatch } from '@/lib/api';
@@ -34,6 +34,10 @@ interface TestDetails {
   negativeMarkingValue: number;
   durationMinutes?: number | null;
   testDate: string;
+  windowEndsAt?: string | null;
+  shuffleQuestions?: boolean;
+  shuffleOptions?: boolean;
+  chapterId?: string | null;
   batchId: string;
   questions: Question[];
 }
@@ -53,6 +57,11 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Lock status (attempts exist)
+  const [hasAttempts, setHasAttempts] = useState(false);
+  const [attemptsCount, setAttemptsCount] = useState(0);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+
   // Question Form States
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [text, setText] = useState('');
@@ -66,6 +75,19 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
 
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchTestDetails = useCallback(async () => {
+    const testRes = await apiGet<{ success: boolean; data: TestDetails }>(`/api/tests/${testId}`);
+    if (testRes.success) {
+      setTest(testRes.data);
+      if (!editingQuestionId) {
+        const nextOrder = testRes.data.questions.length > 0
+          ? Math.max(...testRes.data.questions.map((q) => q.order)) + 1
+          : 1;
+        setOrder(String(nextOrder));
+      }
+    }
+  }, [testId, editingQuestionId]);
 
   // Role validation & fetch initial data
   useEffect(() => {
@@ -93,27 +115,84 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
         }
 
         await fetchTestDetails();
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load test parameters');
+
+        // Check if student attempts exist
+        try {
+          const attemptsRes = await apiGet<{ success: boolean; data: { attempts: unknown[] } }>(
+            `/api/tests/${testId}/attempts`
+          );
+          if (attemptsRes.success && Array.isArray(attemptsRes.data.attempts)) {
+            const count = attemptsRes.data.attempts.length;
+            setHasAttempts(count > 0);
+            setAttemptsCount(count);
+          }
+        } catch {
+          // Ignore attempt check failure if non-staff or not available
+        }
+      } catch (err: unknown) {
+        setErrorMsg((err as Error).message || 'Failed to load test parameters');
       } finally {
         setLoading(false);
       }
     }
 
     init();
-  }, [batchId, testId, router]);
+  }, [batchId, testId, router, fetchTestDetails]);
 
-  const fetchTestDetails = async () => {
-    const testRes = await apiGet<{ success: boolean; data: TestDetails }>(`/api/tests/${testId}`);
-    if (testRes.success) {
-      setTest(testRes.data);
-      // Auto-suggest next order index
-      if (!editingQuestionId) {
-        const nextOrder = testRes.data.questions.length > 0
-          ? Math.max(...testRes.data.questions.map((q) => q.order)) + 1
-          : 1;
-        setOrder(String(nextOrder));
+  const handleDuplicateTest = async () => {
+    if (!test || isDuplicating) return;
+
+    setIsDuplicating(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      // 1. Create duplicate test header
+      const createPayload = {
+        title: `${test.title} (Copy)`,
+        type: test.type,
+        batchId: test.batchId,
+        chapterId: test.chapterId || null,
+        totalMarks: test.totalMarks,
+        negativeMarkingValue: test.negativeMarkingValue,
+        durationMinutes: test.durationMinutes || null,
+        testDate: new Date().toISOString(),
+        windowEndsAt: test.windowEndsAt || null,
+        shuffleQuestions: !!test.shuffleQuestions,
+        shuffleOptions: !!test.shuffleOptions,
+      };
+
+      const createRes = await apiPost<{ success: boolean; data: { id: string }; message?: string }>(
+        '/api/tests',
+        createPayload
+      );
+
+      if (!createRes.success || !createRes.data?.id) {
+        throw new Error(createRes.message || 'Failed to clone test');
       }
+
+      const newTestId = createRes.data.id;
+
+      // 2. Clone questions if existing test has any
+      if (test.questions && test.questions.length > 0) {
+        const bulkPayload = test.questions.map((q) => ({
+          type: q.type,
+          text: q.text,
+          marks: q.marks,
+          order: q.order,
+          options: q.type === 'MCQ'
+            ? q.options.map((o) => ({ text: o.text, isCorrect: o.isCorrect }))
+            : [],
+        }));
+
+        await apiPost(`/api/tests/${newTestId}/questions/bulk`, bulkPayload);
+      }
+
+      router.push(`/batches/${batchId}/tests/${newTestId}/manage`);
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'Failed to duplicate test');
+    } finally {
+      setIsDuplicating(false);
     }
   };
 
@@ -158,6 +237,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
   };
 
   const handleEditClick = (q: Question) => {
+    if (hasAttempts) return;
     setEditingQuestionId(q.id);
     setText(q.text);
     setType(q.type);
@@ -176,6 +256,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
   };
 
   const handleDeleteQuestion = async (qId: string) => {
+    if (hasAttempts) return;
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     setErrorMsg(null);
@@ -190,14 +271,14 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
       } else {
         setErrorMsg(res.message || 'Failed to delete question');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred while deleting the question');
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'An error occurred while deleting the question');
     }
   };
 
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || hasAttempts) return;
 
     setFormError(null);
     setSuccessMsg(null);
@@ -219,7 +300,6 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
       return;
     }
 
-    // MCQ specific validations
     let cleanedOptions: Option[] = [];
     if (type === 'MCQ') {
       if (options.some((opt) => !opt.text.trim())) {
@@ -269,8 +349,8 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
       } else {
         setFormError('Failed to save question');
       }
-    } catch (err: any) {
-      setFormError(err.message || 'An error occurred while saving the question');
+    } catch (err: unknown) {
+      setFormError((err as Error).message || 'An error occurred while saving the question');
     } finally {
       setIsSubmitting(false);
     }
@@ -280,7 +360,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading question builder...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading question builder...</span>
       </div>
     );
   }
@@ -288,9 +368,9 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
   if (errorMsg || !test || !batch) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Builder</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg || 'Parameters not found or access denied.'}</p>
+        <div className="rounded-[var(--radius-card)] bg-status-danger-bg p-4 border border-status-danger-border">
+          <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Builder</h3>
+          <p className="text-sm text-status-danger-text mt-1">{errorMsg || 'Parameters not found or access denied.'}</p>
         </div>
         <Link href={`/batches/${batchId}/tests`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to tests list
@@ -306,23 +386,33 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
+        <nav className="flex text-sm text-muted-foreground gap-x-2">
           <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
           <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch.name}</Link>
           <span>/</span>
           <Link href={`/batches/${batchId}/tests`} className="hover:text-primary font-medium">Tests</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">{test.title}</span>
+          <span className="text-foreground font-semibold">{test.title}</span>
         </nav>
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">{test.title}</h1>
-            <p className="mt-2 text-sm text-gray-500">Design questions and choices for this cohort exam</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{test.title}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Design questions and choices for this cohort exam</p>
           </div>
-          <div className="flex gap-x-3">
+          <div className="flex flex-wrap gap-3">
+            {hasAttempts && (
+              <button
+                type="button"
+                onClick={handleDuplicateTest}
+                disabled={isDuplicating}
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover shadow-sm transition disabled:opacity-50"
+              >
+                {isDuplicating ? 'Duplicating...' : 'Duplicate Test'}
+              </button>
+            )}
             <Link
               href={`/batches/${batchId}/tests/${testId}/results`}
               className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
@@ -340,8 +430,30 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
 
         {/* Global Notifications */}
         {successMsg && (
-          <div className="rounded-lg bg-green-50 p-4 border border-green-200">
-            <p className="text-sm text-green-700 font-medium">✓ {successMsg}</p>
+          <div className="rounded-[var(--radius-card)] bg-status-success-bg p-4 border border-status-success-border">
+            <p className="text-sm text-status-success-text font-medium">✓ {successMsg}</p>
+          </div>
+        )}
+
+        {/* Locked Exam Notice Banner when attempts exist */}
+        {hasAttempts && (
+          <div className="rounded-[var(--radius-card)] bg-status-warning-bg p-5 border border-status-warning-border space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-status-warning-text flex items-center gap-x-2">
+                <span>🔒</span> Exam Locked — {attemptsCount} Active/Completed Attempt{attemptsCount === 1 ? '' : 's'}
+              </h3>
+              <button
+                type="button"
+                onClick={handleDuplicateTest}
+                disabled={isDuplicating}
+                className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition disabled:opacity-50"
+              >
+                {isDuplicating ? 'Duplicating...' : 'Duplicate Test to Edit'}
+              </button>
+            </div>
+            <p className="text-xs text-status-warning-text leading-relaxed">
+              Questions, marks, and answer options are locked because students have already started or submitted attempts. Editing live questions would compromise grading integrity. To make changes, use &ldquo;Duplicate Test&rdquo; to create an editable copy with all existing questions.
+            </p>
           </div>
         )}
 
@@ -354,7 +466,7 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
               <div className="space-y-2 text-sm">
                 <p><span className="text-muted-foreground font-medium">Format:</span> <span className="font-semibold text-foreground">{test.type}</span></p>
                 <p><span className="text-muted-foreground font-medium">Target Marks:</span> <span className="font-semibold text-foreground">{test.totalMarks} Marks</span></p>
-                <p><span className="text-muted-foreground font-medium">MCQ Penalty:</span> <span className="font-semibold text-red-600 dark:text-red-400">-{test.negativeMarkingValue} per error</span></p>
+                <p><span className="text-muted-foreground font-medium">MCQ Penalty:</span> <span className="font-semibold text-status-danger-text">-{test.negativeMarkingValue} per error</span></p>
                 <p>
                   <span className="text-muted-foreground font-medium">Duration:</span>{' '}
                   <span className="font-semibold text-foreground">
@@ -364,162 +476,182 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Form Card */}
-            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
-              <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">
-                {editingQuestionId ? 'Edit Question' : 'Add Question'}
-              </h2>
+            {/* Form Card or Locked Message */}
+            {hasAttempts ? (
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 text-center space-y-3">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-status-warning-bg text-status-warning-text text-xl">
+                  🔒
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">Question Editing Locked</h3>
+                <p className="text-xs text-muted-foreground">
+                  This exam has recorded student attempts. Questions cannot be added, edited, or deleted.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDuplicateTest}
+                  disabled={isDuplicating}
+                  className="w-full inline-flex items-center justify-center rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition disabled:opacity-50"
+                >
+                  {isDuplicating ? 'Duplicating...' : 'Duplicate Test'}
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+                <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">
+                  {editingQuestionId ? 'Edit Question' : 'Add Question'}
+                </h2>
 
-              {formError && (
-                <div className="rounded-md bg-red-50 dark:bg-red-950/40 p-3 border border-red-200 dark:border-red-900/50 text-xs text-red-600 dark:text-red-300">
-                  {formError}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmitQuestion} className="space-y-4">
-                {/* Text */}
-                <div>
-                  <label htmlFor="qText" className="block text-xs font-semibold text-foreground mb-1.5">
-                    Question Text
-                  </label>
-                  <textarea
-                    id="qText"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="e.g. Solve the equation 3x - 7 = 11"
-                    rows={3}
-                    className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-                    required
-                  />
-                </div>
-
-                {/* Type */}
-                <div>
-                  <label htmlFor="qType" className="block text-xs font-semibold text-foreground mb-1.5">
-                    Question Format
-                  </label>
-                  <select
-                    id="qType"
-                    value={type}
-                    disabled={!!editingQuestionId} // Format should not change during edit for database constraint safety
-                    onChange={(e) => setType(e.target.value as any)}
-                    className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-                    required
-                  >
-                    <option value="MCQ">MCQ (Multiple Choice Options)</option>
-                    <option value="WRITTEN">Written / Subjective response</option>
-                  </select>
-                </div>
-
-                {/* Marks & Order */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="qMarks" className="block text-xs font-semibold text-foreground mb-1.5">
-                      Marks Value
-                    </label>
-                    <input
-                      type="number"
-                      id="qMarks"
-                      value={marks}
-                      onChange={(e) => setMarks(e.target.value)}
-                      placeholder="e.g. 5"
-                      min="1"
-                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="qOrder" className="block text-xs font-semibold text-foreground mb-1.5">
-                      Display Order
-                    </label>
-                    <input
-                      type="number"
-                      id="qOrder"
-                      value={order}
-                      onChange={(e) => setOrder(e.target.value)}
-                      placeholder="e.g. 1"
-                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* MCQ Options Config */}
-                {type === 'MCQ' && (
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <span className="block text-xs font-semibold text-foreground">Configure MCQ Options</span>
-                      <button
-                        type="button"
-                        onClick={handleAddOption}
-                        className="text-[11px] font-bold text-primary hover:underline"
-                      >
-                        + Add Choice
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      {options.map((opt, i) => (
-                        <div key={i} className="flex items-center gap-x-2">
-                          <input
-                            type="radio"
-                            name="correctOptionRadio"
-                            checked={opt.isCorrect}
-                            onChange={() => handleMarkCorrect(i)}
-                            title="Mark as correct answer"
-                            className="h-4 w-4 text-primary focus:ring-primary border-border bg-surface"
-                          />
-                          <input
-                            type="text"
-                            value={opt.text}
-                            onChange={(e) => handleOptionTextChange(i, e.target.value)}
-                            placeholder={`Option ${i + 1}`}
-                            className="block w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-xs"
-                            required
-                          />
-                          {options.length > 2 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveOption(i)}
-                              className="text-red-500 hover:text-red-700 font-semibold text-xs px-1"
-                              title="Delete option"
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                {formError && (
+                  <div className="rounded-md bg-status-danger-bg p-3 border border-status-danger-border text-xs text-status-danger-text">
+                    {formError}
                   </div>
                 )}
 
-                {/* Submit actions */}
-                <div className="flex gap-x-3 pt-4">
-                  {editingQuestionId && (
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="w-1/2 inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+                <form onSubmit={handleSubmitQuestion} className="space-y-4">
+                  {/* Text */}
+                  <div>
+                    <label htmlFor="qText" className="block text-xs font-semibold text-foreground mb-1.5">
+                      Question Text
+                    </label>
+                    <textarea
+                      id="qText"
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      placeholder="e.g. Solve the equation 3x - 7 = 11"
+                      rows={3}
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                      required
+                    />
+                  </div>
+
+                  {/* Type */}
+                  <div>
+                    <label htmlFor="qType" className="block text-xs font-semibold text-foreground mb-1.5">
+                      Question Format
+                    </label>
+                    <select
+                      id="qType"
+                      value={type}
+                      disabled={!!editingQuestionId}
+                      onChange={(e) => setType(e.target.value as 'MCQ' | 'WRITTEN')}
+                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                      required
                     >
-                      Cancel Edit
-                    </button>
+                      <option value="MCQ">MCQ (Multiple Choice Options)</option>
+                      <option value="WRITTEN">Written / Subjective response</option>
+                    </select>
+                  </div>
+
+                  {/* Marks & Order */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="qMarks" className="block text-xs font-semibold text-foreground mb-1.5">
+                        Marks Value
+                      </label>
+                      <input
+                        type="number"
+                        id="qMarks"
+                        value={marks}
+                        onChange={(e) => setMarks(e.target.value)}
+                        placeholder="e.g. 5"
+                        min="1"
+                        className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="qOrder" className="block text-xs font-semibold text-foreground mb-1.5">
+                        Display Order
+                      </label>
+                      <input
+                        type="number"
+                        id="qOrder"
+                        value={order}
+                        onChange={(e) => setOrder(e.target.value)}
+                        placeholder="e.g. 1"
+                        className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* MCQ Options Config */}
+                  {type === 'MCQ' && (
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="block text-xs font-semibold text-foreground">Configure MCQ Options</span>
+                        <button
+                          type="button"
+                          onClick={handleAddOption}
+                          className="text-[11px] font-bold text-primary hover:underline"
+                        >
+                          + Add Choice
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {options.map((opt, i) => (
+                          <div key={i} className="flex items-center gap-x-2">
+                            <input
+                              type="radio"
+                              name="correctOptionRadio"
+                              checked={opt.isCorrect}
+                              onChange={() => handleMarkCorrect(i)}
+                              title="Mark as correct answer"
+                              className="h-4 w-4 text-primary focus:ring-primary border-border bg-surface"
+                            />
+                            <input
+                              type="text"
+                              value={opt.text}
+                              onChange={(e) => handleOptionTextChange(i, e.target.value)}
+                              placeholder={`Option ${i + 1}`}
+                              className="block w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-foreground shadow-sm focus:border-primary focus:ring-1 focus:ring-primary text-xs"
+                              required
+                            />
+                            {options.length > 2 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveOption(i)}
+                                className="text-status-danger-text hover:opacity-80 font-semibold text-xs px-1"
+                                title="Delete option"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition ${
-                      editingQuestionId ? 'w-1/2' : 'w-full'
-                    }`}
-                  >
-                    {isSubmitting
-                      ? 'Saving...'
-                      : editingQuestionId
-                      ? 'Save Changes'
-                      : 'Add Question'}
-                  </button>
-                </div>
-              </form>
-            </div>
+
+                  {/* Submit actions */}
+                  <div className="flex gap-x-3 pt-4">
+                    {editingQuestionId && (
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="w-1/2 inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-2 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+                      >
+                        Cancel Edit
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition ${
+                        editingQuestionId ? 'w-1/2' : 'w-full'
+                      }`}
+                    >
+                      {isSubmitting
+                        ? 'Saving...'
+                        : editingQuestionId
+                        ? 'Save Changes'
+                        : 'Add Question'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Running Marks & Question List */}
@@ -528,8 +660,8 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
             <div
               className={`rounded-2xl border p-5 flex items-center justify-between ${
                 isMarksMatching
-                  ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
-                  : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-300'
+                  ? 'bg-status-success-bg border-status-success-border text-status-success-text'
+                  : 'bg-status-warning-bg border-status-warning-border text-status-warning-text'
               }`}
             >
               <div>
@@ -590,18 +722,18 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                                 key={optIdx}
                                 className={`flex items-center gap-x-2.5 text-xs font-medium py-1 px-2.5 rounded-lg border max-w-md ${
                                   o.isCorrect
-                                    ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+                                    ? 'bg-status-success-bg border-status-success-border text-status-success-text'
                                     : 'bg-surface border-border text-foreground'
                                 }`}
                               >
                                 <span
                                   className={`h-2 w-2 rounded-full ${
-                                    o.isCorrect ? 'bg-green-600 dark:bg-green-400' : 'bg-muted-foreground/40'
+                                    o.isCorrect ? 'bg-primary' : 'bg-muted-foreground/40'
                                   }`}
                                 />
                                 <span className="flex-1">{o.text}</span>
                                 {o.isCorrect && (
-                                  <span className="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 tracking-wider">
+                                  <span className="text-[10px] uppercase font-bold text-status-success-text tracking-wider">
                                     Correct answer
                                   </span>
                                 )}
@@ -612,22 +744,24 @@ export default function TestQuestionsManagePage({ params }: PageProps) {
                       </div>
 
                       {/* Row Actions */}
-                      <div className="flex md:flex-col justify-end items-end gap-2 pl-4 self-start">
-                        <button
-                          type="button"
-                          onClick={() => handleEditClick(q)}
-                          className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
-                        >
-                          Edit Question
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteQuestion(q.id)}
-                          className="inline-flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      {!hasAttempts && (
+                        <div className="flex md:flex-col justify-end items-end gap-2 pl-4 self-start">
+                          <button
+                            type="button"
+                            onClick={() => handleEditClick(q)}
+                            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+                          >
+                            Edit Question
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteQuestion(q.id)}
+                            className="inline-flex items-center justify-center rounded-lg bg-status-danger-bg border border-status-danger-border px-3 py-1.5 text-xs font-semibold text-status-danger-text hover:opacity-80 transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
