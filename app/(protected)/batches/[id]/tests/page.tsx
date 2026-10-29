@@ -1,10 +1,14 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { apiGet } from '@/lib/api';
+import { apiGet, apiDelete, apiPost } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { Badge } from '@/components/ui/badge';
+import { Modal } from '@/components/ui/modal';
+import { formatDateTime } from '@/lib/tz';
+import { useCenter } from '@/components/providers/center-provider';
 
 interface BatchDetails {
   id: string;
@@ -17,6 +21,7 @@ interface TestSummary {
   type: 'MCQ' | 'WRITTEN' | 'MIXED' | 'OFFLINE';
   totalMarks: number;
   testDate: string;
+  archivedAt?: string | null;
 }
 
 interface PageProps {
@@ -26,15 +31,77 @@ interface PageProps {
 export default function BatchTestsPage({ params }: PageProps) {
   const router = useRouter();
   const { id: batchId } = use(params);
+  const { center } = useCenter();
+  const centerTz = center?.timezone || 'Asia/Dhaka';
 
   // States
   const [batch, setBatch] = useState<BatchDetails | null>(null);
   const [tests, setTests] = useState<TestSummary[]>([]);
+  const [archivedTests, setArchivedTests] = useState<TestSummary[]>([]);
+  const [activeFilter, setActiveFilter] = useState<'active' | 'archived'>('active');
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
   const [userRole, setUserRole] = useState<'ADMIN' | 'TEACHER' | 'STUDENT' | null>(null);
   const [myResults, setMyResults] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Archive modal states
+  const [testToArchive, setTestToArchive] = useState<TestSummary | null>(null);
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [isRestoring, setIsRestoring] = useState<string | null>(null);
+
+  const isStaff = userRole === 'ADMIN' || userRole === 'TEACHER';
+
+  const loadTests = useCallback(async (role: string) => {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+
+      // 1. Fetch batch details
+      const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
+      if (batchRes.success) {
+        setBatch(batchRes.data);
+      }
+
+      // 2. Fetch tests for this batch
+      const testsRes = await apiGet<{ success: boolean; data: TestSummary[] }>(`/api/batches/${batchId}/tests`);
+      if (testsRes.success) {
+        setTests(testsRes.data);
+
+        // 3. Load question counts asynchronously
+        testsRes.data.forEach(async (t) => {
+          try {
+            const testDetail = await apiGet<{ success: boolean; data: { questions: unknown[] } }>(`/api/tests/${t.id}`);
+            if (testDetail.success) {
+              setQuestionCounts((prev) => ({
+                ...prev,
+                [t.id]: testDetail.data.questions.length,
+              }));
+            }
+          } catch {
+            // Silently ignore
+          }
+
+          // 4. If student, check if they submitted
+          if (role === 'STUDENT') {
+            try {
+              const res = await apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`);
+              if (res && res.success) {
+                setMyResults((prev) => ({ ...prev, [t.id]: true }));
+              }
+            } catch {
+              setMyResults((prev) => ({ ...prev, [t.id]: false }));
+            }
+          }
+        });
+      }
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'Failed to load tests details');
+    } finally {
+      setLoading(false);
+    }
+  }, [batchId]);
 
   // Role validation & fetch initial data
   useEffect(() => {
@@ -52,74 +119,79 @@ export default function BatchTestsPage({ params }: PageProps) {
       loadTests(user.role);
     }
 
-    async function loadTests(role: string) {
-      try {
-        setLoading(true);
-        setErrorMsg(null);
-
-        // 1. Fetch batch details
-        const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
-        if (batchRes.success) {
-          setBatch(batchRes.data);
-        }
-
-        // 2. Fetch tests for this batch
-        const testsRes = await apiGet<{ success: boolean; data: TestSummary[] }>(`/api/batches/${batchId}/tests`);
-        if (testsRes.success) {
-          setTests(testsRes.data);
-
-          // 3. Asynchronously load question counts for each test
-          testsRes.data.forEach(async (t) => {
-            try {
-              const testDetail = await apiGet<{ success: boolean; data: { questions: any[] } }>(`/api/tests/${t.id}`);
-              if (testDetail.success) {
-                setQuestionCounts((prev) => ({
-                  ...prev,
-                  [t.id]: testDetail.data.questions.length,
-                }));
-              }
-            } catch (err) {
-              console.warn(`Failed to fetch details for test ${t.id}`, err);
-            }
-
-            // 4. If student, check if they have submitted this test
-            if (role === 'STUDENT') {
-              try {
-                const res = await apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`);
-                if (res && res.success) {
-                  setMyResults((prev) => ({ ...prev, [t.id]: true }));
-                }
-              } catch (err) {
-                setMyResults((prev) => ({ ...prev, [t.id]: false }));
-              }
-            }
-          });
-        }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load tests details');
-      } finally {
-        setLoading(false);
-      }
-    }
-
     init();
-  }, [batchId, router]);
+  }, [batchId, router, loadTests]);
+
+  const handleArchiveConfirm = async () => {
+    if (!testToArchive || isArchiving) return;
+
+    setIsArchiving(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await apiDelete<{ success: boolean; message?: string; data?: { archived?: boolean } }>(
+        `/api/tests/${testToArchive.id}`
+      );
+
+      if (res.success) {
+        setSuccessMsg(`Test "${testToArchive.title}" has been archived. Past results and history remain safely preserved.`);
+        setArchivedTests((prev) => [...prev, { ...testToArchive, archivedAt: new Date().toISOString() }]);
+        setTests((prev) => prev.filter((t) => t.id !== testToArchive.id));
+        setTestToArchive(null);
+      } else {
+        setErrorMsg(res.message || 'Failed to archive test');
+      }
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'An error occurred while archiving the test');
+    } finally {
+      setIsArchiving(false);
+    }
+  };
+
+  const handleRestore = async (testId: string) => {
+    setIsRestoring(testId);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await apiPost<{ success: boolean; message?: string }>(`/api/tests/${testId}/restore`, {});
+
+      if (res.success) {
+        setSuccessMsg('Test has been restored to active status!');
+        const restored = archivedTests.find((t) => t.id === testId);
+        if (restored) {
+          setArchivedTests((prev) => prev.filter((t) => t.id !== testId));
+          setTests((prev) => [...prev, { ...restored, archivedAt: null }]);
+        }
+        if (userRole) {
+          await loadTests(userRole);
+        }
+      } else {
+        setErrorMsg(res.message || 'Failed to restore test');
+      }
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'An error occurred while restoring the test');
+    } finally {
+      setIsRestoring(null);
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading tests...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading tests...</span>
       </div>
     );
   }
 
-  if (errorMsg || !batch) {
+  if (errorMsg && !batch) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Tests</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
+        <div className="rounded-[var(--radius-card)] bg-status-danger-bg p-4 border border-status-danger-border">
+          <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Tests</h3>
+          <p className="text-sm text-status-danger-text mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
         </div>
         <Link href={`/batches/${batchId}`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to batch details
@@ -128,7 +200,7 @@ export default function BatchTestsPage({ params }: PageProps) {
     );
   }
 
-  const isStaff = userRole === 'ADMIN' || userRole === 'TEACHER';
+  const displayedTests = activeFilter === 'active' ? tests : archivedTests;
 
   return (
     <div className="p-8">
@@ -137,7 +209,7 @@ export default function BatchTestsPage({ params }: PageProps) {
         <nav className="flex text-sm text-muted-foreground gap-x-2">
           <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch.name}</Link>
+          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch?.name}</Link>
           <span>/</span>
           <span className="text-foreground font-semibold">Tests</span>
         </nav>
@@ -148,8 +220,8 @@ export default function BatchTestsPage({ params }: PageProps) {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Exams & Tests</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               {isStaff
-                ? `Manage exams, questions, and grading metrics for ${batch.name}`
-                : `View and take exams scheduled for ${batch.name}`}
+                ? `Manage exams, questions, and grading metrics for ${batch?.name}`
+                : `View and take exams scheduled for ${batch?.name}`}
             </p>
           </div>
           {isStaff && (
@@ -162,26 +234,64 @@ export default function BatchTestsPage({ params }: PageProps) {
           )}
         </div>
 
+        {/* Global Notifications */}
+        {successMsg && (
+          <div className="rounded-[var(--radius-card)] bg-status-success-bg p-4 border border-status-success-border">
+            <p className="text-sm text-status-success-text font-medium">✓ {successMsg}</p>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div className="rounded-[var(--radius-card)] bg-status-danger-bg p-4 border border-status-danger-border">
+            <p className="text-sm text-status-danger-text font-medium">{errorMsg}</p>
+          </div>
+        )}
+
+        {/* Staff Filter Tabs (Active vs Archived) */}
+        {isStaff && (
+          <div className="flex border-b border-border gap-x-2">
+            <button
+              onClick={() => setActiveFilter('active')}
+              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-x-1.5 ${activeFilter === 'active'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              Active Tests
+              <Badge variant="neutral" size="sm">
+                {tests.length}
+              </Badge>
+            </button>
+            <button
+              onClick={() => setActiveFilter('archived')}
+              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-x-1.5 ${activeFilter === 'archived'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              Archived Tests
+              {archivedTests.length > 0 && (
+                <Badge variant="warning" size="sm">
+                  {archivedTests.length}
+                </Badge>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Tests Table */}
         <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
-          {tests.length === 0 ? (
+          {displayedTests.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground">
-              <svg
-                className="mx-auto h-12 w-12 text-muted-foreground/40"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <h3 className="mt-4 text-sm font-semibold text-foreground">No tests scheduled</h3>
-              <p className="text-xs text-muted-foreground mt-1">There are no exams assigned for this batch yet.</p>
-              {isStaff && (
+              <h3 className="text-sm font-semibold text-foreground">
+                {activeFilter === 'active' ? 'No active tests scheduled' : 'No archived tests found'}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {activeFilter === 'active'
+                  ? 'There are no active exams assigned for this batch.'
+                  : 'No exams have been archived for this batch.'}
+              </p>
+              {isStaff && activeFilter === 'active' && (
                 <div className="mt-6">
                   <Link
                     href={`/batches/${batchId}/tests/new`}
@@ -206,9 +316,9 @@ export default function BatchTestsPage({ params }: PageProps) {
                   </tr>
                 </thead>
                 <tbody className="bg-surface divide-y divide-border">
-                  {tests.map((test) => {
+                  {displayedTests.map((test) => {
                     let targetUrl = `/batches/${batchId}/tests/${test.id}/manage`;
-                    let actionText = 'Manage Questions';
+                    let actionText = 'Manage';
 
                     if (!isStaff) {
                       const hasSubmitted = myResults[test.id] === true;
@@ -221,27 +331,32 @@ export default function BatchTestsPage({ params }: PageProps) {
                     return (
                       <tr key={test.id} className="hover:bg-surface-hover/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <Link href={targetUrl} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
-                            {test.title}
-                          </Link>
+                          {activeFilter === 'active' ? (
+                            <Link href={targetUrl} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+                              {test.title}
+                            </Link>
+                          ) : (
+                            <span className="text-sm font-semibold text-muted-foreground">
+                              {test.title} (Archived)
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
-                            test.type === 'MCQ'
-                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-blue-500/20'
-                              : test.type === 'WRITTEN'
-                              ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-purple-500/20'
-                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/20'
-                          }`}>
+                          <Badge
+                            variant={
+                              test.type === 'MCQ'
+                                ? 'primary'
+                                : test.type === 'WRITTEN'
+                                  ? 'secondary'
+                                  : 'accent'
+                            }
+                            size="sm"
+                          >
                             {test.type}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                          {new Date(test.testDate).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          {formatDateTime(test.testDate, centerTz)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground font-semibold">
                           {test.totalMarks} Marks
@@ -250,35 +365,52 @@ export default function BatchTestsPage({ params }: PageProps) {
                           {questionCounts[test.id] !== undefined ? (
                             `${questionCounts[test.id]} items`
                           ) : (
-                            <span className="text-muted-foreground/60">Loading...</span>
+                            <span className="text-muted-foreground/60">—</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          {isStaff && (
-                            <Link
-                              href={`/batches/${batchId}/tests/${test.id}/results`}
-                              className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition mr-2"
-                            >
-                              {test.type === 'OFFLINE' ? 'Enter Marks' : 'View Results'}
-                            </Link>
-                          )}
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium space-x-2">
                           {isStaff ? (
-                            test.type !== 'OFFLINE' && (
-                              <Link
-                                href={targetUrl}
-                                className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
+                            activeFilter === 'active' ? (
+                              <>
+                                <Link
+                                  href={`/batches/${batchId}/tests/${test.id}/results`}
+                                  className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
+                                >
+                                  {test.type === 'OFFLINE' ? 'Marks' : 'Results'}
+                                </Link>
+                                {test.type !== 'OFFLINE' && (
+                                  <Link
+                                    href={targetUrl}
+                                    className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
+                                  >
+                                    {actionText}
+                                  </Link>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => setTestToArchive(test)}
+                                  className="inline-flex items-center rounded-md border border-status-danger-border bg-status-danger-bg px-2.5 py-1 text-xs font-semibold text-status-danger-text hover:opacity-80 transition"
+                                >
+                                  Archive
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={isRestoring === test.id}
+                                onClick={() => handleRestore(test.id)}
+                                className="inline-flex items-center rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover disabled:opacity-50 transition"
                               >
-                                {actionText}
-                              </Link>
+                                {isRestoring === test.id ? 'Restoring...' : 'Restore'}
+                              </button>
                             )
                           ) : (
                             <Link
                               href={targetUrl}
-                              className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
-                                myResults[test.id] === false
+                              className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${myResults[test.id] === false
                                   ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary-hover'
                                   : 'bg-surface text-foreground border-border hover:bg-surface-hover'
-                              }`}
+                                }`}
                             >
                               {actionText}
                             </Link>
@@ -293,6 +425,44 @@ export default function BatchTestsPage({ params }: PageProps) {
           )}
         </div>
       </div>
+
+      {/* Archive Confirmation Modal */}
+      {testToArchive && (
+        <Modal
+          isOpen={true}
+          onClose={() => setTestToArchive(null)}
+          title={`Archive "${testToArchive.title}"`}
+          description="Soft-archive this exam cohort. History is fully preserved."
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-foreground">
+              Are you sure you want to archive this test?
+            </p>
+            <div className="rounded-[var(--radius-card)] bg-surface-hover/40 border border-border p-3 text-xs text-muted-foreground space-y-1">
+              <p>• <strong>Historical safety:</strong> All student attempts, submitted answers, and calculated marks will remain stored in the database.</p>
+              <p>• <strong>Student visibility:</strong> This exam will immediately vanish from active student dashboards.</p>
+              <p>• <strong>Restoration:</strong> Administrators can restore this test at any time from the &ldquo;Archived Tests&rdquo; tab.</p>
+            </div>
+            <div className="flex justify-end gap-x-3 pt-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setTestToArchive(null)}
+                className="rounded-lg border border-border bg-surface px-4 py-2 text-xs font-semibold text-foreground hover:bg-surface-hover transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isArchiving}
+                onClick={handleArchiveConfirm}
+                className="rounded-lg bg-status-danger-bg border border-status-danger-border px-4 py-2 text-xs font-semibold text-status-danger-text hover:opacity-80 disabled:opacity-50 transition"
+              >
+                {isArchiving ? 'Archiving...' : 'Confirm Archive'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

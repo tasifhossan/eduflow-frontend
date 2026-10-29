@@ -22,6 +22,9 @@ import {
   Settings,
   Video,
   ClipboardCheck,
+  Receipt,
+  FileSpreadsheet,
+  BarChart3,
   X,
 } from 'lucide-react';
 import type { CenterPublicData, CenterFeatures } from '@/lib/types/center';
@@ -46,7 +49,7 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         name: 'Dashboard',
         href: '/dashboard',
-        roles: ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN', 'SUPER_ADMIN'],
+        roles: ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN', 'SUPER_ADMIN', 'ACCOUNTANT'],
         icon: LayoutDashboard,
       },
       {
@@ -106,7 +109,7 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         name: 'Students',
         href: '/students',
-        roles: ['ADMIN', 'TEACHER'],
+        roles: ['ADMIN', 'TEACHER', 'ACCOUNTANT'],
         icon: Users,
       },
       {
@@ -130,6 +133,41 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: 'Fees',
+    items: [
+      {
+        name: 'Collect payment',
+        href: '/fees/collect',
+        roles: ['ADMIN', 'SUPER_ADMIN', 'ACCOUNTANT'],
+        icon: CreditCard,
+      },
+      {
+        name: 'Dues',
+        href: '/fees/dues',
+        roles: ['ADMIN', 'SUPER_ADMIN', 'ACCOUNTANT'],
+        icon: FileSpreadsheet,
+      },
+      {
+        name: 'Payments',
+        href: '/fees/payments',
+        roles: ['ADMIN', 'SUPER_ADMIN', 'ACCOUNTANT'],
+        icon: Receipt,
+      },
+      {
+        name: 'Collection report',
+        href: '/fees/reports',
+        roles: ['ADMIN', 'SUPER_ADMIN', 'ACCOUNTANT'],
+        icon: BarChart3,
+      },
+      {
+        name: 'My fees',
+        href: '/my-fees',
+        roles: ['STUDENT', 'GUARDIAN'],
+        icon: Receipt,
+      },
+    ],
+  },
+  {
     label: 'Operations & Finance',
     items: [
       {
@@ -137,12 +175,6 @@ export const NAV_GROUPS: NavGroup[] = [
         href: '/attendance',
         roles: ['ADMIN', 'TEACHER', 'STUDENT'],
         icon: CalendarCheck,
-      },
-      {
-        name: 'My Payments',
-        href: '/payments',
-        roles: ['STUDENT'],
-        icon: CreditCard,
       },
       {
         name: 'Audit Logs',

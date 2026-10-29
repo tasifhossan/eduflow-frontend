@@ -1,28 +1,39 @@
+import { toMinor } from './money';
+
 /**
  * Currency, Date, and Time formatting helpers based on center settings
  */
 
 /**
- * Formats a monetary amount with currency symbol or code.
- * @example formatMoney(1500, 'BDT', '৳') => '৳1,500'
+ * Formats a monetary amount with currency symbol or code without floating-point math.
+ * @example formatMoney("1500.00", "BDT", "৳") => "৳1,500.00"
  */
 export function formatMoney(
-  amount: number | string | null | undefined,
+  amount: number | string | bigint | null | undefined,
   currency = 'BDT',
   symbol = '৳',
   locale = 'en-US'
 ): string {
-  if (amount === null || amount === undefined || isNaN(Number(amount))) {
-    return `${symbol}0`;
+  void currency;
+  if (amount === null || amount === undefined) {
+    return `${symbol}0.00`;
   }
 
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  const formattedNumber = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(num);
+  const ZERO = BigInt(0);
+  const HUNDRED = BigInt(100);
 
-  return `${symbol}${formattedNumber}`;
+  const minor = toMinor(amount);
+  const isNegative = minor < ZERO;
+  const abs = isNegative ? -minor : minor;
+  const units = abs / HUNDRED;
+  const cents = abs % HUNDRED;
+
+  const formattedUnits = new Intl.NumberFormat(locale, {
+    useGrouping: true,
+  }).format(units);
+
+  const formattedAmount = `${formattedUnits}.${cents.toString().padStart(2, '0')}`;
+  return `${isNegative ? '-' : ''}${symbol}${formattedAmount}`;
 }
 
 /**

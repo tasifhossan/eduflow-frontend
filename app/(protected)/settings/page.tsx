@@ -420,6 +420,7 @@ export default function SettingsPage() {
         timezone: formData.timezone,
         defaultLocale: formData.defaultLocale,
         academicYearStartMonth: formData.academicYearStartMonth || 1,
+        feeDueDay: typeof formData.feeDueDay === 'number' ? formData.feeDueDay : 10,
         weekStartsOn: typeof formData.weekStartsOn === 'number' ? formData.weekStartsOn : 6,
         receiptHeader: formData.receiptHeader || null,
         receiptFooter: formData.receiptFooter || null,
@@ -1075,6 +1076,26 @@ export default function SettingsPage() {
               </select>
               <p className="text-[11px] text-muted-foreground mt-1">
                 Anchors calendar views, lecture schedule headers, and weekly academic aggregates.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Monthly Fee Due Day (1–28) *
+              </label>
+              <input
+                id="feeDueDayInput"
+                type="number"
+                min="1"
+                max="28"
+                value={formData.feeDueDay ?? 10}
+                onChange={(e) =>
+                  handleChange('feeDueDay', Math.min(28, Math.max(1, parseInt(e.target.value, 10) || 1)))
+                }
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-surface text-foreground"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Monthly fees are billed with due date on day {formData.feeDueDay ?? 10} of the billing month.
               </p>
             </div>
           </div>

@@ -19,7 +19,9 @@ import {
   Activity,
   ArrowRight,
   HeartHandshake,
+  CreditCard,
 } from 'lucide-react';
+import { formatMoney } from '@/lib/format';
 import {
   StudentAcademicsCards,
   TeacherAcademicsCards,
@@ -36,14 +38,17 @@ interface UpcomingTest {
   batch: { id: string; name: string };
 }
 
-interface DueSummaryItem {
-  batchId: string;
-  batchName: string;
-  dueCount: number;
-  partialCount: number;
-  totalAmountDue: number;
-  totalAmountPaid: number;
-  totalRemaining: number;
+interface StudentFeeAccountSummary {
+  totals?: {
+    totalOutstanding?: string;
+    totalEffective?: string;
+  };
+  studentCredit?: string;
+  summary?: {
+    totalOutstanding?: string;
+    totalEffective?: string;
+    studentCredit?: string;
+  };
 }
 
 interface AdminTeacherSummary {
@@ -95,11 +100,15 @@ type DashboardSummary = AdminTeacherSummary | StudentSummary | GuardianSummary;
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
 }
 
 function TestTypeBadge({ type }: { type: string }) {
@@ -114,30 +123,55 @@ function TestTypeBadge({ type }: { type: string }) {
 
 // ─── Sub-components ────────────────────────────────────────────────────────
 
-function FeeCollectionCard({ dueSummary }: { dueSummary: DueSummaryItem[] }) {
-  const overallOutstanding = dueSummary.reduce((sum, item) => sum + item.totalRemaining, 0);
+interface LedgerDuesData {
+  summary: {
+    totalDue: string;
+    totalPaid: string;
+    totalOutstanding: string;
+    totalStudentsWithDues: number;
+  };
+  items: Array<{
+    studentId: string;
+    name: string;
+    studentCode: string;
+    outstanding: string;
+    status: string;
+  }>;
+}
+
+function FeeCollectionCard({ duesData }: { duesData: LedgerDuesData }) {
+  const overallOutstanding = duesData.summary?.totalOutstanding || '0.00';
 
   return (
     <SectionCard
       title="Fee Collection Summary"
-      description="Pending and partial student dues categorized by batch"
+      description="Active student dues tracked in the append-only ledger"
       actions={
-        <div className="rounded-[var(--radius-control)] border border-status-danger-border bg-status-danger-bg px-3.5 py-1.5 text-right">
-          <span className="text-[10px] font-bold text-status-danger uppercase tracking-wider block">
-            Total Outstanding
-          </span>
-          <span className="text-base sm:text-lg font-heading font-extrabold text-status-danger-text">
-            ৳{overallOutstanding.toLocaleString()}
-          </span>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/fees/collect"
+            className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+          >
+            <CreditCard className="h-3.5 w-3.5" />
+            Collect Payment
+          </Link>
+          <div className="rounded-[var(--radius-control)] border border-status-danger-border bg-status-danger-bg px-3.5 py-1 text-right">
+            <span className="text-[10px] font-bold text-status-danger uppercase tracking-wider block">
+              Total Outstanding
+            </span>
+            <span className="text-base sm:text-lg font-heading font-extrabold text-status-danger-text font-mono">
+              {formatMoney(overallOutstanding)}
+            </span>
+          </div>
         </div>
       }
       noPadding
     >
-      {dueSummary.length === 0 ? (
+      {duesData.items.length === 0 ? (
         <div className="p-6">
           <EmptyState
             title="All fees settled"
-            description="No pending or partial fee balances recorded across any batch."
+            description="No pending or partial fee balances recorded in the ledger."
           />
         </div>
       ) : (
@@ -145,38 +179,45 @@ function FeeCollectionCard({ dueSummary }: { dueSummary: DueSummaryItem[] }) {
           <table className="min-w-full divide-y divide-border text-sm">
             <thead>
               <tr className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-surface-hover/30">
-                <th className="px-5 sm:px-6 py-3">Batch Name</th>
-                <th className="px-4 py-3 text-center">Due Count</th>
-                <th className="px-4 py-3 text-center">Partial Count</th>
+                <th className="px-5 sm:px-6 py-3">Student Name</th>
+                <th className="px-4 py-3">Student Code</th>
+                <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-5 py-3 text-right">Outstanding Amount</th>
                 <th className="px-5 sm:px-6 py-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {dueSummary.map((item) => (
-                <tr key={item.batchId} className="hover:bg-surface-hover/40 transition-colors">
+              {duesData.items.slice(0, 5).map((item) => (
+                <tr key={item.studentId} className="hover:bg-surface-hover/40 transition-colors">
                   <td className="px-5 sm:px-6 py-3.5 font-semibold text-foreground">
-                    {item.batchName}
+                    <Link href={`/fees/students/${item.studentId}`} className="hover:text-primary transition">
+                      {item.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
+                    {item.studentCode || '—'}
                   </td>
                   <td className="px-4 py-3.5 text-center">
-                    <StatusBadge variant="due">
-                      {item.dueCount} Due
-                    </StatusBadge>
+                    <StatusBadge
+                      variant={
+                        item.status.includes('OVERDUE')
+                          ? 'overdue'
+                          : item.status.includes('PARTIAL')
+                          ? 'partial'
+                          : 'due'
+                      }
+                      label={item.status}
+                    />
                   </td>
-                  <td className="px-4 py-3.5 text-center">
-                    <StatusBadge variant="partial">
-                      {item.partialCount} Partial
-                    </StatusBadge>
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-heading font-bold text-foreground">
-                    ৳{item.totalRemaining.toLocaleString()}
+                  <td className="px-5 py-3.5 text-right font-mono font-bold text-status-danger-text">
+                    {formatMoney(item.outstanding)}
                   </td>
                   <td className="px-5 sm:px-6 py-3.5 text-right">
                     <Link
-                      href={`/batches/${item.batchId}/payments`}
+                      href={`/fees/students/${item.studentId}`}
                       className="text-xs font-semibold text-primary hover:text-primary-hover hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                     >
-                      Payments →
+                      Ledger →
                     </Link>
                   </td>
                 </tr>
@@ -186,6 +227,94 @@ function FeeCollectionCard({ dueSummary }: { dueSummary: DueSummaryItem[] }) {
         </div>
       )}
     </SectionCard>
+  );
+}
+
+function AccountantDashboard({ duesData }: { duesData?: LedgerDuesData | null }) {
+  const summary = duesData?.summary;
+
+  return (
+    <div className="space-y-6">
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Outstanding Dues"
+          value={formatMoney(summary?.totalOutstanding || '0.00')}
+          unit="pending"
+          icon={<CreditCard className="h-5 w-5" aria-hidden="true" />}
+        />
+        <StatCard
+          label="Total Billed"
+          value={formatMoney(summary?.totalDue || '0.00')}
+          unit="charges"
+          icon={<Layers className="h-5 w-5" aria-hidden="true" />}
+        />
+        <StatCard
+          label="Collections Settled"
+          value={formatMoney(summary?.totalPaid || '0.00')}
+          unit="paid"
+          icon={<Activity className="h-5 w-5" aria-hidden="true" />}
+        />
+        <StatCard
+          label="Students With Dues"
+          value={summary?.totalStudentsWithDues || 0}
+          unit="accounts"
+          icon={<Users className="h-5 w-5" aria-hidden="true" />}
+        />
+      </div>
+
+      {/* Quick Action */}
+      <div className="rounded-[var(--radius-card)] border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-sm font-bold text-foreground">Record Student Payment</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Collect tuition, admission, or other student fees into the append-only ledger.
+          </p>
+        </div>
+        <Link
+          href="/fees/collect"
+          className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+        >
+          <CreditCard className="h-4 w-4" />
+          Collect Payment Now
+        </Link>
+      </div>
+
+      {/* Dues breakdown table */}
+      {duesData && <FeeCollectionCard duesData={duesData} />}
+    </div>
+  );
+}
+
+function StudentFeeSummaryCard({ account }: { account: StudentFeeAccountSummary | null }) {
+  if (!account) return null;
+  return (
+    <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-[var(--radius-control)] bg-primary-subtle text-primary border border-border flex items-center justify-center shrink-0">
+          <CreditCard className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-foreground">My Fee Account</p>
+          <p className="text-xs text-muted-foreground">
+            Outstanding:{' '}
+            <span className="font-bold text-status-danger-text font-mono">
+              {formatMoney(account.totals?.totalOutstanding || '0.00')}
+            </span>{' '}
+            • Credit:{' '}
+            <span className="font-bold text-status-success-text font-mono">
+              {formatMoney(account.studentCredit || '0.00')}
+            </span>
+          </p>
+        </div>
+      </div>
+      <Link
+        href="/my-fees"
+        className="rounded-[var(--radius-control)] bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+      >
+        View My Fees & Receipts →
+      </Link>
+    </div>
   );
 }
 
@@ -305,7 +434,7 @@ function AdminTeacherDashboard({
   isAdmin,
 }: {
   data: AdminTeacherSummary;
-  dueSummary?: DueSummaryItem[];
+  dueSummary?: LedgerDuesData | null;
   isAdmin?: boolean;
 }) {
   const { stats, attendanceSummary, upcomingTests, recentActivity } = data;
@@ -338,9 +467,9 @@ function AdminTeacherDashboard({
         />
       </div>
 
-      {/* Fee Collection Card (ADMIN only) */}
+      {/* Fee Collection Card (ADMIN & SUPER_ADMIN only) */}
       {isAdmin && dueSummary && (
-        <FeeCollectionCard dueSummary={dueSummary} />
+        <FeeCollectionCard duesData={dueSummary} />
       )}
 
       {/* Academics summary (Admin) or Teacher cards */}
@@ -426,7 +555,7 @@ function AdminTeacherDashboard({
 
 // ─── Student View ─────────────────────────────────────────────────────────
 
-function StudentDashboard({ data }: { data: StudentSummary }) {
+function StudentDashboard({ data, account }: { data: StudentSummary; account?: StudentFeeAccountSummary | null }) {
   const { enrolledBatchCount, enrolledBatches, upcomingTests, recentAttendance } = data;
 
   return (
@@ -452,6 +581,9 @@ function StudentDashboard({ data }: { data: StudentSummary }) {
           icon={<Activity className="h-5 w-5" aria-hidden="true" />}
         />
       </div>
+
+      {/* Fee Account Summary */}
+      {account && <StudentFeeSummaryCard account={account} />}
 
       {/* Enrolled batches */}
       {enrolledBatches.length > 0 && (
@@ -606,44 +738,63 @@ export default async function DashboardPage() {
   const cookieHeader = cookieStore.toString();
 
   let summary: DashboardSummary | null = null;
-  let dueSummaryData: DueSummaryItem[] = [];
+  let ledgerDuesData: LedgerDuesData | null = null;
+  let studentAccountData: StudentFeeAccountSummary | null = null;
   let errorMsg: string | null = null;
 
   try {
-    const response = await apiGet<{ success: boolean; data: DashboardSummary }>(
-      '/api/dashboard/summary',
-      {
-        headers: { Cookie: cookieHeader },
-        cache: 'no-store',
+    const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'ACCOUNTANT';
+
+    if (user?.role !== 'ACCOUNTANT') {
+      const response = await apiGet<{ success: boolean; data: DashboardSummary }>(
+        '/api/dashboard/summary',
+        {
+          headers: { Cookie: cookieHeader },
+          cache: 'no-store',
+        }
+      ).catch(() => null);
+      if (response?.success) {
+        summary = response.data;
       }
-    );
-    if (response?.success) {
-      summary = response.data;
     }
 
-    if (user?.role === 'ADMIN') {
-      const dueRes = await apiGet<{ success: boolean; data: DueSummaryItem[] }>(
-        '/api/payments/due-summary',
+    if (isStaff) {
+      const duesRes = await apiGet<{ success: boolean; data: LedgerDuesData }>(
+        '/api/fees/dues?limit=5',
         {
           headers: { Cookie: cookieHeader },
           cache: 'no-store',
         }
       ).catch(() => null);
 
-      if (dueRes?.success && dueRes.data) {
-        dueSummaryData = dueRes.data;
+      if (duesRes?.success && duesRes.data) {
+        ledgerDuesData = duesRes.data;
+      }
+    }
+
+    if (user?.role === 'STUDENT') {
+      const studentRes = await apiGet<{ success: boolean; data: StudentFeeAccountSummary }>(
+        '/api/fees/my-account',
+        {
+          headers: { Cookie: cookieHeader },
+          cache: 'no-store',
+        }
+      ).catch(() => null);
+
+      if (studentRes?.success && studentRes.data) {
+        studentAccountData = studentRes.data;
       }
     }
   } catch (err: unknown) {
     errorMsg = err instanceof Error ? err.message : 'Failed to load dashboard summary';
   }
 
-  const today = new Date().toLocaleDateString(undefined, {
+  const today = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });
+  }).format(new Date());
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
@@ -664,22 +815,25 @@ export default async function DashboardPage() {
       )}
 
       {/* Role-aware content */}
+      {user?.role === 'ACCOUNTANT' && (
+        <AccountantDashboard duesData={ledgerDuesData} />
+      )}
       {summary && summary.role === 'GUARDIAN' && (
         <GuardianDashboard data={summary as GuardianSummary} />
       )}
       {summary && summary.role === 'STUDENT' && (
-        <StudentDashboard data={summary as StudentSummary} />
+        <StudentDashboard data={summary as StudentSummary} account={studentAccountData} />
       )}
       {summary && (summary.role === 'ADMIN' || summary.role === 'TEACHER') && (
         <AdminTeacherDashboard
           data={summary as AdminTeacherSummary}
-          dueSummary={dueSummaryData}
-          isAdmin={user?.role === 'ADMIN'}
+          dueSummary={ledgerDuesData}
+          isAdmin={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'}
         />
       )}
 
       {/* Empty / fallback state */}
-      {!summary && !errorMsg && (
+      {!summary && user?.role !== 'ACCOUNTANT' && !errorMsg && (
         <EmptyState
           title="Loading dashboard overview"
           description="Fetching your latest center metrics and academic routines..."

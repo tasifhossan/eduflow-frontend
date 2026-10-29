@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
 import { EmptyState } from '@/components/ui/empty-state';
+import { useCenter } from '@/components/providers/center-provider';
+import { formatMoney } from '@/lib/format';
+import { MoneyInput } from '@/components/ui/money-input';
 
 interface Student {
   id: string;
@@ -59,6 +62,8 @@ export default function BatchDetailPage({ params }: PageProps) {
   // User state
   const [userRole, setUserRole] = useState<string>('');
 
+  const { center } = useCenter();
+
   // Main States
   const [batch, setBatch] = useState<BatchDetails | null>(null);
   const [enrolledStudents, setEnrolledStudents] = useState<Student[]>([]);
@@ -69,7 +74,7 @@ export default function BatchDetailPage({ params }: PageProps) {
   // Batch Fee Edit States
   const [isEditingBatchFee, setIsEditingBatchFee] = useState(false);
   const [feeTypeInput, setFeeTypeInput] = useState<'MONTHLY' | 'ONE_TIME'>('MONTHLY');
-  const [feeAmountInput, setFeeAmountInput] = useState<number | ''>('');
+  const [feeAmountInput, setFeeAmountInput] = useState<string>('0');
   const [savingBatchFee, setSavingBatchFee] = useState(false);
   const [batchFeeError, setBatchFeeError] = useState<string | null>(null);
   const [batchFeeSuccess, setBatchFeeSuccess] = useState<string | null>(null);
@@ -165,7 +170,7 @@ export default function BatchDetailPage({ params }: PageProps) {
         if (batchRes.success) {
           setBatch(batchRes.data);
           setFeeTypeInput(batchRes.data.feeType || 'MONTHLY');
-          setFeeAmountInput(batchRes.data.feeAmount ?? 0);
+          setFeeAmountInput(String(batchRes.data.feeAmount ?? 0));
         }
 
         // 2. Fetch enrolled students safely
@@ -416,12 +421,12 @@ export default function BatchDetailPage({ params }: PageProps) {
             >
               Syllabus Progress
             </Link>
-            {userRole === 'ADMIN' && (
+            {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN' || userRole === 'ACCOUNTANT') && (
               <Link
-                href={`/batches/${batchId}/payments`}
+                href={`/fees/dues?batchId=${batchId}`}
                 className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
               >
-                Fee Payments
+                Dues & Billing
               </Link>
             )}
             <Link
@@ -482,11 +487,11 @@ export default function BatchDetailPage({ params }: PageProps) {
             <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-border pb-2">
                 <h2 className="text-lg font-bold text-foreground">Fee Settings</h2>
-                {userRole === 'ADMIN' && (
+                {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && (
                   <button
                     onClick={() => {
                       setFeeTypeInput(batch.feeType || 'MONTHLY');
-                      setFeeAmountInput(batch.feeAmount ?? 0);
+                      setFeeAmountInput(String(batch.feeAmount ?? 0));
                       setIsEditingBatchFee(!isEditingBatchFee);
                       setBatchFeeError(null);
                       setBatchFeeSuccess(null);
@@ -499,12 +504,12 @@ export default function BatchDetailPage({ params }: PageProps) {
               </div>
 
               {batchFeeSuccess && (
-                <div className="rounded-md bg-green-500/10 p-3 border border-green-500/20 text-xs text-green-600 dark:text-green-400">
+                <div className="rounded-md bg-status-success-bg p-3 border border-status-success-border text-xs text-status-success-text">
                   {batchFeeSuccess}
                 </div>
               )}
               {batchFeeError && (
-                <div className="rounded-md bg-red-500/10 p-3 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
+                <div className="rounded-md bg-status-danger-bg p-3 border border-status-danger-border text-xs text-status-danger-text">
                   {batchFeeError}
                 </div>
               )}
@@ -512,15 +517,15 @@ export default function BatchDetailPage({ params }: PageProps) {
               {!isEditingBatchFee ? (
                 <div className="space-y-3 text-sm">
                   <div>
-                    <span className="text-muted-foreground font-medium block">Fee Type</span>
+                    <span className="text-muted-foreground font-medium block">Billing Type</span>
                     <span className="inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
                       {batch.feeType || 'MONTHLY'}
                     </span>
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium block">Base Fee Amount</span>
-                    <span className="text-foreground font-bold text-lg">
-                      ৳{batch.feeAmount !== undefined ? batch.feeAmount.toLocaleString() : '0'}
+                    <span className="text-foreground font-bold text-lg font-mono">
+                      {formatMoney(batch.feeAmount, center.currency, center.currencySymbol)}
                     </span>
                   </div>
                 </div>
@@ -528,31 +533,31 @@ export default function BatchDetailPage({ params }: PageProps) {
                 <form onSubmit={handleUpdateBatchFee} className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                      Fee Type
+                      Billing Type
                     </label>
                     <select
                       value={feeTypeInput}
                       onChange={(e) => setFeeTypeInput(e.target.value as 'MONTHLY' | 'ONE_TIME')}
                       className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                     >
-                      <option value="MONTHLY">MONTHLY</option>
-                      <option value="ONE_TIME">ONE_TIME</option>
+                      <option value="MONTHLY">Monthly Billing</option>
+                      <option value="ONE_TIME">One-time Billing</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                      Base Fee Amount (৳)
+                      Base Fee Amount
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="any"
+                    <MoneyInput
                       value={feeAmountInput}
-                      onChange={(e) => setFeeAmountInput(e.target.value === '' ? '' : Number(e.target.value))}
-                      className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
-                      required
+                      onChange={setFeeAmountInput}
+                      placeholder="0.00"
+                      currencySymbol={center.currencySymbol}
                     />
                   </div>
+                  <p className="text-[11px] text-muted-foreground italic">
+                    Changing the batch fee affects only future generated dues; existing ledger charges are append-only and preserved.
+                  </p>
                   <div className="flex gap-x-2 pt-1">
                     <button
                       type="submit"
@@ -673,11 +678,11 @@ export default function BatchDetailPage({ params }: PageProps) {
                               {netFeeInfo ? (
                                 <div>
                                   <div className="text-sm font-bold text-foreground">
-                                    ৳{netFeeInfo.netFee.toLocaleString()}
+                                    {formatMoney(netFeeInfo.netFee, center.currency, center.currencySymbol)}
                                   </div>
                                   <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1">
                                     <span>
-                                      Base: ৳{(netFeeInfo.customFeeAmount ?? netFeeInfo.baseFee).toLocaleString()}
+                                      Base: {formatMoney(netFeeInfo.customFeeAmount ?? netFeeInfo.baseFee, center.currency, center.currencySymbol)}
                                     </span>
                                     {netFeeInfo.customFeeAmount != null && (
                                       <span className="inline-flex items-center rounded bg-amber-500/10 px-1 py-0.2 text-[10px] font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
@@ -686,7 +691,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                                     )}
                                     {netFeeInfo.discountType && netFeeInfo.discountValue && (
                                       <span className="inline-flex items-center rounded bg-emerald-500/10 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                        -{netFeeInfo.discountType === 'FIXED' ? `৳${netFeeInfo.discountValue}` : `${netFeeInfo.discountValue}%`}
+                                        -{netFeeInfo.discountType === 'FIXED' ? formatMoney(netFeeInfo.discountValue, center.currency, center.currencySymbol) : `${netFeeInfo.discountValue}%`}
                                         {netFeeInfo.discountReason ? ` (${netFeeInfo.discountReason})` : ''}
                                       </span>
                                     )}
@@ -755,16 +760,13 @@ export default function BatchDetailPage({ params }: PageProps) {
             <form onSubmit={handleSaveStudentFee} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                  Custom Fee Override (৳)
+                  Custom Fee Override
                 </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  placeholder={`Default: ৳${batch.feeAmount ?? 0}`}
+                <MoneyInput
+                  placeholder={`Default: ${formatMoney(batch.feeAmount ?? 0, center.currency, center.currencySymbol)}`}
                   value={studentCustomFeeInput}
-                  onChange={(e) => setStudentCustomFeeInput(e.target.value)}
-                  className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+                  onChange={setStudentCustomFeeInput}
+                  currencySymbol={center.currencySymbol}
                 />
                 <p className="text-[11px] text-muted-foreground mt-1">Leave empty to use batch default fee.</p>
               </div>
@@ -789,7 +791,7 @@ export default function BatchDetailPage({ params }: PageProps) {
               {studentDiscountTypeInput !== 'NONE' && (
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                    Discount Value {studentDiscountTypeInput === 'PERCENTAGE' ? '(%)' : '(৳)'}
+                    Discount Value {studentDiscountTypeInput === 'PERCENTAGE' ? '(%)' : `(${center.currencySymbol})`}
                   </label>
                   <input
                     type="number"

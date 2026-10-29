@@ -1,15 +1,29 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { useCenter } from '@/components/providers/center-provider';
+import { formatDateTime } from '@/lib/tz';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatusBadge } from '@/components/dashboard/status-badge';
+import { ErrorState } from '@/components/ui/error-state';
+import {
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  Clock,
+  ChevronLeft,
+  Info,
+} from 'lucide-react';
 
 interface Option {
   id: string;
   text: string;
-  isCorrect: boolean;
+  isCorrect?: boolean;
 }
 
 interface Question {
@@ -45,6 +59,9 @@ interface ResultSummary {
     title: string;
     type: string;
     totalMarks: number;
+    testDate: string;
+    durationMinutes?: number | null;
+    windowEndsAt?: string | null;
   };
 }
 
@@ -60,239 +77,306 @@ interface PageProps {
 export default function TestResultPage({ params }: PageProps) {
   const router = useRouter();
   const { id: batchId, testId } = use(params);
+  const { center } = useCenter();
+  const timezone = center.timezone || 'Asia/Dhaka';
 
-  // States
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Role validation & fetch result
-  useEffect(() => {
-    async function init() {
+  const loadResult = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+
       const user = await getCurrentUserClient();
       if (!user) {
         router.push('/login');
         return;
       }
-      if (user.role !== 'STUDENT') {
-        router.push(`/batches/${batchId}/tests`);
-        return;
+
+      const res = await apiGet<{ success: boolean; data: ResultData }>(`/api/tests/${testId}/my-result`);
+      if (res.success && res.data) {
+        setResultData(res.data);
+      } else {
+        throw new Error('Result record not found');
       }
-      loadResult();
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'Failed to load test results');
+    } finally {
+      setLoading(false);
     }
+  }, [testId, router]);
 
-    async function loadResult() {
-      try {
-        setLoading(true);
-        setErrorMsg(null);
-
-        const res = await apiGet<{ success: boolean; data: ResultData }>(`/api/tests/${testId}/my-result`);
-        if (res.success) {
-          setResultData(res.data);
-        }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load test results');
-      } finally {
-        setLoading(false);
+  useEffect(() => {
+    let isMounted = true;
+    const run = async () => {
+      if (isMounted) {
+        await loadResult();
       }
-    }
-
-    init();
-  }, [batchId, testId, router]);
+    };
+    run();
+    return () => {
+      isMounted = false;
+    };
+  }, [loadResult]);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading test results...</span>
+      <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-6">
+        <Skeleton className="h-8 w-1/3 rounded-[var(--radius-control)]" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Skeleton className="h-28 rounded-[var(--radius-card)]" />
+          <Skeleton className="h-28 rounded-[var(--radius-card)]" />
+          <Skeleton className="h-28 rounded-[var(--radius-card)]" />
+        </div>
+        <Skeleton className="h-64 rounded-[var(--radius-card)]" />
       </div>
     );
   }
 
   if (errorMsg || !resultData) {
     return (
-      <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Results</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg || 'Results not found or access denied.'}</p>
+      <div className="p-4 sm:p-8 max-w-2xl mx-auto">
+        <ErrorState
+          title="Result Unavailable"
+          message={errorMsg || 'Results not found or you have not completed this test yet.'}
+          onRetry={loadResult}
+        />
+        <div className="mt-4 text-center">
+          <Button variant="outline" asChild>
+            <Link href={`/batches/${batchId}/tests`}>&larr; Back to Tests</Link>
+          </Button>
         </div>
-        <Link href={`/batches/${batchId}/tests`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
-          &larr; Back to tests list
-        </Link>
       </div>
     );
   }
 
   const { result, answers } = resultData;
 
+  // Check if correct answers are hidden by checking if any MCQ option has isCorrect undefined
+  const hasHiddenAnswers = answers.some(
+    (a) => a.question.type === 'MCQ' && a.question.options.some((o) => o.isCorrect === undefined)
+  );
+
   return (
-    <div className="p-8">
-      <div className="mx-auto max-w-3xl space-y-6">
-        {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
+    <div className="p-4 sm:p-8">
+      <div className="mx-auto max-w-4xl space-y-6">
+        {/* Navigation Breadcrumb */}
+        <nav className="flex items-center text-xs sm:text-sm text-muted-foreground gap-x-2">
+          <Link href="/batches" className="hover:text-primary transition font-medium">
+            Batches
+          </Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}/tests`} className="hover:text-primary font-medium">Tests</Link>
+          <Link href={`/batches/${batchId}/tests`} className="hover:text-primary transition font-medium">
+            Tests
+          </Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">{result.test.title} Result</span>
+          <span className="text-foreground font-semibold truncate max-w-xs">{result.test.title} Result</span>
         </nav>
 
-        {/* Title Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-4">
+        {/* Header Confirmation Card */}
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Exam Performance</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Graded report card for {result.test.title}</p>
-          </div>
-          <Link
-            href={`/batches/${batchId}/tests`}
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
-          >
-            Back to Tests
-          </Link>
-        </div>
-
-        {/* Score Summary Metrics */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Score Obtained</span>
-            <div className="mt-2 flex items-baseline gap-x-2">
-              <span className="text-4xl font-extrabold text-primary">{result.totalMarksObtained}</span>
-              <span className="text-sm text-muted-foreground font-medium">/ {result.test.totalMarks} Marks</span>
-            </div>
-          </div>
-
-          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Class Rank</span>
-            <div className="mt-2 flex items-baseline gap-x-2">
-              <span className="text-4xl font-extrabold text-foreground">
-                {result.rank ? `#${result.rank}` : <span className="text-muted-foreground italic text-xl">Pending</span>}
-              </span>
-              {result.rank && <span className="text-sm text-muted-foreground font-medium">in batch</span>}
-            </div>
-          </div>
-
-          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Submitted At</span>
-            <div className="mt-2 flex items-baseline gap-x-2">
-              <span className="text-xs font-semibold text-foreground">
-                {new Date(result.submittedAt).toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+            <div className="flex items-center gap-2">
+              <StatusBadge variant="completed" label="Exam Completed" />
+              <span className="text-xs text-muted-foreground">
+                Submitted on {formatDateTime(result.submittedAt, timezone)}
               </span>
             </div>
-          </div>
-        </div>
-
-        {/* Question-by-Question Graded Review */}
-        <div className="space-y-6">
-          <h2 className="text-lg font-bold text-foreground border-b border-border pb-3">Questions Review</h2>
-
-          {answers.length === 0 ? (
-            <p className="text-sm text-muted-foreground italic text-center py-4 bg-surface border border-border rounded-[var(--radius-card)]">
-              No questions found on this exam response.
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-2">
+              {result.test.title}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Performance report for {result.test.type} examination
             </p>
+          </div>
+
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/batches/${batchId}/tests`} className="gap-1.5">
+              <ChevronLeft className="h-4 w-4" /> Back to Tests
+            </Link>
+          </Button>
+        </div>
+
+        {/* Metric Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Total Score */}
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+              Marks Obtained
+            </span>
+            <div className="mt-2 flex items-baseline gap-x-2">
+              <span className="text-3xl sm:text-4xl font-extrabold text-primary">
+                {result.totalMarksObtained}
+              </span>
+              <span className="text-sm text-muted-foreground font-medium">/ {result.test.totalMarks}</span>
+            </div>
+            <span className="text-xs text-muted-foreground mt-1 block">
+              {Math.round((result.totalMarksObtained / (result.test.totalMarks || 1)) * 100)}% overall score
+            </span>
+          </div>
+
+          {/* Rank with Competition Ties */}
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+              Batch Rank
+            </span>
+            <div className="mt-2 flex items-baseline gap-x-2">
+              {result.rank ? (
+                <>
+                  <span className="text-3xl sm:text-4xl font-extrabold text-foreground">
+                    #{result.rank}
+                  </span>
+                  <span className="text-xs text-muted-foreground">rank in batch</span>
+                </>
+              ) : (
+                <span className="text-xl font-bold text-muted-foreground italic">Pending</span>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground mt-1 block">
+              Competition ranking (ties share ranks)
+            </span>
+          </div>
+
+          {/* Submission Info */}
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+              Exam Details
+            </span>
+            <div className="mt-2 text-sm font-semibold text-foreground">
+              {result.test.type} Exam
+            </div>
+            <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{result.test.durationMinutes ? `${result.test.durationMinutes} mins` : 'Untimed'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Question Review Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h2 className="text-lg font-bold text-foreground">Question-by-Question Review</h2>
+          </div>
+
+          {hasHiddenAnswers ? (
+            /* Exam window still open notice */
+            <div className="p-6 rounded-[var(--radius-card)] border border-border bg-surface text-center space-y-3 shadow-card">
+              <div className="inline-flex p-3 rounded-full bg-primary/10 text-primary">
+                <Info className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">
+                Results appear when the exam closes
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+                To preserve academic integrity for all students while the testing window remains active, detailed answer review and correct option markings will be released automatically once the exam window concludes.
+              </p>
+            </div>
+          ) : answers.length === 0 ? (
+            <div className="p-8 rounded-[var(--radius-card)] border border-border bg-surface text-center text-muted-foreground text-sm">
+              No detailed question records found for this submission.
+            </div>
           ) : (
-            <div className="space-y-6">
+            /* Full answers breakdown once released */
+            <div className="space-y-4">
               {answers.map((ans, idx) => {
                 const q = ans.question;
-                const isMcq = q.type === 'MCQ';
-                const isCorrect = isMcq && ans.selectedOptionId && q.options.find((o) => o.id === ans.selectedOptionId)?.isCorrect;
-                const correctOption = isMcq ? q.options.find((o) => o.isCorrect) : null;
-                const isGraded = ans.marksAwarded !== null && ans.marksAwarded !== undefined;
+                const isMCQ = q.type === 'MCQ';
+
+                // Evaluate correctness for MCQ
+                let isCorrect = false;
+                let isAnswered = false;
+                if (isMCQ) {
+                  const correctOpt = q.options.find((o) => o.isCorrect === true);
+                  isAnswered = !!ans.selectedOptionId;
+                  isCorrect = isAnswered && !!correctOpt && ans.selectedOptionId === correctOpt.id;
+                }
 
                 return (
-                  <div key={ans.id} className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 space-y-4">
+                  <div
+                    key={ans.id || idx}
+                    className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card space-y-3"
+                  >
                     {/* Header */}
-                    <div className="flex justify-between items-start gap-x-4">
-                      <span className="inline-flex items-center gap-x-2 text-sm font-semibold text-foreground">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                          {idx + 1}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs px-2 py-0.5 rounded bg-surface-hover border border-border text-foreground">
+                          Q{idx + 1}
                         </span>
-                        Question {idx + 1} ({q.type})
-                      </span>
-                      
-                      <span className="text-xs font-bold">
-                        {isGraded ? (
-                          <span className={ans.marksAwarded! >= q.marks ? 'text-green-600 dark:text-green-400' : ans.marksAwarded! > 0 ? 'text-amber-500' : 'text-red-500 dark:text-red-400'}>
-                            {ans.marksAwarded} / {q.marks} Marks
+                        <span className="text-xs text-muted-foreground font-medium uppercase">
+                          {q.type} • {q.marks} Marks
+                        </span>
+                      </div>
+
+                      {isMCQ ? (
+                        isCorrect ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-[var(--radius-pill)] bg-status-success-bg text-status-success-text">
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Correct (+{q.marks})
+                          </span>
+                        ) : isAnswered ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-[var(--radius-pill)] bg-status-danger-bg text-status-danger-text">
+                            <XCircle className="h-3.5 w-3.5" /> Incorrect
                           </span>
                         ) : (
-                          <span className="text-amber-500 italic bg-amber-500/10 rounded-md px-2 py-0.5 border border-amber-500/20">
-                            Pending grading
+                          <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-[var(--radius-pill)] bg-surface-hover text-muted-foreground">
+                            <HelpCircle className="h-3.5 w-3.5" /> Unanswered (0)
                           </span>
-                        )}
-                      </span>
+                        )
+                      ) : (
+                        <span className="text-xs font-semibold text-primary">
+                          {ans.marksAwarded !== null && ans.marksAwarded !== undefined
+                            ? `Graded: ${ans.marksAwarded} / ${q.marks}`
+                            : 'Pending Teacher Grading'}
+                        </span>
+                      )}
                     </div>
 
-                    {/* Question Text */}
-                    <p className="text-sm font-medium text-foreground/90 whitespace-pre-wrap pl-8">
+                    {/* Question Prompt */}
+                    <p className="text-sm sm:text-base font-medium text-foreground whitespace-pre-wrap">
                       {q.text}
                     </p>
 
-                    {/* MCQ Details */}
-                    {isMcq ? (
-                      <div className="pl-8 space-y-3">
-                        {/* Option choices list */}
-                        <div className="space-y-2 max-w-lg">
-                          {q.options.map((o) => {
-                            const isSelectedOption = ans.selectedOptionId === o.id;
-                            const optionStyle = o.isCorrect
-                              ? 'border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300 font-bold'
-                              : isSelectedOption
-                              ? 'border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-300 font-bold'
-                              : 'border-border bg-surface text-foreground';
+                    {/* MCQ Options Display */}
+                    {isMCQ && (
+                      <div className="space-y-2 pt-1">
+                        {q.options.map((opt) => {
+                          const isStudentPick = ans.selectedOptionId === opt.id;
+                          const isOptCorrect = opt.isCorrect === true;
 
-                            return (
-                              <div
-                                key={o.id}
-                                className={`flex items-center gap-x-3 text-xs p-3 rounded-lg border ${optionStyle}`}
-                              >
-                                <span
-                                  className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                                    o.isCorrect ? 'bg-green-600 dark:bg-green-400' : isSelectedOption ? 'bg-red-600 dark:bg-red-400' : 'bg-muted-foreground/40'
-                                  }`}
-                                />
-                                <span className="flex-1">{o.text}</span>
-                                {o.isCorrect && (
-                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-green-700 dark:text-green-400">
-                                    Correct Answer
-                                  </span>
-                                )}
-                                {isSelectedOption && !o.isCorrect && (
-                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-red-700 dark:text-red-400">
-                                    Your Choice (Wrong)
-                                  </span>
-                                )}
-                                {isSelectedOption && o.isCorrect && (
-                                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-green-700 dark:text-green-400">
-                                    Your Choice (Correct)
-                                  </span>
-                                )}
+                          let rowClass = 'border-border bg-surface text-foreground';
+                          if (isOptCorrect) {
+                            rowClass = 'border-status-success-text/40 bg-status-success-bg text-status-success-text font-medium';
+                          } else if (isStudentPick && !isOptCorrect) {
+                            rowClass = 'border-status-danger-text/40 bg-status-danger-bg text-status-danger-text';
+                          }
+
+                          return (
+                            <div
+                              key={opt.id}
+                              className={`flex items-center justify-between p-3 rounded-[var(--radius-control)] border text-sm ${rowClass}`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-xs font-bold shrink-0">
+                                  {isOptCorrect ? '✓' : isStudentPick ? '✕' : '•'}
+                                </span>
+                                <span>{opt.text}</span>
                               </div>
-                            );
-                          })}
-                        </div>
-                        
-                        {!ans.selectedOptionId && (
-                          <p className="text-xs text-muted-foreground italic">
-                            ⚠️ Question was left unanswered (0 marks).
-                          </p>
-                        )}
+                              <div className="text-xs shrink-0 flex items-center gap-1 font-semibold">
+                                {isStudentPick && <span>(Your Answer)</span>}
+                                {isOptCorrect && <span>(Correct Answer)</span>}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ) : (
-                      /* Written Details */
-                      <div className="pl-8 space-y-2">
-                        <div className="rounded-lg border border-border bg-surface-hover/50 p-4">
-                          <span className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                            Your Written Response
-                          </span>
-                          <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
-                            {ans.writtenAnswerText || <span className="text-muted-foreground italic">No answer submitted</span>}
-                          </p>
+                    )}
+
+                    {/* Written Response Display */}
+                    {!isMCQ && (
+                      <div className="space-y-2 pt-1">
+                        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface-hover/30 text-xs sm:text-sm text-foreground whitespace-pre-wrap">
+                          {ans.writtenAnswerText || <span className="text-muted-foreground italic">No answer provided.</span>}
                         </div>
                       </div>
                     )}

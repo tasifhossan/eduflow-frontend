@@ -7,7 +7,7 @@ export interface User {
   email?: string | null;
   phone?: string | null;
   studentCode?: string | null;
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN';
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN' | 'ACCOUNTANT';
   branchId: string;
   mustChangePassword?: boolean;
   isActive?: boolean;

@@ -5,7 +5,7 @@ export interface UserClaims {
   name: string;
   email: string;
   phone?: string | null;
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN';
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'GUARDIAN' | 'SUPER_ADMIN' | 'ACCOUNTANT';
   branchId: string;
 }
 
@@ -26,6 +26,7 @@ export function getToken(): string | null {
   return null;
 }
 
-export function parseJwt(_token: string): any {
+export function parseJwt(token: string): Record<string, unknown> | null {
+  void token;
   return null;
 }
