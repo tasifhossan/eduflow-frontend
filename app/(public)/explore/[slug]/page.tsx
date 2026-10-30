@@ -9,6 +9,7 @@ import {
   ReviewItem,
 } from '@/components/explore/course-detail-view';
 import { BatchCardData } from '@/components/ui/batch-card';
+import { DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,7 +113,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
           offers: {
             '@type': 'Offer',
             price: batch.feeAmount,
-            priceCurrency: center.currency || 'BDT',
+            priceCurrency: center.currency || DEFAULT_CURRENCY,
             category: batch.feeType === 'MONTHLY' ? 'Monthly Tuition' : 'Full Course',
           },
         }
@@ -138,7 +139,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         batch={batch}
         relatedBatches={relatedBatches}
         reviews={reviews}
-        currencySymbol={center.currencySymbol || '৳'}
+        currencySymbol={center.currencySymbol || DEFAULT_CURRENCY_SYMBOL}
         reviewsEnabled={Boolean(center.features.reviews)}
       />
     </>

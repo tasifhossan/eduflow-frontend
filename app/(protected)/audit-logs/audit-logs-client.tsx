@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { apiGet } from '@/lib/api';
+import { formatDateTime } from '@/lib/format';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -215,7 +216,7 @@ export default function AuditLogsClient() {
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground text-[11px]">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span>{new Date(log.createdAt).toLocaleString()}</span>
+                        <span>{formatDateTime(log.createdAt)}</span>
                       </div>
                     </td>
 
@@ -321,7 +322,7 @@ export default function AuditLogsClient() {
               </div>
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase font-semibold">Timestamp</span>
-                <p className="text-muted-foreground">{new Date(inspectedLog.createdAt).toLocaleString()}</p>
+                <p className="text-muted-foreground">{formatDateTime(inspectedLog.createdAt)}</p>
               </div>
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase font-semibold">Actor</span>

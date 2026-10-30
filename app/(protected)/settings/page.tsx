@@ -15,6 +15,7 @@ import {
   AdmissionStepItem,
 } from '@/lib/types/center';
 import { enforceWcagAA, sanitizeHex } from '@/lib/theme';
+import { DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL } from '@/lib/format';
 import {
   Palette,
   Phone,
@@ -991,7 +992,7 @@ export default function SettingsPage() {
                 type="text"
                 value={formData.currency}
                 onChange={(e) => handleChange('currency', e.target.value)}
-                placeholder="BDT"
+                placeholder={DEFAULT_CURRENCY}
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg uppercase"
               />
             </div>
@@ -1004,7 +1005,7 @@ export default function SettingsPage() {
                 type="text"
                 value={formData.currencySymbol}
                 onChange={(e) => handleChange('currencySymbol', e.target.value)}
-                placeholder="৳"
+                placeholder={DEFAULT_CURRENCY_SYMBOL}
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
               />
             </div>

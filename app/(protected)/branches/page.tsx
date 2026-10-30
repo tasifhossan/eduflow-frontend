@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatDate } from '@/lib/format';
 
 interface Branch {
   id: string;
@@ -216,9 +217,7 @@ export default function BranchesManagementPage() {
                     <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">{b.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">{b.address || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                      {new Date(b.createdAt).toLocaleDateString(undefined, {
-                        year: 'numeric', month: 'short', day: 'numeric',
-                      })}
+                      {formatDate(b.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
                       <button

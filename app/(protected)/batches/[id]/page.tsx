@@ -30,6 +30,7 @@ interface BatchDetails {
   type: 'ACADEMIC' | 'ADMISSION';
   classLevel?: string | null;
   feeType?: 'MONTHLY' | 'ONE_TIME';
+  feeBilling?: 'MONTHLY' | 'ONE_TIME' | 'NONE';
   feeAmount?: number;
   subject: {
     id: string;
@@ -73,7 +74,7 @@ export default function BatchDetailPage({ params }: PageProps) {
 
   // Batch Fee Edit States
   const [isEditingBatchFee, setIsEditingBatchFee] = useState(false);
-  const [feeTypeInput, setFeeTypeInput] = useState<'MONTHLY' | 'ONE_TIME'>('MONTHLY');
+  const [feeTypeInput, setFeeTypeInput] = useState<'MONTHLY' | 'ONE_TIME' | 'NONE'>('MONTHLY');
   const [feeAmountInput, setFeeAmountInput] = useState<string>('0');
   const [savingBatchFee, setSavingBatchFee] = useState(false);
   const [batchFeeError, setBatchFeeError] = useState<string | null>(null);
@@ -169,7 +170,7 @@ export default function BatchDetailPage({ params }: PageProps) {
         const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
         if (batchRes.success) {
           setBatch(batchRes.data);
-          setFeeTypeInput(batchRes.data.feeType || 'MONTHLY');
+          setFeeTypeInput((batchRes.data.feeBilling as 'MONTHLY' | 'ONE_TIME' | 'NONE') || batchRes.data.feeType || 'MONTHLY');
           setFeeAmountInput(String(batchRes.data.feeAmount ?? 0));
         }
 
@@ -261,14 +262,15 @@ export default function BatchDetailPage({ params }: PageProps) {
 
     try {
       const response = await apiPatch(`/api/batches/${batchId}/fee`, {
-        feeType: feeTypeInput,
-        feeAmount: Number(feeAmountInput),
+        feeBilling: feeTypeInput,
+        feeType: feeTypeInput !== 'NONE' ? feeTypeInput : undefined,
+        feeAmount: feeTypeInput === 'NONE' ? 0 : Number(feeAmountInput),
       });
 
       if (response && response.success) {
         setBatchFeeSuccess('Batch fee settings updated successfully!');
         setIsEditingBatchFee(false);
-        setBatch((prev) => (prev ? { ...prev, feeType: feeTypeInput, feeAmount: Number(feeAmountInput) } : null));
+        setBatch((prev) => (prev ? { ...prev, feeBilling: feeTypeInput, feeType: feeTypeInput !== 'NONE' ? feeTypeInput : (prev.feeType || 'MONTHLY'), feeAmount: feeTypeInput === 'NONE' ? 0 : Number(feeAmountInput) } : null));
 
         // Refetch all student net fees as base fee changed
         for (const student of enrolledStudents) {
@@ -490,7 +492,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                 {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && (
                   <button
                     onClick={() => {
-                      setFeeTypeInput(batch.feeType || 'MONTHLY');
+                      setFeeTypeInput((batch.feeBilling as 'MONTHLY' | 'ONE_TIME' | 'NONE') || batch.feeType || 'MONTHLY');
                       setFeeAmountInput(String(batch.feeAmount ?? 0));
                       setIsEditingBatchFee(!isEditingBatchFee);
                       setBatchFeeError(null);
@@ -537,11 +539,12 @@ export default function BatchDetailPage({ params }: PageProps) {
                     </label>
                     <select
                       value={feeTypeInput}
-                      onChange={(e) => setFeeTypeInput(e.target.value as 'MONTHLY' | 'ONE_TIME')}
+                      onChange={(e) => setFeeTypeInput(e.target.value as 'MONTHLY' | 'ONE_TIME' | 'NONE')}
                       className="block w-full rounded-lg border border-border bg-surface px-3 py-2 text-foreground text-sm focus:border-primary focus:ring-1 focus:ring-primary"
                     >
                       <option value="MONTHLY">Monthly Billing</option>
                       <option value="ONE_TIME">One-time Billing</option>
+                      <option value="NONE">No Fee / None</option>
                     </select>
                   </div>
                   <div>

@@ -377,7 +377,10 @@ export default function TakeExamPage({ params }: PageProps) {
     } catch (err: unknown) {
       const errorObj = err as { data?: { code?: string }; message?: string };
       if (errorObj?.data?.code === 'ATTEMPT_CLOSED' || errorObj?.message?.includes('ATTEMPT_CLOSED')) {
-        // Attempt closed by deadline -> transition to submitted or result view
+        // Attempt closed by deadline -> remove local backup and transition to submitted or result view
+        try {
+          localStorage.removeItem(backupStorageKey);
+        } catch {}
         setExamState('SUBMITTED');
         return;
       }

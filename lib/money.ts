@@ -121,3 +121,33 @@ export function isValidMoneyString(value: string): boolean {
   if (!value) return false;
   return /^\d+(\.\d{1,2})?$/.test(value.trim());
 }
+
+/**
+ * Splits a total monetary amount into `count` installments.
+ * Uses exact integer division on minor units with HALF_UP rounding for the base split,
+ * placing the remainder on the LAST installment to match backend FeeLedgerService.splitInstallments.
+ */
+export function splitInstallments(
+  total: string | number | bigint,
+  count: number
+): string[] {
+  if (count < 2 || count > 12) {
+    throw new Error('Installment count must be between 2 and 12');
+  }
+
+  const totalMinor = toMinor(total);
+  const countBig = BigInt(count);
+
+  // Exact split in minor units with HALF_UP rounding: round(totalMinor / count)
+  const exactSplitMinor = (totalMinor * BigInt(2) + countBig) / (countBig * BigInt(2));
+  const firstPartSumMinor = exactSplitMinor * BigInt(count - 1);
+  const lastAmountMinor = totalMinor - firstPartSumMinor;
+
+  const result: string[] = [];
+  for (let i = 0; i < count - 1; i++) {
+    result.push(fromMinor(exactSplitMinor));
+  }
+  result.push(fromMinor(lastAmountMinor));
+  return result;
+}
+

@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { apiPost } from '@/lib/api';
+import { clearExamBackups } from '@/lib/client-auth';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -12,9 +13,11 @@ export default function LogoutButton() {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
+      clearExamBackups();
       // Call POST /api/auth/logout backend to clear session cookie
       await apiPost('/api/auth/logout');
     } catch (err) {
+      clearExamBackups();
       console.warn('Backend logout failed:', err);
     } finally {
       router.push('/login');

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatDate, formatMoney } from '@/lib/format';
 import {
   Calendar,
   Award,
@@ -14,6 +15,7 @@ import {
   XCircle,
   Clock,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 
 interface AttendanceRecord {
@@ -45,18 +47,45 @@ interface TestResultRecord {
   };
 }
 
-interface PaymentRecord {
+interface LedgerPaymentItem {
   id: string;
+  receiptNumber: string;
+  receivedAt: string;
+  amount: string;
+  method: string;
+  reference?: string | null;
+  isReversed: boolean;
+  allocations: Array<{
+    chargeId: string;
+    chargeDescription: string;
+    period: string;
+    amount: string;
+  }>;
+}
+
+interface LedgerChargeItem {
+  id: string;
+  batchName: string;
+  kind: string;
   period: string;
-  amountDue: number;
-  amountPaid: number;
-  status: 'DUE' | 'PARTIAL' | 'PAID';
-  dueDate?: string | null;
-  paidAt?: string | null;
-  batch: {
-    id: string;
-    name: string;
+  description: string;
+  dueDate: string;
+  effectiveAmount: string;
+  paidAmount: string;
+  balance: string;
+  status: string;
+}
+
+interface FeeAccountStatement {
+  summary?: {
+    totalCharges?: string;
+    totalEffective?: string;
+    totalPaid?: string;
+    totalOutstanding?: string;
+    unallocatedCredit?: string;
   };
+  charges?: LedgerChargeItem[];
+  payments?: LedgerPaymentItem[];
 }
 
 interface StudentInfo {
@@ -79,7 +108,7 @@ export default function ChildDetailPage({ params }: PageProps) {
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [results, setResults] = useState<TestResultRecord[]>([]);
-  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [feeAccount, setFeeAccount] = useState<FeeAccountStatement | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,18 +139,18 @@ export default function ChildDetailPage({ params }: PageProps) {
           if (match) setStudentInfo(match);
         }
 
-        // Fetch attendance, results, payments in parallel
-        const [attRes, resRes, payRes] = await Promise.all([
+        // Fetch attendance, results, fees account in parallel
+        const [attRes, resRes, feeRes] = await Promise.all([
           apiGet<{ success: boolean; data: AttendanceRecord[] }>(`/api/guardians/students/${studentId}/attendance`),
           apiGet<{ success: boolean; data: TestResultRecord[] }>(`/api/guardians/students/${studentId}/results`),
-          apiGet<{ success: boolean; data: PaymentRecord[] }>(`/api/guardians/students/${studentId}/payments`),
+          apiGet<{ success: boolean; data: FeeAccountStatement }>(`/api/fees/guardian/students/${studentId}/account`),
         ]);
 
         if (attRes.success && attRes.data) setAttendance(attRes.data);
         if (resRes.success && resRes.data) setResults(resRes.data);
-        if (payRes.success && payRes.data) setPayments(payRes.data);
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load student performance records');
+        if (feeRes.success && feeRes.data) setFeeAccount(feeRes.data);
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load student performance records');
       } finally {
         setLoading(false);
       }
@@ -148,31 +177,6 @@ export default function ChildDetailPage({ params }: PageProps) {
         return (
           <span className="inline-flex items-center gap-x-1 rounded-md bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-700/10">
             <Clock className="w-3.5 h-3.5" /> LATE
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const getPaymentBadge = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return (
-          <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-700/10">
-            PAID
-          </span>
-        );
-      case 'PARTIAL':
-        return (
-          <span className="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-700/10">
-            PARTIAL
-          </span>
-        );
-      case 'DUE':
-        return (
-          <span className="inline-flex items-center rounded-md bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 ring-1 ring-inset ring-red-700/10">
-            DUE
           </span>
         );
       default:
@@ -247,7 +251,7 @@ export default function ChildDetailPage({ params }: PageProps) {
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            <CreditCard className="w-4 h-4" /> Fee Payments ({payments.length})
+            <CreditCard className="w-4 h-4" /> Fee Payments ({feeAccount?.payments?.length || 0})
           </button>
         </div>
 
@@ -265,7 +269,7 @@ export default function ChildDetailPage({ params }: PageProps) {
                     <div className="space-y-1">
                       <div className="flex items-center gap-x-2">
                         <span className="font-bold text-foreground text-base">
-                          {new Date(record.date).toLocaleDateString(undefined, { dateStyle: 'full' })}
+                          {formatDate(record.date)}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-x-1">
@@ -298,7 +302,7 @@ export default function ChildDetailPage({ params }: PageProps) {
                         <span>•</span>
                         <span>Type: <span className="uppercase font-semibold text-foreground">{res.test.type}</span></span>
                         <span>•</span>
-                        <span>Submitted: {new Date(res.submittedAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
+                        <span>Submitted: {formatDate(res.submittedAt)}</span>
                       </div>
                     </div>
 
@@ -324,42 +328,72 @@ export default function ChildDetailPage({ params }: PageProps) {
 
         {/* Tab 3: Payment History */}
         {activeTab === 'payments' && (
-          <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
-            {payments.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground text-sm">
-                No fee payment records found.
-              </div>
-            ) : (
-              <div className="divide-y divide-border">
-                {payments.map((p) => (
-                  <div key={p.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-x-3">
-                        <h3 className="font-bold text-foreground text-base">Period: {p.period}</h3>
-                        {getPaymentBadge(p.status)}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Batch: <strong className="text-foreground">{p.batch.name}</strong>
-                      </p>
-                      {p.paidAt && (
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                          Paid on: {new Date(p.paidAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="text-right space-y-0.5 shrink-0">
-                      <div className="text-sm font-semibold text-muted-foreground">
-                        Due: ৳{p.amountDue}
-                      </div>
-                      <div className="text-lg font-bold text-foreground">
-                        Paid: <span className="text-emerald-600 dark:text-emerald-400">৳{p.amountPaid}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          <div className="space-y-6">
+            {feeAccount?.summary && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-sm">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase">Total Paid</span>
+                  <p className="text-xl font-extrabold text-foreground mt-1">
+                    {formatMoney(feeAccount.summary.totalPaid || '0.00')}
+                  </p>
+                </div>
+                <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-sm">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase">Outstanding Balance</span>
+                  <p className="text-xl font-extrabold text-foreground mt-1">
+                    {formatMoney(feeAccount.summary.totalOutstanding || '0.00')}
+                  </p>
+                </div>
               </div>
             )}
+
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
+              {(!feeAccount?.payments || feeAccount.payments.length === 0) ? (
+                <div className="p-12 text-center text-muted-foreground text-sm">
+                  No fee payment records found.
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {feeAccount.payments.map((p) => (
+                    <div key={p.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-x-3">
+                          <h3 className="font-bold text-foreground text-base">Receipt #{p.receiptNumber}</h3>
+                          <span
+                            className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                              p.isReversed
+                                ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
+                                : 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
+                            }`}
+                          >
+                            {p.isReversed ? 'REVERSED' : 'PAID'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Method: <strong className="text-foreground">{p.method}</strong>
+                          {p.reference && <span> • Ref: {p.reference}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          Paid on: {formatDate(p.receivedAt)}
+                        </p>
+                      </div>
+
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0">
+                        <div className="text-right">
+                          <div className="text-xs font-semibold text-muted-foreground">Amount Paid</div>
+                          <div className="text-lg font-bold text-foreground">{formatMoney(p.amount)}</div>
+                        </div>
+                        <Link
+                          href={`/fees/receipts/${p.id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-hover hover:bg-surface border border-border text-foreground transition"
+                        >
+                          <FileText className="w-3.5 h-3.5" /> View Receipt
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -11,6 +11,7 @@ import { Button } from './button';
 import { Skeleton } from './skeleton';
 import { BookOpen, Calendar, MapPin, Tag } from 'lucide-react';
 import { useCenter } from '@/components/providers/center-provider';
+import { formatMoney } from '@/lib/format';
 
 export interface BatchCardData {
   id: string;
@@ -40,10 +41,9 @@ export function BatchCard({ batch, href, className }: BatchCardProps) {
   const [imageError, setImageError] = React.useState(false);
   const targetHref = href || `/explore/${batch.slug || batch.id}`;
 
-  const symbol = center.currencySymbol || '৳';
   const hasFee = batch.feeAmount !== undefined && batch.feeAmount !== null;
   const formattedFee = hasFee
-    ? `${symbol}${batch.feeAmount!.toLocaleString()}${batch.feeType === 'MONTHLY' ? '/mo' : ''}`
+    ? `${formatMoney(batch.feeAmount!, center.currency, center.currencySymbol)}${batch.feeType === 'MONTHLY' ? '/mo' : ''}`
     : null;
 
   const hasReviews = Boolean(batch.ratingCount && batch.ratingCount > 0 && batch.ratingAverage);

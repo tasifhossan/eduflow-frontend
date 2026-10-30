@@ -11,7 +11,8 @@
     "check:links": "npx tsx scripts/check-links.ts",
     "check:theme": "npx tsx scripts/check-theme.ts",
     "check:colors": "npx tsx scripts/check-colors.ts",
-    "check:safe-text": "npx tsx scripts/check-safe-text.ts"
+    "check:safe-text": "npx tsx scripts/check-safe-text.ts",
+    "check:money": "npx tsx scripts/check-money.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",

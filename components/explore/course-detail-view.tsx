@@ -16,6 +16,7 @@ import { BatchCard, BatchCardData } from '@/components/ui/batch-card';
 import { TeacherCard } from '@/components/cards/TeacherCard';
 import { toast } from 'sonner';
 import { apiPost } from '@/lib/api';
+import { formatMoney } from '@/lib/format';
 import {
   BookOpen,
   Calendar,
@@ -202,7 +203,7 @@ export function CourseDetailView({
 
   const formattedFee =
     batch.feeAmount !== undefined && batch.feeAmount !== null
-      ? `${currencySymbol}${batch.feeAmount.toLocaleString()}${
+      ? `${formatMoney(batch.feeAmount, undefined, currencySymbol)}${
           batch.feeType === 'MONTHLY' ? '/month' : ' (One-time)'
         }`
       : 'Contact for Fee Structure';
