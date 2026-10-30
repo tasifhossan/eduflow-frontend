@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
+import { formatDate } from '@/lib/format';
 
 interface BatchSummary {
   id: string;
@@ -106,7 +107,7 @@ export default async function AttendancePage() {
             </p>
           </div>
           <div className="text-sm font-semibold text-gray-600 bg-gray-100 rounded-lg px-4 py-2 border border-gray-200">
-            Date: {today.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            Date: {formatDate(today, undefined, undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </div>
         </div>
 
@@ -190,7 +191,7 @@ export default async function AttendancePage() {
                       {studentHistory.map((rec) => (
                         <tr key={rec.id} className="hover:bg-surface-hover/50 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                            {new Date(rec.date).toLocaleDateString(undefined, {
+                            {formatDate(rec.date, undefined, undefined, {
                               weekday: 'short',
                               year: 'numeric',
                               month: 'short',

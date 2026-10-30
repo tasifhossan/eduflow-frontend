@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { formatDate } from '@/lib/format';
 
 export interface StudentSummary {
   id: string;
@@ -200,7 +201,7 @@ export default function StudentsTable({
                                 student.recentAttendance.status.slice(1).toLowerCase()}
                             </span>
                             <span className="text-[10px] text-muted-foreground font-medium ml-1.5">
-                              {student.recentAttendance.batchName} ({new Date(student.recentAttendance.date).toLocaleDateString()})
+                              {student.recentAttendance.batchName} ({formatDate(student.recentAttendance.date)})
                             </span>
                           </div>
                         ) : (

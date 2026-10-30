@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatMoney } from '@/lib/format';
 
 interface BranchBreakdownItem {
   branchId: string;
@@ -53,8 +54,8 @@ export default function SuperAdminDashboardPage() {
         } else {
           setErrorMsg('Failed to load super admin dashboard data.');
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load dashboard data.');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load dashboard data.');
       } finally {
         setLoading(false);
       }
@@ -128,7 +129,7 @@ export default function SuperAdminDashboardPage() {
 
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Revenue</p>
-          <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">৳{totalRevenue.toLocaleString()}</p>
+          <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">{formatMoney(totalRevenue)}</p>
           <p className="text-xs text-muted-foreground mt-1">Collected fee payments</p>
         </div>
 
@@ -170,7 +171,7 @@ export default function SuperAdminDashboardPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-foreground">{b.studentCount}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-foreground">{b.batchCount}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                      ৳{b.totalRevenue.toLocaleString()}
+                      {formatMoney(b.totalRevenue)}
                     </td>
                   </tr>
                 ))}

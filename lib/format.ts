@@ -1,5 +1,8 @@
 import { toMinor } from './money';
 
+export const DEFAULT_CURRENCY = 'BDT';
+export const DEFAULT_CURRENCY_SYMBOL = '৳';
+
 /**
  * Currency, Date, and Time formatting helpers based on center settings
  */

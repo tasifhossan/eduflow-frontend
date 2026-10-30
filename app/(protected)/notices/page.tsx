@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatDateTime } from '@/lib/format';
 import {
   PageHeader,
   SectionCard,
@@ -377,10 +378,7 @@ export default function NoticesPage() {
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                       <time dateTime={notice.createdAt}>
-                        {new Date(notice.createdAt).toLocaleString(undefined, {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        })}
+                        {formatDateTime(notice.createdAt)}
                       </time>
                     </span>
                   </div>

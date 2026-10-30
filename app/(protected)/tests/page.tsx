@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatDate } from '@/lib/format';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -32,14 +33,6 @@ interface BatchWithTests {
 }
 
 type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
 
 function typeBadgeClass(type: string) {
   const map: Record<string, string> = {

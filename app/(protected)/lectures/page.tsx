@@ -561,7 +561,7 @@ export default function LecturesPage() {
                 {/* Day Header */}
                 <div className="border-b border-border pb-1.5 text-center">
                   <span className="text-[11px] font-semibold text-muted-foreground uppercase">
-                    {dayDate.toLocaleDateString(undefined, { weekday: 'short' })}
+                    {formatDate(dayDate, undefined, 'en-US', { weekday: 'short' })}
                   </span>
                   <p
                     className={`text-sm font-bold ${

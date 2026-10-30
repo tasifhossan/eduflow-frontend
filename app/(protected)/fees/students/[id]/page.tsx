@@ -17,10 +17,9 @@ import { useCenter } from '@/components/providers/center-provider';
 import { useAuth } from '@/components/providers/auth-provider';
 import { formatMoney, formatDate } from '@/lib/format';
 import {
-  toMinor,
-  fromMinor,
   isPositive,
   isZero,
+  splitInstallments,
 } from '@/lib/money';
 import { MoneyInput } from '@/components/ui/money-input';
 import { StatusBadge, StatusVariant } from '@/components/dashboard/status-badge';
@@ -258,28 +257,19 @@ export default function StudentLedgerPage({
     const count = parseInt(instCount, 10);
     if (isNaN(count) || count < 2 || count > 12) return [];
 
-    const totalMinor = toMinor(instTotal);
-    const baseInstallmentMinor = totalMinor / BigInt(count);
-    const remainderMinor = totalMinor % BigInt(count);
-
+    const splitAmounts = splitInstallments(instTotal, count);
     const interval = parseInt(instInterval, 10) || 1;
     const baseDate = new Date(instFirstDueDate);
 
-    const items: Array<{ num: number; amount: string; dueDate: string }> = [];
-
-    for (let i = 0; i < count; i++) {
-      // Remainder poisha/cents added to first installment so sum matches total exactly
-      const amountMinor = i === 0 ? baseInstallmentMinor + remainderMinor : baseInstallmentMinor;
+    return splitAmounts.map((amount, idx) => {
       const d = new Date(baseDate);
-      d.setMonth(d.getMonth() + i * interval);
-      items.push({
-        num: i + 1,
-        amount: fromMinor(amountMinor),
+      d.setMonth(d.getMonth() + idx * interval);
+      return {
+        num: idx + 1,
+        amount,
         dueDate: d.toISOString().slice(0, 10),
-      });
-    }
-
-    return items;
+      };
+    });
   }, [instTotal, instCount, instInterval, instFirstDueDate]);
 
   // Handlers for Staff Actions

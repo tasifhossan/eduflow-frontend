@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
 import { getCurrentUserClient, UserClaims } from '@/lib/client-auth';
+import { formatDateTime } from '@/lib/format';
 
 interface Option {
   id: string;
@@ -277,7 +278,7 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                 <span>🎉 Practice Completed!</span>
               </h2>
               <span className="text-xs font-semibold text-emerald-700">
-                Submitted on {new Date(submissionResult.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                Submitted on {formatDateTime(submissionResult.submittedAt)}
               </span>
             </div>
             <p className="text-xs text-emerald-800">

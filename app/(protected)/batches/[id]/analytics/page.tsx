@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatDate } from '@/lib/format';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -195,9 +196,7 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
                     <tr key={test.testId} className="hover:bg-surface-hover/50 transition">
                       <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">{test.testName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                        {new Date(test.testDate).toLocaleDateString(undefined, {
-                          year: 'numeric', month: 'short', day: 'numeric',
-                        })}
+                        {formatDate(test.testDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-foreground">{test.totalMarks}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-muted-foreground">{test.resultCount}</td>

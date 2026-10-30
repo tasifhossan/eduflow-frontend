@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
+import { formatDate, formatMoney } from '@/lib/format';
 import StudentEditControls from '@/components/student-edit-controls';
 import UnlinkGuardianButton from '@/components/unlink-guardian-button';
 import PracticeWeakSpotCard from '@/components/practice-weak-spot-card';
@@ -50,23 +51,43 @@ interface StudentSummary {
   createdAt: string;
 }
 
-interface FeePayment {
+interface LedgerPaymentItem {
   id: string;
-  studentId: string;
-  batchId: string;
-  period: string;
-  amountDue: number;
-  amountPaid: number;
-  status: 'DUE' | 'PARTIAL' | 'PAID';
-  dueDate?: string | null;
-  paidAt?: string | null;
-  notes?: string | null;
-  createdAt: string;
-  batch: {
-    id: string;
-    name: string;
-    type?: string;
+  receiptNumber: string;
+  receivedAt: string;
+  amount: string;
+  method: string;
+  reference?: string | null;
+  isReversed: boolean;
+  allocations: Array<{
+    chargeId: string;
+    chargeDescription: string;
+    period: string;
+    amount: string;
+  }>;
+}
+
+interface FeeAccountStatement {
+  summary?: {
+    totalCharges?: string;
+    totalEffective?: string;
+    totalPaid?: string;
+    totalOutstanding?: string;
+    unallocatedCredit?: string;
   };
+  charges?: Array<{
+    id: string;
+    batchName: string;
+    kind: string;
+    period: string;
+    description: string;
+    dueDate: string;
+    effectiveAmount: string;
+    paidAmount: string;
+    balance: string;
+    status: string;
+  }>;
+  payments?: LedgerPaymentItem[];
 }
 
 interface TrendEntry {
@@ -144,7 +165,7 @@ export default async function StudentDetailPage({
   let studentProfile: StudentSummary | null = null;
   let enrolledBatches: Batch[] = [];
   let attendanceHistory: AttendanceRecord[] = [];
-  let paymentHistory: FeePayment[] = [];
+  let feeAccount: FeeAccountStatement | null = null;
   let scoreTrend: TrendEntry[] = [];
   let errorMsg: string | null = null;
 
@@ -187,7 +208,7 @@ export default async function StudentDetailPage({
     } else {
       if (user.role === 'GUARDIAN') {
         // Fetch guardian linked child data
-        const [attRes, resRes, payRes] = await Promise.all([
+        const [attRes, resRes, feeRes] = await Promise.all([
           apiGet<{ success: boolean; data: Array<{ id: string; date: string; status: string; batch?: { name: string } }> }>(
             `/api/guardians/students/${studentId}/attendance`,
             { headers: { Cookie: cookieHeader } }
@@ -196,10 +217,10 @@ export default async function StudentDetailPage({
             `/api/guardians/students/${studentId}/results`,
             { headers: { Cookie: cookieHeader } }
           ).catch(() => ({ success: false, data: [] })),
-          apiGet<{ success: boolean; data: Array<{ id: string; period?: string | null; amountDue: number; amountPaid: number; status: string; dueDate?: string | null; paidAt?: string | null; createdAt?: string; batch?: { id: string; name: string } }> }>(
-            `/api/guardians/students/${studentId}/payments`,
+          apiGet<{ success: boolean; data: FeeAccountStatement }>(
+            `/api/fees/guardian/students/${studentId}/account`,
             { headers: { Cookie: cookieHeader } }
-          ).catch(() => ({ success: false, data: [] })),
+          ).catch(() => null),
         ]);
 
         if (attRes.success && attRes.data) {
@@ -231,23 +252,11 @@ export default async function StudentDetailPage({
           });
         }
 
-        if (payRes.success && payRes.data) {
-          paymentHistory = payRes.data.map((p) => ({
-            id: p.id,
-            studentId,
-            batchId: p.batch?.id || '',
-            period: p.period || '',
-            amountDue: p.amountDue,
-            amountPaid: p.amountPaid,
-            status: p.status as 'DUE' | 'PARTIAL' | 'PAID',
-            dueDate: p.dueDate || null,
-            paidAt: p.paidAt || null,
-            createdAt: p.createdAt || new Date().toISOString(),
-            batch: { id: p.batch?.id || '', name: p.batch?.name || 'Batch' },
-          }));
+        if (feeRes && feeRes.success && feeRes.data) {
+          feeAccount = feeRes.data;
         }
       } else {
-        // ADMIN / TEACHER / STUDENT
+        // ADMIN / TEACHER / STUDENT / ACCOUNTANT
         const batchesResponse = await apiGet<{ success: boolean; data: Batch[] }>(
           `/api/students/${studentId}/batches`,
           { headers: { Cookie: cookieHeader } }
@@ -266,14 +275,14 @@ export default async function StudentDetailPage({
           attendanceHistory = attendanceResponse.data;
         }
 
-        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-          const paymentsResponse = await apiGet<{ success: boolean; data: FeePayment[] }>(
-            `/api/students/${studentId}/payments`,
+        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'ACCOUNTANT') {
+          const acctResponse = await apiGet<{ success: boolean; data: FeeAccountStatement }>(
+            `/api/fees/students/${studentId}/account`,
             { headers: { Cookie: cookieHeader } }
           ).catch(() => null);
 
-          if (paymentsResponse && paymentsResponse.success) {
-            paymentHistory = paymentsResponse.data;
+          if (acctResponse && acctResponse.success && acctResponse.data) {
+            feeAccount = acctResponse.data;
           }
         }
 
@@ -303,10 +312,9 @@ export default async function StudentDetailPage({
   }
 
   // Summary totals for payment history
-  const totalPaidAcrossBatches = paymentHistory.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
-  const totalOutstanding = paymentHistory
-    .filter((p) => p.status !== 'PAID')
-    .reduce((sum, p) => sum + Math.max(0, p.amountDue - p.amountPaid), 0);
+  const totalPaidAcrossBatches = feeAccount?.summary?.totalPaid || '0.00';
+  const totalOutstanding = feeAccount?.summary?.totalOutstanding || '0.00';
+  const paymentHistory = feeAccount?.payments || [];
 
   return (
     <div className="p-8">
@@ -408,7 +416,7 @@ export default async function StudentDetailPage({
                   <div>
                     <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admission Date</span>
                     <span className="text-sm font-medium text-foreground">
-                      {new Date(studentProfile.createdAt).toLocaleDateString(undefined, {
+                      {formatDate(studentProfile.createdAt, undefined, undefined, {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -499,11 +507,11 @@ export default async function StudentDetailPage({
                     <div className="flex gap-x-4 text-xs font-semibold">
                       <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-lg px-3 py-1.5">
                         <span className="text-[10px] uppercase block font-bold">Total Paid</span>
-                        <span className="text-sm font-extrabold">৳{totalPaidAcrossBatches.toLocaleString()}</span>
+                        <span className="text-sm font-extrabold">{formatMoney(totalPaidAcrossBatches)}</span>
                       </div>
                       <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-lg px-3 py-1.5">
                         <span className="text-[10px] uppercase block font-bold">Outstanding</span>
-                        <span className="text-sm font-extrabold">৳{totalOutstanding.toLocaleString()}</span>
+                        <span className="text-sm font-extrabold">{formatMoney(totalOutstanding)}</span>
                       </div>
                     </div>
                   </div>
@@ -518,65 +526,64 @@ export default async function StudentDetailPage({
                         <thead className="bg-surface-hover/50">
                           <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              Batch Name
+                              Receipt #
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              Period
+                              Date
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              Amount Due
+                              Amount
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              Amount Paid
+                              Method
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                              Reference
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Status
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              Due Date
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              Paid At
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                              Receipt
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-surface divide-y divide-border">
                           {paymentHistory.map((payment) => (
                             <tr key={payment.id} className="hover:bg-surface-hover/50 transition">
-                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
-                                {payment.batch?.name || 'N/A'}
+                              <td className="px-6 py-4 whitespace-nowrap font-mono font-semibold text-foreground">
+                                #{payment.receiptNumber}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-muted-foreground font-mono text-xs">
-                                {payment.period}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
-                                ৳{payment.amountDue.toLocaleString()}
+                              <td className="px-6 py-4 whitespace-nowrap text-muted-foreground text-xs">
+                                {formatDate(payment.receivedAt)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">
-                                ৳{payment.amountPaid.toLocaleString()}
+                                {formatMoney(payment.amount)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground font-semibold">
+                                {payment.method}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
+                                {payment.reference || '—'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span
                                   className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
-                                    payment.status === 'PAID'
-                                      ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
-                                      : payment.status === 'PARTIAL'
-                                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
-                                      : 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
+                                    payment.isReversed
+                                      ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
+                                      : 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
                                   }`}
                                 >
-                                  {payment.status}
+                                  {payment.isReversed ? 'REVERSED' : 'PAID'}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                                {payment.dueDate
-                                  ? new Date(payment.dueDate).toLocaleDateString()
-                                  : <span className="text-muted-foreground italic">N/A</span>}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                                {payment.paidAt
-                                  ? new Date(payment.paidAt).toLocaleDateString()
-                                  : <span className="text-muted-foreground italic">-</span>}
+                              <td className="px-6 py-4 whitespace-nowrap text-right">
+                                <Link
+                                  href={`/fees/receipts/${payment.id}`}
+                                  className="text-xs font-semibold text-primary hover:underline"
+                                >
+                                  View Receipt →
+                                </Link>
                               </td>
                             </tr>
                           ))}
@@ -617,9 +624,7 @@ export default async function StudentDetailPage({
                             <td className="px-6 py-4 whitespace-nowrap font-semibold text-foreground">{entry.testName}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">{entry.batchName || '—'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                              {new Date(entry.testDate).toLocaleDateString(undefined, {
-                                year: 'numeric', month: 'short', day: 'numeric',
-                              })}
+                              {formatDate(entry.testDate)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right font-mono font-semibold text-foreground">
                               {entry.score} / {entry.totalMarks}
@@ -689,7 +694,7 @@ export default async function StudentDetailPage({
                         {attendanceHistory.map((record) => (
                           <tr key={record.id} className="hover:bg-surface-hover/50 transition">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground font-medium">
-                              {new Date(record.date).toLocaleDateString(undefined, {
+                              {formatDate(record.date, undefined, undefined, {
                                 weekday: 'short',
                                 year: 'numeric',
                                 month: 'short',

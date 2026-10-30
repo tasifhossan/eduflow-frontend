@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiPatch, apiGet } from '@/lib/api';
+import { formatDateTime } from '@/lib/format';
 
 interface GuardianLogEntry {
   id: string;
@@ -258,7 +259,7 @@ export default function StudentEditControls({ student, isAdmin }: StudentEditCon
                         {log.field === 'guardianName' ? 'Guardian Name' : 'Guardian Phone'}
                       </span>
                       <span className="text-gray-400 font-mono">
-                        {new Date(log.changedAt).toLocaleString()}
+                        {formatDateTime(log.changedAt)}
                       </span>
                     </div>
 

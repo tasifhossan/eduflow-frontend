@@ -4,6 +4,7 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
+import { formatDate } from '@/lib/format';
 import {
   FileText,
   FileImage,
@@ -446,7 +447,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
                       <div className="flex items-center gap-x-4 text-xs text-muted-foreground flex-wrap">
                         <span>Type: <strong className="uppercase font-medium text-foreground">{res.fileType}</strong></span>
                         <span>•</span>
-                        <span>Uploaded: {new Date(res.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
+                        <span>Uploaded: {formatDate(res.createdAt)}</span>
                         {res.uploadedBy && (
                           <>
                             <span>•</span>

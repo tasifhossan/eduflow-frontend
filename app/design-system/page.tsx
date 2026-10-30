@@ -4,6 +4,7 @@ import * as React from 'react';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { formatMoney } from '@/lib/format';
 
 // Design System Component Imports
 import { Container } from '@/components/ui/container';
@@ -904,7 +905,7 @@ export default function DesignSystemShowcasePage() {
                 />
                 <StatCard
                   label="Outstanding Balance"
-                  value="৳84,500"
+                  value={formatMoney(84500)}
                   trend={{ value: '4%', direction: 'down', label: 'overdue rate' }}
                 />
                 <StatCard
