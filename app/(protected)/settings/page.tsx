@@ -36,6 +36,7 @@ import {
   ArrowDown,
   Eye,
   FileText,
+  CalendarCheck,
 } from 'lucide-react';
 
 const WHITELISTED_ICONS = [
@@ -87,7 +88,7 @@ import { PagesSettingsTab } from '@/components/settings/pages-settings-tab';
 export default function SettingsPage() {
   const router = useRouter();
   const { updateCenter } = useCenter();
-  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'homepage' | 'pages'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'attendance' | 'homepage' | 'pages'>('branding');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -426,6 +427,7 @@ export default function SettingsPage() {
         receiptHeader: formData.receiptHeader || null,
         receiptFooter: formData.receiptFooter || null,
         features: formData.features,
+        attendancePolicy: formData.attendancePolicy,
         homepage: {
           heroBadge: formData.homepage?.heroBadge?.trim() || undefined,
           heroPoints: (formData.homepage?.heroPoints || [])
@@ -623,6 +625,19 @@ export default function SettingsPage() {
         >
           <ToggleLeft className="h-4 w-4" />
           Feature Flags
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('attendance')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+            activeTab === 'attendance'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <CalendarCheck className="h-4 w-4" />
+          Attendance Policy
         </button>
 
         <button
@@ -1302,6 +1317,152 @@ export default function SettingsPage() {
                 onChange={(e) => handleFeatureToggle('onlineClasses', e.target.checked)}
                 className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
               />
+            </div>
+
+            {/* Guardian Attendance Alerts */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Guardian Attendance Alerts</h4>
+                <p className="text-xs text-muted-foreground">
+                  Automatically dispatches in-app notifications and email alerts to linked guardians whenever a student is marked absent.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.features?.attendanceAlerts !== false}
+                onChange={(e) => handleFeatureToggle('attendanceAlerts', e.target.checked)}
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Attendance Policy & Alerts */}
+      {activeTab === 'attendance' && (
+        <div className="space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Attendance Policy & Guardian Alerts</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Configure attendance notification rules, teacher edit windows, and low-attendance warning thresholds.
+            </p>
+          </div>
+
+          <div className="divide-y divide-border">
+            {/* Guardian Alerts Enabled */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Guardian Absence Alerts</h4>
+                <p className="text-xs text-muted-foreground">
+                  When enabled, guardians receive real-time in-app notifications and automated emails whenever their student is marked absent.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.features?.attendanceAlerts !== false}
+                onChange={(e) => handleFeatureToggle('attendanceAlerts', e.target.checked)}
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* Alert on Late */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Alert on Late Arrival</h4>
+                <p className="text-xs text-muted-foreground">
+                  Also send alerts to linked guardians when a student is marked Late (in addition to Absent).
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={Boolean(formData.attendancePolicy?.alertOnLate)}
+                onChange={(e) =>
+                  setFormData((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          attendancePolicy: {
+                            ...prev.attendancePolicy,
+                            alertOnLate: e.target.checked,
+                          },
+                        }
+                      : prev
+                  )
+                }
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* Low Attendance Threshold */}
+            <div className="py-4 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">Low Attendance Warning Threshold (%)</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Students whose attendance percentage falls below this threshold appear in the Low Attendance Report and admin dashboard warnings.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={formData.attendancePolicy?.lowThresholdPercent ?? 75}
+                    onChange={(e) => {
+                      const val = Math.min(100, Math.max(1, parseInt(e.target.value, 10) || 75));
+                      setFormData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              attendancePolicy: {
+                                ...prev.attendancePolicy,
+                                lowThresholdPercent: val,
+                              },
+                            }
+                          : prev
+                      );
+                    }}
+                    className="w-24 px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium text-muted-foreground">%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Teacher Edit Window */}
+            <div className="py-4 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">Teacher Edit Window (Days)</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Number of days (0–30) after class date during which teachers are allowed to record or edit attendance. Older records are locked for teachers and require administrator approval.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    max={30}
+                    value={formData.attendancePolicy?.editWindowDays ?? 7}
+                    onChange={(e) => {
+                      const val = Math.min(30, Math.max(0, parseInt(e.target.value, 10) || 0));
+                      setFormData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              attendancePolicy: {
+                                ...prev.attendancePolicy,
+                                editWindowDays: val,
+                              },
+                            }
+                          : prev
+                      );
+                    }}
+                    className="w-24 px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium text-muted-foreground">days</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

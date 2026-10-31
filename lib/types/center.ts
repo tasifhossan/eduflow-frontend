@@ -9,6 +9,13 @@ export interface CenterFeatures {
   lectures?: boolean;
   assignments?: boolean;
   onlineClasses?: boolean;
+  attendanceAlerts?: boolean;
+}
+
+export interface AttendancePolicy {
+  alertOnLate?: boolean;
+  lowThresholdPercent?: number;
+  editWindowDays?: number;
 }
 
 export interface CenterSocials {
@@ -111,6 +118,7 @@ export interface FullCenterSettings extends CenterPublicData {
   feeDueDay?: number;
   receiptHeader?: string | null;
   receiptFooter?: string | null;
+  attendancePolicy?: AttendancePolicy;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -144,6 +152,7 @@ export const defaultCenterData: CenterPublicData = {
     lectures: true,
     assignments: true,
     onlineClasses: true,
+    attendanceAlerts: true,
   },
   homepage: {
     heroBadge: '',

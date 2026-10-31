@@ -23,6 +23,7 @@ import {
   UserPlus,
   Clock,
   AlertCircle,
+  TrendingDown,
 } from 'lucide-react';
 import { formatMoney } from '@/lib/format';
 import {
@@ -562,11 +563,13 @@ function AdminTeacherDashboard({
   data,
   dueSummary,
   enquiriesSummary,
+  lowAttendanceCount,
   isAdmin,
 }: {
   data: AdminTeacherSummary;
   dueSummary?: LedgerDuesData | null;
   enquiriesSummary?: EnquirySummaryData | null;
+  lowAttendanceCount?: number | null;
   isAdmin?: boolean;
 }) {
   const { stats, attendanceSummary, upcomingTests, recentActivity } = data;
@@ -598,6 +601,76 @@ function AdminTeacherDashboard({
           icon={<GraduationCap className="h-5 w-5" aria-hidden="true" />}
         />
       </div>
+
+      {/* Classes to mark today (Teachers) */}
+      {!isAdmin && (
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div
+              className={`p-2.5 rounded-xl border ${
+                attendanceSummary.totalBatches - attendanceSummary.markedBatches > 0
+                  ? 'bg-warning-subtle text-warning border-warning/20'
+                  : 'bg-secondary-subtle text-secondary border-secondary/20'
+              }`}
+            >
+              <CalendarCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Classes to mark today
+              </div>
+              <div className="text-lg font-bold text-foreground">
+                {attendanceSummary.totalBatches - attendanceSummary.markedBatches > 0 ? (
+                  <span>{attendanceSummary.totalBatches - attendanceSummary.markedBatches} classes pending</span>
+                ) : (
+                  <span>All classes marked for today</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <Link
+            href="/attendance"
+            className="text-xs font-semibold text-primary hover:text-primary-hover hover:underline shrink-0"
+          >
+            Mark attendance →
+          </Link>
+        </div>
+      )}
+
+      {/* Low Attendance Warning Card (Admins) */}
+      {isAdmin && typeof lowAttendanceCount === 'number' && (
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-card flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div
+              className={`p-2.5 rounded-xl border ${
+                lowAttendanceCount > 0
+                  ? 'bg-danger-subtle text-danger border-danger/20'
+                  : 'bg-secondary-subtle text-secondary border-secondary/20'
+              }`}
+            >
+              <TrendingDown className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Low Attendance Warning
+              </div>
+              <div className="text-lg font-bold text-foreground">
+                {lowAttendanceCount > 0 ? (
+                  <span>{lowAttendanceCount} student{lowAttendanceCount > 1 ? 's' : ''} below threshold</span>
+                ) : (
+                  <span>All students on track</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <Link
+            href="/attendance/low"
+            className="text-xs font-semibold text-primary hover:text-primary-hover hover:underline shrink-0"
+          >
+            View report →
+          </Link>
+        </div>
+      )}
 
       {/* Fee Collection Card (ADMIN & SUPER_ADMIN only) */}
       {isAdmin && dueSummary && (
@@ -692,18 +765,32 @@ function AdminTeacherDashboard({
 
 // ─── Student View ─────────────────────────────────────────────────────────
 
-function StudentDashboard({ data, account }: { data: StudentSummary; account?: StudentFeeAccountSummary | null }) {
+function StudentDashboard({
+  data,
+  account,
+  monthPercent,
+}: {
+  data: StudentSummary;
+  account?: StudentFeeAccountSummary | null;
+  monthPercent?: number | null;
+}) {
   const { enrolledBatchCount, enrolledBatches, upcomingTests, recentAttendance } = data;
 
   return (
     <div className="space-y-6">
       {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
         <StatCard
           label="My Batches"
           value={enrolledBatchCount}
           unit="enrolled"
           icon={<Layers className="h-5 w-5" aria-hidden="true" />}
+        />
+        <StatCard
+          label="This Month's Rate"
+          value={typeof monthPercent === 'number' ? `${monthPercent}%` : '—'}
+          unit="attendance"
+          icon={<CalendarCheck className="h-5 w-5" aria-hidden="true" />}
         />
         <StatCard
           label="Present (7 Days)"
@@ -788,7 +875,13 @@ function StudentDashboard({ data, account }: { data: StudentSummary; account?: S
 
 // ─── Guardian View ────────────────────────────────────────────────────────
 
-function GuardianDashboard({ data }: { data: GuardianSummary }) {
+function GuardianDashboard({
+  data,
+  monthPercent,
+}: {
+  data: GuardianSummary;
+  monthPercent?: number | null;
+}) {
   const { childrenCount, children } = data;
 
   return (
@@ -801,6 +894,14 @@ function GuardianDashboard({ data }: { data: GuardianSummary }) {
           unit="linked"
           icon={<HeartHandshake className="h-5 w-5" aria-hidden="true" />}
         />
+        {monthPercent !== null && (
+          <StatCard
+            label="This Month's Rate"
+            value={`${monthPercent}%`}
+            unit="attendance"
+            icon={<CalendarCheck className="h-5 w-5" aria-hidden="true" />}
+          />
+        )}
       </div>
 
       {/* Guardian Fee Summary Card */}
@@ -887,6 +988,8 @@ export default async function DashboardPage() {
   let ledgerDuesData: LedgerDuesData | null = null;
   let enquiriesSummaryData: EnquirySummaryData | null = null;
   let studentAccountData: StudentFeeAccountSummary | null = null;
+  let lowAttendanceCount: number | null = null;
+  let attendanceMonthPercent: number | null = null;
   let errorMsg: string | null = null;
 
   try {
@@ -931,6 +1034,32 @@ export default async function DashboardPage() {
 
       if (enqRes?.success && enqRes.data) {
         enquiriesSummaryData = enqRes.data;
+      }
+
+      const lowRes = await apiGet<{ success: boolean; data: { pagination: { total: number } } }>(
+        '/api/attendance/low?limit=1',
+        {
+          headers: { Cookie: cookieHeader },
+          cache: 'no-store',
+        }
+      ).catch(() => null);
+
+      if (lowRes?.success && lowRes.data?.pagination) {
+        lowAttendanceCount = lowRes.data.pagination.total;
+      }
+    }
+
+    if (user?.role === 'STUDENT' || user?.role === 'GUARDIAN') {
+      const attRes = await apiGet<{ success: boolean; data: { monthPercent: number } }>(
+        '/api/my/attendance/summary',
+        {
+          headers: { Cookie: cookieHeader },
+          cache: 'no-store',
+        }
+      ).catch(() => null);
+
+      if (attRes?.success && attRes.data && typeof attRes.data.monthPercent === 'number') {
+        attendanceMonthPercent = attRes.data.monthPercent;
       }
     }
 
@@ -981,16 +1110,17 @@ export default async function DashboardPage() {
         <AccountantDashboard duesData={ledgerDuesData} />
       )}
       {summary && summary.role === 'GUARDIAN' && (
-        <GuardianDashboard data={summary as GuardianSummary} />
+        <GuardianDashboard data={summary as GuardianSummary} monthPercent={attendanceMonthPercent} />
       )}
       {summary && summary.role === 'STUDENT' && (
-        <StudentDashboard data={summary as StudentSummary} account={studentAccountData} />
+        <StudentDashboard data={summary as StudentSummary} account={studentAccountData} monthPercent={attendanceMonthPercent} />
       )}
       {summary && (summary.role === 'ADMIN' || summary.role === 'TEACHER') && (
         <AdminTeacherDashboard
           data={summary as AdminTeacherSummary}
           dueSummary={ledgerDuesData}
           enquiriesSummary={enquiriesSummaryData}
+          lowAttendanceCount={lowAttendanceCount}
           isAdmin={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'}
         />
       )}
