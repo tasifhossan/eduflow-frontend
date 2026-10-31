@@ -53,6 +53,12 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: LayoutDashboard,
       },
       {
+        name: 'Admissions',
+        href: '/admissions',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: ClipboardList,
+      },
+      {
         name: 'Notices',
         href: '/notices',
         roles: ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN'],

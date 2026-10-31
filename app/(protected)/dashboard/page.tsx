@@ -20,6 +20,9 @@ import {
   ArrowRight,
   HeartHandshake,
   CreditCard,
+  UserPlus,
+  Clock,
+  AlertCircle,
 } from 'lucide-react';
 import { formatMoney } from '@/lib/format';
 import {
@@ -451,15 +454,119 @@ async function DbStatusBadge({ cookieHeader }: { cookieHeader: string }) {
   );
 }
 
+interface EnquirySummaryData {
+  stageCounts: Record<string, number>;
+  activeInPipeline: number;
+  newLast7Days: number;
+  followUpsToday: number;
+  followUpsOverdue: number;
+  last90Days: {
+    total: number;
+    admitted: number;
+    conversionRatePercent: number;
+    bySource: Record<string, number>;
+  };
+}
+
+function AdmissionsSummaryCard({ summary }: { summary: EnquirySummaryData }) {
+  const overdueCount = summary.followUpsOverdue || 0;
+  const todayCount = summary.followUpsToday || 0;
+  const new7dCount = summary.newLast7Days || 0;
+  const activeCount = summary.activeInPipeline || 0;
+
+  return (
+    <SectionCard
+      title="Admissions & Prospect Pipeline"
+      description="Active enquiry stages, conversion, and urgent follow-ups"
+      actions={
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admissions"
+            className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Admissions Board
+          </Link>
+        </div>
+      }
+    >
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface-hover/30">
+          <p className="text-xs font-medium text-muted-foreground">New (Last 7d)</p>
+          <p className="text-xl font-heading font-bold text-foreground mt-1">{new7dCount}</p>
+        </div>
+        <div className="p-3 rounded-[var(--radius-control)] border border-border bg-surface-hover/30">
+          <p className="text-xs font-medium text-muted-foreground">Active in Pipeline</p>
+          <p className="text-xl font-heading font-bold text-primary mt-1">{activeCount}</p>
+        </div>
+        <Link
+          href="/admissions?followUp=today"
+          className="p-3 rounded-[var(--radius-control)] border border-status-info-border bg-status-info-bg hover:opacity-90 transition block"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-status-info-text">Due Today</p>
+            <Clock className="h-3.5 w-3.5 text-status-info" />
+          </div>
+          <p className="text-xl font-heading font-bold text-status-info-text mt-1">{todayCount}</p>
+        </Link>
+        <Link
+          href="/admissions?followUp=overdue"
+          className={`p-3 rounded-[var(--radius-control)] border transition block ${
+            overdueCount > 0
+              ? 'border-status-danger-border bg-status-danger-bg'
+              : 'border-border bg-surface-hover/30'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className={`text-xs font-medium ${overdueCount > 0 ? 'text-status-danger-text font-bold' : 'text-muted-foreground'}`}>
+              Overdue
+            </p>
+            {overdueCount > 0 && <AlertCircle className="h-3.5 w-3.5 text-status-danger" />}
+          </div>
+          <p className={`text-xl font-heading font-bold mt-1 ${overdueCount > 0 ? 'text-status-danger-text' : 'text-foreground'}`}>
+            {overdueCount}
+          </p>
+        </Link>
+      </div>
+
+      <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-muted-foreground font-medium mr-1">Pipeline stages:</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] border border-border bg-surface text-foreground font-medium">
+          New: <strong className="ml-1">{summary.stageCounts?.NEW || 0}</strong>
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] border border-border bg-surface text-foreground font-medium">
+          Contacted: <strong className="ml-1">{summary.stageCounts?.CONTACTED || 0}</strong>
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] border border-border bg-surface text-foreground font-medium">
+          Visit: <strong className="ml-1">{summary.stageCounts?.VISIT_SCHEDULED || 0}</strong>
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] border border-border bg-surface text-foreground font-medium">
+          Trial: <strong className="ml-1">{summary.stageCounts?.TRIAL || 0}</strong>
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] border border-status-success-border bg-status-success-bg text-status-success-text font-medium">
+          Admitted: <strong className="ml-1">{summary.stageCounts?.ADMITTED || 0}</strong>
+        </span>
+        {summary.last90Days?.conversionRatePercent !== undefined && (
+          <span className="ml-auto text-muted-foreground text-xs font-medium">
+            90d Conversion: <span className="font-bold text-foreground">{summary.last90Days.conversionRatePercent}%</span>
+          </span>
+        )}
+      </div>
+    </SectionCard>
+  );
+}
+
 // ─── Admin / Teacher View ─────────────────────────────────────────────────
 
 function AdminTeacherDashboard({
   data,
   dueSummary,
+  enquiriesSummary,
   isAdmin,
 }: {
   data: AdminTeacherSummary;
   dueSummary?: LedgerDuesData | null;
+  enquiriesSummary?: EnquirySummaryData | null;
   isAdmin?: boolean;
 }) {
   const { stats, attendanceSummary, upcomingTests, recentActivity } = data;
@@ -495,6 +602,11 @@ function AdminTeacherDashboard({
       {/* Fee Collection Card (ADMIN & SUPER_ADMIN only) */}
       {isAdmin && dueSummary && (
         <FeeCollectionCard duesData={dueSummary} />
+      )}
+
+      {/* Admissions Pipeline Card (ADMIN & SUPER_ADMIN only) */}
+      {isAdmin && enquiriesSummary && (
+        <AdmissionsSummaryCard summary={enquiriesSummary} />
       )}
 
       {/* Academics summary (Admin) or Teacher cards */}
@@ -773,11 +885,13 @@ export default async function DashboardPage() {
 
   let summary: DashboardSummary | null = null;
   let ledgerDuesData: LedgerDuesData | null = null;
+  let enquiriesSummaryData: EnquirySummaryData | null = null;
   let studentAccountData: StudentFeeAccountSummary | null = null;
   let errorMsg: string | null = null;
 
   try {
     const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'ACCOUNTANT';
+    const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
     if (user?.role !== 'ACCOUNTANT') {
       const response = await apiGet<{ success: boolean; data: DashboardSummary }>(
@@ -803,6 +917,20 @@ export default async function DashboardPage() {
 
       if (duesRes?.success && duesRes.data) {
         ledgerDuesData = duesRes.data;
+      }
+    }
+
+    if (isAdmin) {
+      const enqRes = await apiGet<{ success: boolean; data: EnquirySummaryData }>(
+        '/api/enquiries/summary',
+        {
+          headers: { Cookie: cookieHeader },
+          cache: 'no-store',
+        }
+      ).catch(() => null);
+
+      if (enqRes?.success && enqRes.data) {
+        enquiriesSummaryData = enqRes.data;
       }
     }
 
@@ -862,6 +990,7 @@ export default async function DashboardPage() {
         <AdminTeacherDashboard
           data={summary as AdminTeacherSummary}
           dueSummary={ledgerDuesData}
+          enquiriesSummary={enquiriesSummaryData}
           isAdmin={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'}
         />
       )}

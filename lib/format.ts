@@ -116,6 +116,18 @@ export function normalizePhone(phone: string | null | undefined): string | null 
 }
 
 /**
+ * Formats a Bangladeshi phone number into standard display format: 01XXX-XXXXXX
+ */
+export function formatPhone(phone: string | null | undefined): string {
+  const norm = normalizePhone(phone);
+  if (!norm) return phone || '—';
+  if (norm.length === 11) {
+    return `${norm.slice(0, 5)}-${norm.slice(5)}`;
+  }
+  return norm;
+}
+
+/**
  * Validates whether a phone string conforms to standard 11-digit Bangladeshi mobile format.
  */
 export function isValidBangladeshiPhone(phone: string): boolean {

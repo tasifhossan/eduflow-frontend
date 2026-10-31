@@ -11,13 +11,15 @@ import { Send, Loader2, CheckCircle2 } from 'lucide-react';
 
 export interface ContactFormProps {
   batches?: Array<{ id: string; name: string }>;
+  branches?: Array<{ id: string; name: string }>;
 }
 
-export function ContactForm({ batches = [] }: ContactFormProps) {
+export function ContactForm({ batches = [], branches = [] }: ContactFormProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [batchId, setBatchId] = useState('');
+  const [preferredBranchId, setPreferredBranchId] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -31,11 +33,12 @@ export function ContactForm({ batches = [] }: ContactFormProps) {
 
     setLoading(true);
     try {
-      const res = await apiPost('/api/contact', {
+      const res = await apiPost<{ success: boolean; message?: string }>('/api/contact', {
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim() || undefined,
         interestedBatchId: batchId || undefined,
+        preferredBranchId: preferredBranchId || undefined,
         message: message.trim(),
       });
 
@@ -140,6 +143,26 @@ export function ContactForm({ batches = [] }: ContactFormProps) {
                 {batches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {branches.length > 1 && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground">
+                Preferred Branch (Optional)
+              </label>
+              <select
+                value={preferredBranchId}
+                onChange={(e) => setPreferredBranchId(e.target.value)}
+                className="w-full h-10 px-3 rounded-[var(--radius-control)] border border-border bg-surface text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">Select preferred branch...</option>
+                {branches.map((br) => (
+                  <option key={br.id} value={br.id}>
+                    {br.name}
                   </option>
                 ))}
               </select>

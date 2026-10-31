@@ -25,6 +25,7 @@ const enquirySchema = z.object({
     }),
   interestedBatchId: z.string().optional(),
   interestedGrade: z.string().trim().max(40, 'Grade cannot exceed 40 characters').optional(),
+  preferredBranchId: z.string().optional(),
   message: z.string().trim().max(1000, 'Message cannot exceed 1000 characters').optional(),
   website: z.string().optional(), // Honeypot field
 });
@@ -41,6 +42,10 @@ export function HomeEnquiryForm() {
   );
   const publishedBatches = batchesRes?.items || [];
 
+  // Fetch branches to display preferred branch when center has >1 branch
+  const { data: branchesRes } = useApi<Array<{ id: string; name: string }>>('/api/public/branches');
+  const branches = Array.isArray(branchesRes) ? branchesRes : [];
+
   const {
     register,
     handleSubmit,
@@ -52,6 +57,7 @@ export function HomeEnquiryForm() {
       phone: '',
       interestedBatchId: '',
       interestedGrade: '',
+      preferredBranchId: '',
       message: '',
       website: '',
     },
@@ -65,19 +71,21 @@ export function HomeEnquiryForm() {
         phone: values.phone,
         interestedBatchId: values.interestedBatchId || undefined,
         interestedGrade: values.interestedGrade || undefined,
+        preferredBranchId: values.preferredBranchId || undefined,
         message: values.message || undefined,
         website: values.website || undefined,
         source: 'WEBSITE',
       });
       setSubmitted(true);
       reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError && err.status === 429) {
         setServerError(
           'You have reached the maximum number of enquiry submissions. Please try again in a little while or call our helpline directly.'
         );
       } else {
-        setServerError(err.message || 'Failed to submit enquiry. Please check your network and try again.');
+        const msg = err instanceof Error ? err.message : 'Failed to submit enquiry. Please check your network and try again.';
+        setServerError(msg);
       }
     }
   };
@@ -194,6 +202,22 @@ export function HomeEnquiryForm() {
                   />
                 </FormField>
               </div>
+
+              {branches.length > 1 && (
+                <FormField
+                  label="Preferred Branch (Optional)"
+                  error={errors.preferredBranchId?.message}
+                >
+                  <Select disabled={isSubmitting} {...register('preferredBranchId')}>
+                    <option value="">Select preferred branch</option>
+                    {branches.map((br) => (
+                      <option key={br.id} value={br.id}>
+                        {br.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+              )}
 
               <FormField
                 label="Any specific questions? (Optional)"
