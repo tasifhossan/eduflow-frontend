@@ -14,7 +14,6 @@ import {
   MapPin,
   Clock,
   MessageCircle,
-  Globe,
   HelpCircle,
 } from 'lucide-react';
 
@@ -149,7 +148,7 @@ export default async function ContactPage() {
                 Send an Admission Inquiry
               </h2>
             </div>
-            <ContactForm batches={batches} />
+            <ContactForm batches={batches} branches={branches} />
           </div>
 
           {/* Socials & FAQ Link Callout (5 cols) */}

@@ -11,15 +11,16 @@ import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { Rating } from '@/components/ui/rating';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { BatchCard, BatchCardData } from '@/components/ui/batch-card';
 import { TeacherCard } from '@/components/cards/TeacherCard';
 import { toast } from 'sonner';
 import { apiPost } from '@/lib/api';
+import { useApi } from '@/lib/use-api';
 import { formatMoney } from '@/lib/format';
 import {
   BookOpen,
-  Calendar,
   Clock,
   MapPin,
   Tag,
@@ -92,8 +93,13 @@ export function CourseDetailView({
   const [enquiryName, setEnquiryName] = useState('');
   const [enquiryPhone, setEnquiryPhone] = useState('');
   const [enquiryEmail, setEnquiryEmail] = useState('');
+  const [enquiryBranchId, setEnquiryBranchId] = useState('');
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [isSubmittingEnquiry, setIsSubmittingEnquiry] = useState(false);
+
+  // Fetch branches to display preferred branch when center has >1 branch
+  const { data: branchesRes } = useApi<Array<{ id: string; name: string }>>('/api/public/branches');
+  const branches = Array.isArray(branchesRes) ? branchesRes : [];
 
   // Keyboard navigation for gallery modal
   useEffect(() => {
@@ -147,12 +153,13 @@ export function CourseDetailView({
 
     setIsSubmittingEnquiry(true);
     try {
-      const res = await apiPost('/api/contact', {
+      const res = await apiPost<{ success: boolean; message?: string }>('/api/contact', {
         name: enquiryName.trim(),
         phone: enquiryPhone.trim(),
         email: enquiryEmail.trim() || undefined,
         message: enquiryMessage.trim() || `Inquiry regarding batch: ${batch.name}`,
         interestedBatchId: batch.id,
+        preferredBranchId: enquiryBranchId || undefined,
       });
 
       if (res.success) {
@@ -161,6 +168,7 @@ export function CourseDetailView({
         setEnquiryName('');
         setEnquiryPhone('');
         setEnquiryEmail('');
+        setEnquiryBranchId('');
         setEnquiryMessage('');
       } else {
         toast.error(res.message || 'Failed to submit enquiry. Please try again.');
@@ -612,6 +620,22 @@ export function CourseDetailView({
                 onChange={(e) => setEnquiryEmail(e.target.value)}
               />
             </div>
+            {branches.length > 1 && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Preferred Branch (Optional)</label>
+                <Select
+                  value={enquiryBranchId}
+                  onChange={(e) => setEnquiryBranchId(e.target.value)}
+                >
+                  <option value="">Select preferred branch</option>
+                  {branches.map((br) => (
+                    <option key={br.id} value={br.id}>
+                      {br.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            )}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground">Note / Questions</label>
               <Textarea
