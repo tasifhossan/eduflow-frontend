@@ -153,19 +153,25 @@ export default function LecturesPage() {
   // Load filter options and guardian children
   React.useEffect(() => {
     if (isStaff) {
-      apiGet<{ success: boolean; data: { items?: Array<{ id: string; name: string; subjectId?: string; teacherId?: string }> } }>('/api/tables/batches?limit=100')
+      apiGet<{ success: boolean; data: Array<{ id: string; name: string; subjectId?: string; teacherId?: string }> | { items?: Array<{ id: string; name: string; subjectId?: string; teacherId?: string }> } }>('/api/batches')
         .then((res) => {
-          if (res?.data?.items) setBatches(res.data.items);
+          if (res?.data) {
+            const list = Array.isArray(res.data) ? res.data : res.data.items || [];
+            setBatches(list);
+          }
         })
         .catch(() => {});
 
-      apiGet<{ success: boolean; data: { items?: Array<{ id: string; name: string }> } }>('/api/tables/subjects?limit=100')
+      apiGet<{ success: boolean; data: Array<{ id: string; name: string }> | { items?: Array<{ id: string; name: string }> } }>('/api/subjects')
         .then((res) => {
-          if (res?.data?.items) setSubjects(res.data.items);
+          if (res?.data) {
+            const list = Array.isArray(res.data) ? res.data : res.data.items || [];
+            setSubjects(list);
+          }
         })
         .catch(() => {});
 
-      apiGet<{ success: boolean; data: { items?: Array<{ id: string; name: string }> } }>('/api/tables/teachers?limit=100')
+      apiGet<{ success: boolean; data: { items?: Array<{ id: string; name: string }> } }>('/api/tables/users?role=TEACHER')
         .then((res) => {
           if (res?.data?.items) setTeachers(res.data.items);
         })

@@ -33,9 +33,15 @@ const AuthContext = React.createContext<AuthContextType>({
   refreshUser: async () => {},
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+export function AuthProvider({
+  initialUser,
+  children,
+}: {
+  initialUser?: AuthUser | null;
+  children: React.ReactNode;
+}) {
+  const [user, setUser] = React.useState<AuthUser | null>(initialUser ?? null);
+  const [isLoading, setIsLoading] = React.useState(!initialUser);
   const router = useRouter();
 
   const refreshUser = React.useCallback(async () => {
@@ -53,6 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
+    if (initialUser) {
+      setUser(initialUser);
+      setIsLoading(false);
+      return;
+    }
+
     let ignore = false;
 
     async function loadUser() {
@@ -82,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [initialUser]);
 
   const logout = React.useCallback(async () => {
     try {

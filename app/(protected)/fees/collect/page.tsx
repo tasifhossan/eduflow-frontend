@@ -27,7 +27,7 @@ import { MoneyInput } from '@/components/ui/money-input';
 import { StatusBadge, StatusVariant } from '@/components/dashboard/status-badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Modal } from '@/components/ui/modal';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -336,7 +336,7 @@ export default function CollectPaymentPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
       <PageHeader
         title="Collect Payment"
         description="Record fee payments into the append-only ledger with race-free receipt generation"
@@ -349,6 +349,9 @@ export default function CollectPaymentPage() {
             <User className="h-4 w-4 text-primary" />
             1. Select Student
           </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Search for an enrolled student by name, student code, or phone number to load their fee account and collect payment.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!selectedStudent ? (
@@ -409,6 +412,23 @@ export default function CollectPaymentPage() {
               {searchFocused && searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
                 <div className="absolute z-20 mt-1 w-full rounded-[var(--radius-card)] border border-border bg-surface p-4 text-center text-sm text-muted-foreground shadow-lg">
                   No students found matching &quot;{searchQuery}&quot;
+                </div>
+              )}
+
+              {!searchFocused && (
+                <div className="mt-4 pt-4 border-t border-border/60 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <div className="h-5 w-5 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-[11px]">1</div>
+                    <span>Search student by full name, admission code, or mobile number.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="h-5 w-5 rounded-full bg-muted text-muted-foreground font-bold flex items-center justify-center shrink-0 text-[11px]">2</div>
+                    <span>Review open batch charges and outstanding balances.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="h-5 w-5 rounded-full bg-muted text-muted-foreground font-bold flex items-center justify-center shrink-0 text-[11px]">3</div>
+                    <span>Post payment into ledger with sequential receipt generation.</span>
+                  </div>
                 </div>
               )}
             </div>

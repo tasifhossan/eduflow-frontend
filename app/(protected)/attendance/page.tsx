@@ -130,10 +130,10 @@ function StaffAttendanceMarkingView() {
     let active = true;
     async function loadBatches() {
       try {
-        const res = await apiGet<ApiResponse<{ items: BatchItem[] }>>('/api/tables/batches?limit=100');
+        const res = await apiGet<ApiResponse<BatchItem[]>>('/api/batches');
         if (!active) return;
-        if (res.success && res.data?.items) {
-          const list = res.data.items;
+        if (res.success && res.data) {
+          const list = Array.isArray(res.data) ? res.data : ((res.data as unknown) as { items?: BatchItem[] }).items || [];
           setBatches(list);
           if (list.length > 0) {
             setSelectedBatchId(list[0].id);

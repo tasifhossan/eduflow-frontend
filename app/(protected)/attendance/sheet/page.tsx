@@ -73,9 +73,9 @@ export default function AttendanceSheetPage() {
     async function loadBatches() {
       setLoadingBatches(true);
       try {
-        const res = await apiGet<ApiResponse<{ items: BatchOption[] }>>('/api/tables/batches?limit=100');
-        if (res.success && res.data?.items) {
-          const list = res.data.items;
+        const res = await apiGet<ApiResponse<BatchOption[]>>('/api/batches');
+        if (res.success && res.data) {
+          const list = Array.isArray(res.data) ? res.data : ((res.data as unknown) as { items?: BatchOption[] }).items || [];
           setBatches(list);
           if (list.length > 0) {
             setSelectedBatchId(list[0].id);

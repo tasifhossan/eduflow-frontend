@@ -7,6 +7,7 @@ import {
   Download,
   RotateCw,
   RotateCcw,
+  Filter,
 } from 'lucide-react';
 import { apiGet } from '@/lib/api';
 import { useCenter } from '@/components/providers/center-provider';
@@ -17,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ReportGroup {
   key: string;
@@ -56,10 +58,11 @@ interface BatchOption {
 export default function CollectionReportPage() {
   const { center } = useCenter();
 
-  // Date filters: 1st of current month to today
+  // Date filters: 30 days prior to today
   const [fromDate, setFromDate] = React.useState(() => {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
   });
   const [toDate, setToDate] = React.useState(() => {
     return new Date().toISOString().slice(0, 10);
@@ -173,25 +176,31 @@ export default function CollectionReportPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader
-          title="Fee Collection Reports"
-          description="Detailed financial analytics, group breakdown, and transaction status reconciliation"
-        />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExportCsv}
-          disabled={!report || report.groups.length === 0}
-        >
-          <Download className="h-4 w-4 mr-1.5" />
-          Export Report CSV
-        </Button>
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <PageHeader
+        title="Fee Collection Reports"
+        description="Detailed financial analytics, group breakdown, and transaction status reconciliation"
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            disabled={!report || report.groups.length === 0}
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            Export Report CSV
+          </Button>
+        }
+      />
 
       {/* Filter Bar */}
       <Card>
+        <CardHeader className="pb-3 border-b border-border/50">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+            <Filter className="h-4 w-4 text-primary" />
+            Report Scope &amp; Filters
+          </CardTitle>
+        </CardHeader>
         <CardContent className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-1">
@@ -260,7 +269,17 @@ export default function CollectionReportPage() {
       </Card>
 
       {/* Summary Cards */}
-      {report && (
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-sm space-y-2">
+              <Skeleton className="h-3.5 w-28" />
+              <Skeleton className="h-7 w-36" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          ))}
+        </div>
+      ) : report ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-sm">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -306,7 +325,7 @@ export default function CollectionReportPage() {
             <div className="text-xs text-muted-foreground mt-1">Across selected period</div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Token-Colored Bar List Visualization (CSS Only) */}
       <Card>
@@ -318,9 +337,16 @@ export default function CollectionReportPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-              <RotateCw className="h-5 w-5 animate-spin text-primary" />
-              Calculating collection report...
+            <div className="space-y-4 py-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-3 w-full rounded-full" />
+                </div>
+              ))}
             </div>
           ) : error ? (
             <ErrorState title="Error Loading Report" message={error} onRetry={refetchReport} />

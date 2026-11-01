@@ -168,35 +168,33 @@ export default function MyFeesPage() {
   }, [isGuardian, selectedChildId, reloadTrigger]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader
-          title="My Fees & Ledger"
-          description="Official billing statement, receipt records, and account balances"
-        />
-
-        {/* Guardian Child Selector */}
-        {isGuardian && children.length > 0 && (
-          <div className="flex items-center gap-2">
-            <label htmlFor="child-select" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
-              Select Child:
-            </label>
-            <select
-              id="child-select"
-              disabled={isLoadingChildren}
-              value={selectedChildId}
-              onChange={(e) => setSelectedChildId(e.target.value)}
-              className="flex h-9 rounded-[var(--radius-control)] border border-border bg-surface px-3 py-1 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring disabled:opacity-50"
-            >
-              {children.map((child) => (
-                <option key={child.id} value={child.id}>
-                  {child.name} {child.studentCode ? `(${child.studentCode})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        title="My Fees & Ledger"
+        description="Official billing statement, receipt records, and account balances"
+        actions={
+          isGuardian && children.length > 0 ? (
+            <div className="flex items-center gap-2">
+              <label htmlFor="child-select" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+                Select Child:
+              </label>
+              <select
+                id="child-select"
+                disabled={isLoadingChildren}
+                value={selectedChildId}
+                onChange={(e) => setSelectedChildId(e.target.value)}
+                className="flex h-9 rounded-[var(--radius-control)] border border-border bg-surface px-3 py-1 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring disabled:opacity-50"
+              >
+                {children.map((child) => (
+                  <option key={child.id} value={child.id}>
+                    {child.name} {child.studentCode ? `(${child.studentCode})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : undefined
+        }
+      />
 
       {/* Loading Skeleton */}
       {isLoading ? (
