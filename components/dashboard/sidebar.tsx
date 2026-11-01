@@ -25,6 +25,7 @@ import {
   Receipt,
   FileSpreadsheet,
   BarChart3,
+  Award,
   X,
 } from 'lucide-react';
 import type { CenterPublicData, CenterFeatures } from '@/lib/types/center';
@@ -106,6 +107,18 @@ export const NAV_GROUPS: NavGroup[] = [
         href: '/subjects',
         roles: ['ADMIN'],
         icon: GraduationCap,
+      },
+      {
+        name: 'Report Cards',
+        href: '/report-cards',
+        roles: ['ADMIN', 'SUPER_ADMIN', 'TEACHER'],
+        icon: Award,
+      },
+      {
+        name: 'My Report Cards',
+        href: '/my-report-cards',
+        roles: ['STUDENT', 'GUARDIAN'],
+        icon: Award,
       },
     ],
   },
@@ -210,6 +223,12 @@ export const NAV_GROUPS: NavGroup[] = [
         href: '/settings',
         roles: ['SUPER_ADMIN'],
         icon: Settings,
+      },
+      {
+        name: 'Data Exports',
+        href: '/exports',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: FileSpreadsheet,
       },
     ],
   },
