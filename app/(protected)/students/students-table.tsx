@@ -57,9 +57,9 @@ export default function StudentsTable({
         </div>
 
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-            <p className="text-sm text-red-600">
-              <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+            <p className="text-sm text-status-danger-text">
+              <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
             </p>
           </div>
         )}
@@ -180,7 +180,7 @@ export default function StudentsTable({
                         {student.recentAttendance ? (
                           <div className="flex flex-col items-start gap-1 max-w-[220px]">
                             <span
-                              className={`inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                              className={`inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 w-fit ${
                                 student.recentAttendance.status === 'PRESENT'
                                   ? 'bg-status-success-bg text-status-success-text ring-status-success-border'
                                   : student.recentAttendance.status === 'ABSENT'
@@ -201,7 +201,7 @@ export default function StudentsTable({
                                 student.recentAttendance.status.slice(1).toLowerCase()}
                             </span>
                             <span
-                              className="text-[11px] text-muted-foreground font-medium truncate w-full"
+                              className="text-[11px] text-muted-foreground font-medium truncate block max-w-[200px]"
                               title={`${student.recentAttendance.batchName} (${formatDate(student.recentAttendance.date)})`}
                             >
                               {student.recentAttendance.batchName} ({formatDate(student.recentAttendance.date)})

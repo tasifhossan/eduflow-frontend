@@ -16,6 +16,7 @@ import { apiGet } from '@/lib/api';
 import { useAuth } from '@/components/providers/auth-provider';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BatchOption {
   id: string;
@@ -29,7 +30,7 @@ interface PeriodOption {
 
 export default function ExportsPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
@@ -174,8 +175,28 @@ export default function ExportsPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto pb-16">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-80" />
+        </div>
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-72 w-full rounded-xl" />
+          <Skeleton className="h-72 w-full rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
   if (!isStaff) {
-    return null;
+    return (
+      <div className="p-8 text-center text-sm text-muted-foreground">
+        Access restricted to administrators.
+      </div>
+    );
   }
 
   return (

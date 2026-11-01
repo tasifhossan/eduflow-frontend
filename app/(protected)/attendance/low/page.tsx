@@ -49,10 +49,11 @@ export default function LowAttendancePage() {
     let active = true;
     async function loadBatches() {
       try {
-        const res = await apiGet<ApiResponse<{ items: BatchOption[] }>>('/api/tables/batches?limit=100');
+        const res = await apiGet<ApiResponse<BatchOption[]>>('/api/batches');
         if (!active) return;
-        if (res.success && res.data?.items) {
-          setBatches(res.data.items);
+        if (res.success && res.data) {
+          const list = Array.isArray(res.data) ? res.data : ((res.data as unknown) as { items?: BatchOption[] }).items || [];
+          setBatches(list);
         }
       } catch {
         // ignore

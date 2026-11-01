@@ -64,8 +64,8 @@ export default function StaffReportCardsPage() {
     async function loadBatches() {
       try {
         setLoadingBatches(true);
-        const res = await apiGet<{ success: boolean; data: BatchOption[] }>('/api/batches');
-        const batchList = Array.isArray(res.data) ? res.data : [];
+        const res = await apiGet<{ success: boolean; data: BatchOption[] | { items?: BatchOption[] } }>('/api/batches');
+        const batchList = Array.isArray(res.data) ? res.data : res.data?.items || [];
         setBatches(batchList);
         if (batchList.length > 0) {
           setSelectedBatchId(batchList[0].id);
@@ -338,18 +338,21 @@ export default function StaffReportCardsPage() {
             value={selectedBatchId}
             onChange={(e) => setSelectedBatchId(e.target.value)}
             disabled={loadingBatches || actionLoading || batches.length === 0}
-            className="w-full px-3 py-2 rounded-control border border-border bg-background text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-60"
+            className="w-full px-3 py-2 rounded-control border border-border bg-background text-foreground text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-60"
           >
             {loadingBatches ? (
               <option value="">Loading batches...</option>
             ) : batches.length === 0 ? (
               <option value="">No batches available</option>
             ) : (
-              batches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))
+              <>
+                <option value="" disabled>Select a batch...</option>
+                {batches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </>
             )}
           </select>
         </div>
@@ -363,7 +366,7 @@ export default function StaffReportCardsPage() {
             value={selectedPeriodId}
             onChange={(e) => setSelectedPeriodId(e.target.value)}
             disabled={loadingPeriods || periods.length === 0}
-            className="w-full px-3 py-2 rounded-control border border-border bg-background text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+            className="w-full px-3 py-2 rounded-control border border-border bg-background text-foreground text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
           >
             {periods.length === 0 ? (
               <option value="">No report periods for this batch</option>

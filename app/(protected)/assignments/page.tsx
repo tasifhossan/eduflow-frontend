@@ -115,15 +115,21 @@ export default function AssignmentsPage() {
   // Load staff filter options and guardian children
   React.useEffect(() => {
     if (isStaff) {
-      apiGet<{ success: boolean; data: { items?: FilterBatch[] } }>('/api/tables/batches?limit=100')
+      apiGet<{ success: boolean; data: FilterBatch[] | { items?: FilterBatch[] } }>('/api/batches')
         .then((res) => {
-          if (res?.data?.items) setBatches(res.data.items);
+          if (res?.data) {
+            const list = Array.isArray(res.data) ? res.data : res.data.items || [];
+            setBatches(list);
+          }
         })
         .catch(() => {});
 
-      apiGet<{ success: boolean; data: { items?: FilterSubject[] } }>('/api/tables/subjects?limit=100')
+      apiGet<{ success: boolean; data: FilterSubject[] | { items?: FilterSubject[] } }>('/api/subjects')
         .then((res) => {
-          if (res?.data?.items) setSubjects(res.data.items);
+          if (res?.data) {
+            const list = Array.isArray(res.data) ? res.data : res.data.items || [];
+            setSubjects(list);
+          }
         })
         .catch(() => {});
     }

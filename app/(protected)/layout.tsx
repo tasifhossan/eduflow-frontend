@@ -6,6 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getCenterData } from '@/lib/center';
 import { apiGet } from '@/lib/api';
 import { DashboardShell } from '@/components/dashboard';
+import { AuthProvider } from '@/components/providers/auth-provider';
 
 export const metadata: Metadata = {
   robots: {
@@ -45,8 +46,10 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <DashboardShell user={user} center={center} branchName={branchName}>
-      {children}
-    </DashboardShell>
+    <AuthProvider initialUser={user}>
+      <DashboardShell user={user} center={center} branchName={branchName}>
+        {children}
+      </DashboardShell>
+    </AuthProvider>
   );
 }
