@@ -18,6 +18,11 @@ export interface AttendancePolicy {
   editWindowDays?: number;
 }
 
+export interface GradingScaleRange {
+  minPercent: number;
+  label: string;
+}
+
 export interface CenterSocials {
   facebook?: string;
   youtube?: string;
@@ -104,6 +109,7 @@ export interface CenterPublicData {
   timezone: string;
   defaultLocale: string;
   weekStartsOn?: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday (default 6)
+  gradingScale?: GradingScaleRange[] | null;
   features: CenterFeatures;
   homepage?: HomepageSettings;
   about?: AboutSettings | null;

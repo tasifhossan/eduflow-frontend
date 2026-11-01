@@ -13,6 +13,7 @@ import {
   HighlightItem,
   WhyChooseUsItem,
   AdmissionStepItem,
+  GradingScaleRange,
 } from '@/lib/types/center';
 import { enforceWcagAA, sanitizeHex } from '@/lib/theme';
 import { DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL } from '@/lib/format';
@@ -37,6 +38,7 @@ import {
   Eye,
   FileText,
   CalendarCheck,
+  Award,
 } from 'lucide-react';
 
 const WHITELISTED_ICONS = [
@@ -88,7 +90,8 @@ import { PagesSettingsTab } from '@/components/settings/pages-settings-tab';
 export default function SettingsPage() {
   const router = useRouter();
   const { updateCenter } = useCenter();
-  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'attendance' | 'homepage' | 'pages'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'contact' | 'locale' | 'receipts' | 'features' | 'attendance' | 'grading' | 'homepage' | 'pages'>('branding');
+  const [previewScore, setPreviewScore] = useState<number>(80);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -394,6 +397,42 @@ export default function SettingsPage() {
     handleHomepageChange('admissionSteps', list);
   };
 
+  // Grading scale helpers
+  function validateGradingScale(scale: GradingScaleRange[] | null | undefined): string | null {
+    if (!scale || scale.length === 0) return null;
+    for (let i = 0; i < scale.length; i++) {
+      if (typeof scale[i].minPercent !== 'number' || isNaN(scale[i].minPercent)) {
+        return 'All minimum percentages must be valid numbers.';
+      }
+      if (scale[i].minPercent < 0 || scale[i].minPercent > 100) {
+        return 'Minimum percentages must be between 0 and 100.';
+      }
+      if (!scale[i].label?.trim()) {
+        return 'All grade ranges must have a non-empty label.';
+      }
+      if (scale[i].label.length > 10) {
+        return 'Grade labels cannot exceed 10 characters.';
+      }
+      if (i < scale.length - 1 && scale[i].minPercent <= scale[i + 1].minPercent) {
+        return 'Grade ranges must be strictly descending by minimum percentage.';
+      }
+    }
+    if (scale[scale.length - 1].minPercent !== 0) {
+      return 'The lowest grade range must have a minimum percentage of 0%.';
+    }
+    return null;
+  }
+
+  function getPreviewGrade(score: number, scale: GradingScaleRange[] | null | undefined): string {
+    if (!scale || scale.length === 0) return 'Not configured';
+    for (const range of scale) {
+      if (score >= range.minPercent) {
+        return range.label;
+      }
+    }
+    return 'Unclassified';
+  }
+
   // Live WCAG analysis
   const primarySanitized = sanitizeHex(formData.primaryColor || '#0ea5e9');
   const contrastInfo = enforceWcagAA(primarySanitized);
@@ -405,6 +444,15 @@ export default function SettingsPage() {
     setErrors({});
 
     try {
+      if (formData.gradingScale && formData.gradingScale.length > 0) {
+        const scaleErr = validateGradingScale(formData.gradingScale);
+        if (scaleErr) {
+          toast.error(scaleErr);
+          setSaving(false);
+          return;
+        }
+      }
+
       const payload: Partial<FullCenterSettings> = {
         name: formData.name.trim(),
         shortName: formData.shortName.trim(),
@@ -428,6 +476,7 @@ export default function SettingsPage() {
         receiptFooter: formData.receiptFooter || null,
         features: formData.features,
         attendancePolicy: formData.attendancePolicy,
+        gradingScale: formData.gradingScale || null,
         homepage: {
           heroBadge: formData.homepage?.heroBadge?.trim() || undefined,
           heroPoints: (formData.homepage?.heroPoints || [])
@@ -638,6 +687,19 @@ export default function SettingsPage() {
         >
           <CalendarCheck className="h-4 w-4" />
           Attendance Policy
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('grading')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+            activeTab === 'grading'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Award className="h-4 w-4" />
+          Grading Scale
         </button>
 
         <button
@@ -1465,6 +1527,243 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab: Grading Scale */}
+      {activeTab === 'grading' && (
+        <div className="space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">Grading Scale & Performance Bands</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Define letter grades or performance bands corresponding to minimum exam score percentages. Used for automated report card evaluations.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          gradingScale: [
+                            { minPercent: 80, label: 'A+' },
+                            { minPercent: 70, label: 'A' },
+                            { minPercent: 60, label: 'B' },
+                            { minPercent: 50, label: 'C' },
+                            { minPercent: 40, label: 'D' },
+                            { minPercent: 0, label: 'F' },
+                          ],
+                        }
+                      : prev
+                  );
+                }}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-surface-hover transition-colors"
+              >
+                Standard Preset (A+ to F)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => (prev ? { ...prev, gradingScale: null } : prev));
+                }}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-surface-hover transition-colors"
+              >
+                Clear Scale
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const current = formData.gradingScale || [];
+                  if (current.length >= 10) return;
+                  const lastMin = current.length > 0 ? current[current.length - 1].minPercent : 100;
+                  const newMin = Math.max(0, lastMin - 10);
+                  setFormData((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          gradingScale: [...current, { minPercent: newMin, label: '' }],
+                        }
+                      : prev
+                  );
+                }}
+                disabled={(formData.gradingScale || []).length >= 10}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Grade Band
+              </button>
+            </div>
+          </div>
+
+          {/* Validation Notice */}
+          {(() => {
+            const scale = formData.gradingScale;
+            if (!scale || scale.length === 0) return null;
+            const err = validateGradingScale(scale);
+            if (err) {
+              return (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <span className="font-medium">{err}</span>
+                </div>
+              );
+            }
+            return (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span className="font-medium">Grading scale structure is valid and strictly descending to 0%.</span>
+              </div>
+            );
+          })()}
+
+          {/* Scale Rows Editor */}
+          {(!formData.gradingScale || formData.gradingScale.length === 0) ? (
+            <div className="text-center py-8 px-4 rounded-xl border border-dashed border-border bg-background/50 space-y-2">
+              <Award className="h-8 w-8 text-muted-foreground mx-auto" />
+              <p className="text-sm font-semibold text-foreground">No grading scale configured</p>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                Without a scale, report cards will display numeric exam percentages without letter grade badges. Click &quot;Standard Preset&quot; above to configure standard letter grades.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-12 gap-3 px-3 text-xs font-semibold text-muted-foreground">
+                <div className="col-span-5">Minimum Percentage (%)</div>
+                <div className="col-span-5">Grade Label</div>
+                <div className="col-span-2 text-right">Action</div>
+              </div>
+
+              <div className="space-y-2">
+                {formData.gradingScale.map((band, idx) => (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-12 gap-3 items-center p-3 rounded-xl border border-border bg-background shadow-xs"
+                  >
+                    <div className="col-span-5 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={band.minPercent}
+                        onChange={(e) => {
+                          const val = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
+                          const copy = [...(formData.gradingScale || [])];
+                          copy[idx] = { ...copy[idx], minPercent: val };
+                          setFormData((prev) => (prev ? { ...prev, gradingScale: copy } : prev));
+                        }}
+                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-surface text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                      <span className="text-xs text-muted-foreground">%</span>
+                    </div>
+
+                    <div className="col-span-5">
+                      <input
+                        type="text"
+                        maxLength={10}
+                        placeholder="e.g. A+, Distinction"
+                        value={band.label}
+                        onChange={(e) => {
+                          const copy = [...(formData.gradingScale || [])];
+                          copy[idx] = { ...copy[idx], label: e.target.value };
+                          setFormData((prev) => (prev ? { ...prev, gradingScale: copy } : prev));
+                        }}
+                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-surface text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+                      />
+                    </div>
+
+                    <div className="col-span-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const copy = (formData.gradingScale || []).filter((_, i) => i !== idx);
+                          setFormData((prev) =>
+                            prev ? { ...prev, gradingScale: copy.length > 0 ? copy : null } : prev
+                          );
+                        }}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-surface-hover transition-colors"
+                        aria-label="Remove grade range"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Preview & Boundary Verification */}
+          {formData.gradingScale && formData.gradingScale.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-border space-y-4">
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" />
+                <h4 className="text-sm font-semibold text-foreground">Interactive Scale Preview</h4>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Live Input Tester */}
+                <div className="p-4 rounded-xl border border-border bg-background space-y-3">
+                  <label className="text-xs font-semibold text-foreground block">
+                    Test Score Percentage
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      max={100}
+                      value={previewScore}
+                      onChange={(e) => setPreviewScore(parseFloat(e.target.value) || 0)}
+                      className="w-28 px-3 py-1.5 text-xs rounded-lg border border-border bg-surface text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                    <span className="text-xs text-muted-foreground">% yields grade:</span>
+                    <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-primary text-primary-foreground">
+                      {getPreviewGrade(previewScore, formData.gradingScale)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Boundary Checks: 80.00% vs 79.99% */}
+                <div className="p-4 rounded-xl border border-border bg-background space-y-2">
+                  <span className="text-xs font-semibold text-foreground block">
+                    Boundary Verification
+                  </span>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 rounded-lg bg-surface border border-border flex items-center justify-between">
+                      <span className="text-muted-foreground">80.00%:</span>
+                      <span className="font-bold text-foreground">
+                        {getPreviewGrade(80.0, formData.gradingScale)}
+                      </span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-surface border border-border flex items-center justify-between">
+                      <span className="text-muted-foreground">79.99%:</span>
+                      <span className="font-bold text-foreground">
+                        {getPreviewGrade(79.99, formData.gradingScale)}
+                      </span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-surface border border-border flex items-center justify-between">
+                      <span className="text-muted-foreground">100.00%:</span>
+                      <span className="font-bold text-foreground">
+                        {getPreviewGrade(100.0, formData.gradingScale)}
+                      </span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-surface border border-border flex items-center justify-between">
+                      <span className="text-muted-foreground">0.00%:</span>
+                      <span className="font-bold text-foreground">
+                        {getPreviewGrade(0.0, formData.gradingScale)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
