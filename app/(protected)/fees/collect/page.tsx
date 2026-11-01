@@ -27,7 +27,7 @@ import { MoneyInput } from '@/components/ui/money-input';
 import { StatusBadge, StatusVariant } from '@/components/dashboard/status-badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Modal } from '@/components/ui/modal';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -336,7 +336,7 @@ export default function CollectPaymentPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
       <PageHeader
         title="Collect Payment"
         description="Record fee payments into the append-only ledger with race-free receipt generation"
@@ -349,6 +349,9 @@ export default function CollectPaymentPage() {
             <User className="h-4 w-4 text-primary" />
             1. Select Student
           </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Search for an enrolled student by name, student code, or phone number to load their fee account and collect payment.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!selectedStudent ? (

@@ -172,31 +172,31 @@ export default function PaymentsLedgerPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader
-          title="Payments Ledger"
-          description="Audit-logged immutable transaction history with race-free receipt numbers and reversal records"
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCsv}
-            disabled={!data || data.items.length === 0}
-          >
-            <Download className="h-4 w-4 mr-1.5" />
-            Export CSV
-          </Button>
-          <Link
-            href="/fees/collect"
-            className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
-          >
-            <CreditCard className="h-4 w-4" />
-            Collect Payment
-          </Link>
-        </div>
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <PageHeader
+        title="Payments Ledger"
+        description="Audit-logged immutable transaction history with race-free receipt numbers and reversal records"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCsv}
+              disabled={!data || data.items.length === 0}
+            >
+              <Download className="h-4 w-4 mr-1.5" />
+              Export CSV
+            </Button>
+            <Link
+              href="/fees/collect"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+            >
+              <CreditCard className="h-4 w-4" />
+              Collect Payment
+            </Link>
+          </div>
+        }
+      />
 
       {/* Filter Bar */}
       <Card>

@@ -179,7 +179,7 @@ export default function ExportsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto pb-16">
       <PageHeader
         title="Data Exports"
         description="Download branch-scoped directories and academic result spreadsheets in sanitized CSV format."
@@ -357,3 +357,4 @@ export default function ExportsPage() {
     </div>
   );
 }
+

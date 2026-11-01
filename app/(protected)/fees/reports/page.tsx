@@ -173,22 +173,22 @@ export default function CollectionReportPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader
-          title="Fee Collection Reports"
-          description="Detailed financial analytics, group breakdown, and transaction status reconciliation"
-        />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExportCsv}
-          disabled={!report || report.groups.length === 0}
-        >
-          <Download className="h-4 w-4 mr-1.5" />
-          Export Report CSV
-        </Button>
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <PageHeader
+        title="Fee Collection Reports"
+        description="Detailed financial analytics, group breakdown, and transaction status reconciliation"
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            disabled={!report || report.groups.length === 0}
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            Export Report CSV
+          </Button>
+        }
+      />
 
       {/* Filter Bar */}
       <Card>

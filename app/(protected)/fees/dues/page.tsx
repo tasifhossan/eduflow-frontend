@@ -231,38 +231,38 @@ export default function DuesPage() {
   const isMonthEmpty = duesData && duesData.summary.totalStudentsWithDues === 0 && !selectedBatchId;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader
-          title="Student Dues & Billing"
-          description="Track outstanding balances, generate monthly charges, and review collection statuses"
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCsv}
-            disabled={!duesData || duesData.items.length === 0}
-          >
-            <Download className="h-4 w-4 mr-1.5" />
-            Export CSV
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              setGenMonth(selectedMonth);
-              setGenBatchId(selectedBatchId);
-              setGenPreview(null);
-              setGenError(null);
-              setShowGenerateModal(true);
-            }}
-          >
-            <Sparkles className="h-4 w-4 mr-1.5" />
-            Generate Dues
-          </Button>
-        </div>
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <PageHeader
+        title="Student Dues & Billing"
+        description="Track outstanding balances, generate monthly charges, and review collection statuses"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCsv}
+              disabled={!duesData || duesData.items.length === 0}
+            >
+              <Download className="h-4 w-4 mr-1.5" />
+              Export CSV
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setGenMonth(selectedMonth);
+                setGenBatchId(selectedBatchId);
+                setGenPreview(null);
+                setGenError(null);
+                setShowGenerateModal(true);
+              }}
+            >
+              <Sparkles className="h-4 w-4 mr-1.5" />
+              Generate Dues
+            </Button>
+          </div>
+        }
+      />
 
       {/* Prominent Banner when selected month has no dues generated */}
       {isMonthEmpty && !isLoading && (

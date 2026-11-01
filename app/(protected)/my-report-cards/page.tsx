@@ -148,7 +148,7 @@ export default function MyReportCardsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto pb-12">
       <PageHeader
         title="Report Cards"
         description="View and print official academic performance summaries and term report cards."

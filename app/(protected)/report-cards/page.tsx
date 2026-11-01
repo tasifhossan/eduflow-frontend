@@ -308,7 +308,7 @@ export default function StaffReportCardsPage() {
   const activePeriod = periods.find((p) => p.id === selectedPeriodId);
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -337,14 +337,20 @@ export default function StaffReportCardsPage() {
           <select
             value={selectedBatchId}
             onChange={(e) => setSelectedBatchId(e.target.value)}
-            disabled={loadingBatches || actionLoading}
-            className="w-full px-3 py-2 rounded-control border border-border bg-background text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+            disabled={loadingBatches || actionLoading || batches.length === 0}
+            className="w-full px-3 py-2 rounded-control border border-border bg-background text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-60"
           >
-            {batches.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
+            {loadingBatches ? (
+              <option value="">Loading batches...</option>
+            ) : batches.length === 0 ? (
+              <option value="">No batches available</option>
+            ) : (
+              batches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
@@ -455,8 +461,12 @@ export default function StaffReportCardsPage() {
             Computing student performance data...
           </div>
         ) : !selectedPeriodId ? (
-          <div className="p-12 text-center text-muted-foreground text-sm">
-            Please select or create a report period to review student report cards.
+          <div className="p-12 text-center text-muted-foreground text-sm max-w-md mx-auto">
+            {batches.length === 0
+              ? 'No batches found. Please create a batch before managing report periods and cards.'
+              : periods.length === 0
+              ? 'No report periods found for this batch. Click "Create Report Period" above to get started.'
+              : 'Please select a report period above to review student report cards.'}
           </div>
         ) : rosterData?.cards.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground text-sm">
@@ -785,3 +795,4 @@ export default function StaffReportCardsPage() {
     </div>
   );
 }
+
