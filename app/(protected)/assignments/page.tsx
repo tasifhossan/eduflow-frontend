@@ -552,7 +552,7 @@ export default function AssignmentsPage() {
             return (
               <div
                 key={assign.id}
-                className="p-4 rounded-[var(--radius-card)] border border-border bg-surface hover:border-primary/40 transition-colors shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="p-4 rounded-[var(--radius-card)] border border-border bg-surface hover:border-primary/40 transition-colors shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 overflow-hidden"
               >
                 {/* Info block */}
                 <div className="space-y-1.5 min-w-0 flex-1">
@@ -626,19 +626,19 @@ export default function AssignmentsPage() {
                 </div>
 
                 {/* Right side stats & action */}
-                <div className="flex items-center gap-4 shrink-0 justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-border">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-border w-full md:w-auto">
                   {isStaff && assign.counts && (
-                    <div className="flex items-center gap-3 text-center">
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 text-center">
                       <div className="px-2 py-1 rounded-[var(--radius-control)] bg-surface-hover/50">
-                        <p className="text-[11px] text-muted-foreground">Submitted</p>
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground">Submitted</p>
                         <p className="text-xs font-bold text-foreground">{assign.counts.submitted}</p>
                       </div>
                       <div className="px-2 py-1 rounded-[var(--radius-control)] bg-surface-hover/50">
-                        <p className="text-[11px] text-muted-foreground">Graded</p>
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground">Graded</p>
                         <p className="text-xs font-bold text-status-success-text">{assign.counts.graded}</p>
                       </div>
                       <div className="px-2 py-1 rounded-[var(--radius-control)] bg-surface-hover/50">
-                        <p className="text-[11px] text-muted-foreground">Missing</p>
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground">Missing</p>
                         <p className="text-xs font-bold text-status-danger-text">{assign.counts.missing}</p>
                       </div>
                     </div>
@@ -656,12 +656,12 @@ export default function AssignmentsPage() {
                     </div>
                   )}
 
-                  <Link href={`/assignments/${assign.id}`}>
-                    <Button variant="outline" size="sm" className="gap-1">
+                  <Button asChild variant="outline" size="sm" className="gap-1 shrink-0">
+                    <Link href={`/assignments/${assign.id}`}>
                       <span>View</span>
                       <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             );
