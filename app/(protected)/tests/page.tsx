@@ -136,19 +136,31 @@ export default function TestsHubPage() {
               const tests: TestSummary[] = testsRes.success ? testsRes.data : [];
 
               // Check submission status for each test
-              const resultChecks = await Promise.allSettled(
-                tests.map((t) =>
-                  apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`).then(() => ({
-                    id: t.id,
-                    submitted: true,
-                  })),
-                ),
-              );
-
               const myResults: Record<string, boolean> = {};
-              resultChecks.forEach((r, i) => {
-                myResults[tests[i].id] = r.status === 'fulfilled';
+              const unverifiedTests: TestSummary[] = [];
+
+              tests.forEach((t: TestSummary & { isSubmitted?: boolean }) => {
+                if (typeof t.isSubmitted === 'boolean') {
+                  myResults[t.id] = t.isSubmitted;
+                } else {
+                  unverifiedTests.push(t);
+                }
               });
+
+              if (unverifiedTests.length > 0) {
+                const resultChecks = await Promise.allSettled(
+                  unverifiedTests.map((t) =>
+                    apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`).then(() => ({
+                      id: t.id,
+                      submitted: true,
+                    })),
+                  ),
+                );
+
+                resultChecks.forEach((r, i) => {
+                  myResults[unverifiedTests[i].id] = r.status === 'fulfilled';
+                });
+              }
 
               return { batch: b, tests, myResults } as BatchWithTests;
             }),

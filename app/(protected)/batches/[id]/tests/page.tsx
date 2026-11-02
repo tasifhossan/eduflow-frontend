@@ -86,13 +86,18 @@ export default function BatchTestsPage({ params }: PageProps) {
 
           // 4. If student, check if they submitted
           if (role === 'STUDENT') {
-            try {
-              const res = await apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`);
-              if (res && res.success) {
-                setMyResults((prev) => ({ ...prev, [t.id]: true }));
+            const isSub = (t as { isSubmitted?: boolean }).isSubmitted;
+            if (typeof isSub === 'boolean') {
+              setMyResults((prev) => ({ ...prev, [t.id]: isSub }));
+            } else {
+              try {
+                const res = await apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`);
+                if (res && res.success) {
+                  setMyResults((prev) => ({ ...prev, [t.id]: true }));
+                }
+              } catch {
+                setMyResults((prev) => ({ ...prev, [t.id]: false }));
               }
-            } catch {
-              setMyResults((prev) => ({ ...prev, [t.id]: false }));
             }
           }
         });
