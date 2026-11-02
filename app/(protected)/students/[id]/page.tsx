@@ -105,7 +105,7 @@ interface TrendEntry {
 export default async function StudentDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const user = await getCurrentUser();
 
@@ -114,8 +114,7 @@ export default async function StudentDetailPage({
   }
 
   // Resolve params
-  const resolvedParams = await params;
-  const studentId = resolvedParams.id;
+  const { id: studentId } = await params;
 
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();

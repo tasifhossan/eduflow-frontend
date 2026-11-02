@@ -181,7 +181,20 @@ export function CourseDetailView({
   };
 
   // Prepare defensive syllabus accordion items
-  const syllabusItems: AccordionItem[] = (batch.syllabus || []).map((item, index) => {
+  let rawSyllabus: Array<string | { title?: string; description?: string; topics?: string[] }> = [];
+  if (Array.isArray(batch.syllabus)) {
+    rawSyllabus = batch.syllabus;
+  } else if (typeof batch.syllabus === 'string') {
+    try {
+      const parsed = JSON.parse(batch.syllabus);
+      if (Array.isArray(parsed)) rawSyllabus = parsed;
+      else if (parsed) rawSyllabus = [parsed];
+    } catch {
+      rawSyllabus = [batch.syllabus];
+    }
+  }
+
+  const syllabusItems: AccordionItem[] = rawSyllabus.map((item, index) => {
     if (typeof item === 'string') {
       return {
         id: `module-${index}`,
@@ -199,7 +212,7 @@ export function CourseDetailView({
           )}
           {item.topics && item.topics.length > 0 && (
             <ul className="list-disc pl-5 space-y-1 text-xs sm:text-sm text-muted-foreground">
-              {item.topics.map((t, tidx) => (
+              {item.topics.map((t: string, tidx: number) => (
                 <li key={tidx}>{t}</li>
               ))}
             </ul>
