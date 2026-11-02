@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -31,7 +32,14 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
 };
 
+const emptySubscribe = () => () => {};
+
 export function MobileMenu() {
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [isOpen, setIsOpen] = React.useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = React.useState(true);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -107,7 +115,7 @@ export function MobileMenu() {
   };
 
   const rawNavLinks = user ? siteConfig.nav.loggedIn : siteConfig.nav.loggedOut;
-  const navLinks = (user || features.publicSite ? rawNavLinks : []).filter(
+  const navLinks = (user || features?.publicSite !== false ? rawNavLinks : []).filter(
     (item) => isRouteVisible(item.href, features, center.content)
   );
 
@@ -127,7 +135,7 @@ export function MobileMenu() {
       </Button>
 
       {/* Drawer Overlay & Content */}
-      {isOpen && (
+      {isOpen && mounted && typeof document !== 'undefined' && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -250,7 +258,7 @@ export function MobileMenu() {
               })}
 
               {/* Resources Collapsible/Expanded Section (Logged-out only) */}
-              {!user && features.publicSite && (
+              {!user && features?.publicSite !== false && (
                 <div className="pt-3">
                   <button
                     type="button"
@@ -339,7 +347,8 @@ export function MobileMenu() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
