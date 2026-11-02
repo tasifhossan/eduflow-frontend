@@ -330,6 +330,17 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
 }
 
+/* Custom radius utilities matching theme tokens */
+.rounded-card {
+  border-radius: var(--radius-card);
+}
+.rounded-control {
+  border-radius: var(--radius-control);
+}
+.rounded-pill {
+  border-radius: var(--radius-pill);
+}
+
 /* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,

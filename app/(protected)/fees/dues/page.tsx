@@ -425,6 +425,22 @@ export default function DuesPage() {
               <EmptyState
                 title="No dues found"
                 description={`No student dues records found for ${selectedMonth} matching current filters.`}
+                action={
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                      setGenMonth(selectedMonth);
+                      setGenBatchId(selectedBatchId);
+                      setGenPreview(null);
+                      setGenError(null);
+                      setShowGenerateModal(true);
+                    }}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1.5" />
+                    Generate {selectedMonth} Dues
+                  </Button>
+                }
               />
             </div>
           ) : (

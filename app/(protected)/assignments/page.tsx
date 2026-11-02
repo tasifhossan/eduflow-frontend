@@ -81,7 +81,7 @@ interface GuardianChild {
 }
 
 export default function AssignmentsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { center } = useCenter();
   const tz = center?.timezone || 'Asia/Dhaka';
 
@@ -275,6 +275,31 @@ export default function AssignmentsPage() {
 
     return { totalAssignments, totalSubmitted, totalGraded, totalMissing };
   }, [assignments]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-9 w-32" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-[var(--radius-card)]" />
+          ))}
+        </div>
+        <Skeleton className="h-14 w-full rounded-[var(--radius-card)]" />
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-[var(--radius-card)]" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
