@@ -33,15 +33,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const batch = batchRes.data;
-  const title = `${batch.name} | ${center.name}`;
   const description =
     batch.description || `Comprehensive ${batch.type.toLowerCase()} course at ${center.name}.`;
 
   return {
-    title,
+    title: batch.name,
     description,
+    alternates: {
+      canonical: `/explore/${slug}`,
+    },
     openGraph: {
-      title,
+      title: `${batch.name} | ${center.name}`,
       description,
       images: batch.imageUrl ? [{ url: batch.imageUrl }] : undefined,
     },

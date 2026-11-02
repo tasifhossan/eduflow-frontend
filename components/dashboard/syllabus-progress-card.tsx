@@ -73,8 +73,9 @@ export function SyllabusProgressCard({
           return;
         }
 
+        const queryStr = studentId ? `?studentId=${encodeURIComponent(studentId)}` : '';
         const res = await apiGet<{ success: boolean; data: SyllabusProgressData }>(
-          `/api/batches/${targetBatchId}/syllabus-progress`
+          `/api/batches/${targetBatchId}/syllabus-progress${queryStr}`
         );
         if (!active) return;
         if (res?.success && res.data) {

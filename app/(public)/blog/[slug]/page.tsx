@@ -27,14 +27,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const post = postRes.data;
-  const title = `${post.title} | ${center.name}`;
   const description = post.excerpt || post.title;
 
   return {
-    title,
+    title: post.title,
     description,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
-      title,
+      title: `${post.title} | ${center.name}`,
       description,
       type: 'article',
       publishedTime: post.publishedAt || post.createdAt,
