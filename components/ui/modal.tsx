@@ -1,8 +1,11 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/cn';
 import { X } from 'lucide-react';
+
+const emptySubscribe = () => () => {};
 
 export interface ModalProps {
   isOpen: boolean;
@@ -25,6 +28,11 @@ export function Modal({
   maxWidth = 'md',
   className,
 }: ModalProps) {
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const modalRef = React.useRef<HTMLDivElement>(null);
   const previouslyFocusedElement = React.useRef<HTMLElement | null>(null);
 
@@ -90,7 +98,7 @@ export function Modal({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted || typeof document === 'undefined') return null;
 
   const maxWidths = {
     sm: 'max-w-sm',
@@ -100,13 +108,13 @@ export function Modal({
     '2xl': 'max-w-2xl',
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
       aria-describedby={description ? 'modal-desc' : undefined}
-      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-6 overflow-hidden"
     >
       {/* Backdrop */}
       <div
@@ -120,7 +128,8 @@ export function Modal({
         ref={modalRef}
         tabIndex={-1}
         className={cn(
-          'relative z-10 w-full rounded-[var(--radius-card)] border border-border bg-surface text-foreground shadow-popover overflow-hidden',
+          'relative z-10 w-full flex flex-col rounded-[var(--radius-card)] border border-border bg-surface text-foreground shadow-popover overflow-hidden',
+          'max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)]',
           'animate-in fade-in zoom-in-95 duration-200 focus:outline-none',
           maxWidths[maxWidth],
           className
@@ -128,15 +137,15 @@ export function Modal({
       >
         {/* Header */}
         {(title || description) && (
-          <div className="flex items-start justify-between border-b border-border p-5">
+          <div className="flex items-start justify-between border-b border-border p-4 sm:p-5 shrink-0">
             <div>
               {title && (
-                <h3 id="modal-title" className="text-lg font-bold text-foreground">
+                <h3 id="modal-title" className="text-base sm:text-lg font-bold text-foreground">
                   {title}
                 </h3>
               )}
               {description && (
-                <p id="modal-desc" className="text-xs text-muted-foreground mt-1">
+                <p id="modal-desc" className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {description}
                 </p>
               )}
@@ -144,7 +153,7 @@ export function Modal({
             <button
               type="button"
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground rounded p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="text-muted-foreground hover:text-foreground rounded p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0 -mr-1 -mt-1"
               aria-label="Close dialog"
             >
               <X className="h-5 w-5" />
@@ -152,17 +161,20 @@ export function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className="p-6">{children}</div>
+        {/* Body with scrolling */}
+        <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+          {children}
+        </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 border-t border-border bg-muted/30 px-6 py-4">
+          <div className="flex items-center justify-end gap-3 border-t border-border bg-muted/30 px-4 sm:px-6 py-3.5 sm:py-4 shrink-0">
             {footer}
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
