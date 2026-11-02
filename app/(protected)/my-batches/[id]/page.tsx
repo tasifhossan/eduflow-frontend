@@ -120,32 +120,32 @@ export default function StudentBatchDetailPage() {
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
       {/* Navigation Header */}
-      <div className="border-b border-gray-200 pb-5">
-        <nav className="flex text-sm text-gray-500 gap-x-2 mb-2">
+      <div className="border-b border-border pb-5">
+        <nav className="flex flex-wrap items-center text-sm text-muted-foreground gap-x-2 gap-y-1 mb-2">
           <Link href="/dashboard" className="hover:text-primary font-medium">Dashboard</Link>
           <span>/</span>
           <Link href="/my-batches" className="hover:text-primary font-medium">My Batches</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">{batch.name}</span>
+          <span className="text-foreground font-semibold truncate max-w-[200px] sm:max-w-none">{batch.name}</span>
         </nav>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-x-3 mb-1">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">{batch.name}</h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-x-3 mb-1">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground break-words">{batch.name}</h1>
               <span
-                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 ${
                   batch.type === 'ACADEMIC'
-                    ? 'bg-blue-50 text-blue-700 ring-blue-600/20'
-                    : 'bg-purple-50 text-purple-700 ring-purple-600/20'
+                    ? 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-950 dark:text-blue-300'
+                    : 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-950 dark:text-purple-300'
                 }`}
               >
                 {batch.type}
               </span>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {batch.subject.name} {batch.classLevel ? `• ${batch.classLevel}` : ''}
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function StudentBatchDetailPage() {
           <div className="flex items-center gap-x-3">
             <Link
               href={`/batches/${batch.id}/tests`}
-              className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
             >
               <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
