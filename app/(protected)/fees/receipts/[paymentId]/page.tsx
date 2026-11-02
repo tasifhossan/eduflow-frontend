@@ -45,14 +45,13 @@ interface ReceiptData {
 export default function ReceiptPrintPage({
   params,
 }: {
-  params: Promise<{ paymentId: string }> | { paymentId: string };
+  params: Promise<{ paymentId: string }>;
 }) {
   const router = useRouter();
   const { center } = useCenter();
 
   // Resolve params
-  const unwrappedParams = 'then' in params ? React.use(params) : params;
-  const paymentId = unwrappedParams.paymentId;
+  const { paymentId } = React.use(params);
 
   const [receipt, setReceipt] = React.useState<ReceiptData | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);

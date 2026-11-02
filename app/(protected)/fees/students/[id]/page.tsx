@@ -122,14 +122,13 @@ interface BatchOption {
 export default function StudentLedgerPage({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { center } = useCenter();
   const { user } = useAuth();
 
   // Resolve params
-  const unwrappedParams = 'then' in params ? React.use(params) : params;
-  const studentId = unwrappedParams.id;
+  const { id: studentId } = React.use(params);
 
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'ACCOUNTANT';
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
