@@ -171,9 +171,12 @@ export default function LecturesPage() {
         })
         .catch(() => {});
 
-      apiGet<{ success: boolean; data: { items?: Array<{ id: string; name: string }> } }>('/api/tables/users?role=TEACHER')
+      apiGet<{ success: boolean; data: FilterTeacher[] | { items?: FilterTeacher[] } }>('/api/users?role=TEACHER')
         .then((res) => {
-          if (res?.data?.items) setTeachers(res.data.items);
+          if (res?.data) {
+            const list = Array.isArray(res.data) ? res.data : res.data.items || [];
+            setTeachers(list);
+          }
         })
         .catch(() => {});
     }

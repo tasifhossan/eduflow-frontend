@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/components/providers/auth-provider';
 import { apiGet, apiPost, apiPut } from '@/lib/api';
 import {
   ReportPeriod,
@@ -26,9 +27,12 @@ import {
 interface BatchOption {
   id: string;
   name: string;
+  teacherId?: string | null;
 }
 
 export default function StaffReportCardsPage() {
+  const { user, isLoading: authLoading } = useAuth();
+
   const [batches, setBatches] = useState<BatchOption[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [periods, setPeriods] = useState<ReportPeriod[]>([]);
@@ -60,34 +64,64 @@ export default function StaffReportCardsPage() {
 
   // 1. Fetch batches
   useEffect(() => {
+    if (authLoading) return;
+
+    let active = true;
     async function loadBatches() {
       try {
         setLoadingBatches(true);
         const res = await apiGet<{ success: boolean; data: BatchOption[] | { items?: BatchOption[] } }>('/api/batches');
-        const batchList = Array.isArray(res.data) ? res.data : res.data?.items || [];
+        if (!active) return;
+
+        const rawList = Array.isArray(res.data) ? res.data : res.data?.items || [];
+        const isTeacher = user?.role === 'TEACHER';
+        const batchList = isTeacher
+          ? rawList.filter((b) => b.teacherId === user?.id)
+          : rawList;
+
         setBatches(batchList);
         if (batchList.length > 0) {
-          setSelectedBatchId(batchList[0].id);
+          setSelectedBatchId((prev) => {
+            return batchList.some((b) => b.id === prev) ? prev : batchList[0].id;
+          });
+        } else {
+          setSelectedBatchId('');
+          setPeriods([]);
+          setSelectedPeriodId('');
+          setRosterData(null);
         }
       } catch {
+        if (!active) return;
         toast.error('Failed to load batches');
       } finally {
-        setLoadingBatches(false);
+        if (active) setLoadingBatches(false);
       }
     }
     loadBatches();
-  }, []);
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user?.role, user?.id]);
 
   // 2. Fetch report periods when batch changes
   useEffect(() => {
-    if (!selectedBatchId) return;
+    if (!selectedBatchId) {
+      setPeriods([]);
+      setSelectedPeriodId('');
+      setRosterData(null);
+      return;
+    }
 
+    let active = true;
     async function loadPeriods() {
       try {
         setLoadingPeriods(true);
         const res = await apiGet<{ success: boolean; data: ReportPeriod[] }>(
           `/api/batches/${selectedBatchId}/report-periods`
         );
+        if (!active) return;
+
         const periodList = Array.isArray(res.data) ? res.data : [];
         setPeriods(periodList);
         if (periodList.length > 0) {
@@ -97,12 +131,20 @@ export default function StaffReportCardsPage() {
           setRosterData(null);
         }
       } catch {
+        if (!active) return;
+        setPeriods([]);
+        setSelectedPeriodId('');
+        setRosterData(null);
         toast.error('Failed to load report periods');
       } finally {
-        setLoadingPeriods(false);
+        if (active) setLoadingPeriods(false);
       }
     }
     loadPeriods();
+
+    return () => {
+      active = false;
+    };
   }, [selectedBatchId]);
 
   // 3. Fetch roster cards when period changes or reloaded
@@ -352,7 +394,9 @@ export default function StaffReportCardsPage() {
             {loadingBatches ? (
               <option value="">Loading batches...</option>
             ) : batches.length === 0 ? (
-              <option value="">No batches available</option>
+              <option value="">
+                {user?.role === 'TEACHER' ? 'No assigned batches' : 'No batches available'}
+              </option>
             ) : (
               <>
                 <option value="">Select a batch...</option>
@@ -478,14 +522,18 @@ export default function StaffReportCardsPage() {
               icon={<FileText className="h-8 w-8 text-muted-foreground stroke-[1.5]" />}
               title={
                 batches.length === 0
-                  ? 'No batches found'
+                  ? user?.role === 'TEACHER'
+                    ? 'No assigned batches'
+                    : 'No batches found'
                   : periods.length === 0
                   ? 'No report periods for this batch'
                   : 'No report period selected'
               }
               description={
                 batches.length === 0
-                  ? 'Please create a batch before managing report periods and cards.'
+                  ? user?.role === 'TEACHER'
+                    ? 'You are not assigned as the teacher of any batches yet. You can only manage report cards for batches assigned to you.'
+                    : 'Please create a batch before managing report periods and cards.'
                   : periods.length === 0
                   ? 'No evaluation periods have been created for this batch yet. Click "Create Report Period" to get started.'
                   : 'Please select a report period above to review student report cards.'
