@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/format';
+import { StatusBadge } from '@/components/dashboard/status-badge';
 
 export interface StudentSummary {
   id: string;
@@ -178,37 +179,32 @@ export default function StudentsTable({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {student.recentAttendance ? (
-                          <div className="flex flex-col items-start gap-1 max-w-[220px]">
-                            <span
-                              className={`inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 w-fit ${
+                          <div className="flex flex-col items-start gap-1 max-w-[240px]">
+                            <StatusBadge
+                              variant={
                                 student.recentAttendance.status === 'PRESENT'
-                                  ? 'bg-status-success-bg text-status-success-text ring-status-success-border'
+                                  ? 'present'
                                   : student.recentAttendance.status === 'ABSENT'
-                                  ? 'bg-status-danger-bg text-status-danger-text ring-status-danger-border'
-                                  : 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
-                              }`}
+                                  ? 'absent'
+                                  : 'late'
+                              }
+                              showDot
                             >
-                              <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  student.recentAttendance.status === 'PRESENT'
-                                    ? 'bg-status-success-text'
-                                    : student.recentAttendance.status === 'ABSENT'
-                                    ? 'bg-status-danger-text'
-                                    : 'bg-status-warning-text'
-                                }`}
-                              />
-                              {student.recentAttendance.status.charAt(0) +
-                                student.recentAttendance.status.slice(1).toLowerCase()}
-                            </span>
+                              {student.recentAttendance.status === 'PRESENT'
+                                ? 'Present'
+                                : student.recentAttendance.status === 'ABSENT'
+                                ? 'Absent'
+                                : 'Late'}
+                            </StatusBadge>
                             <span
-                              className="text-[11px] text-muted-foreground font-medium truncate block max-w-[200px]"
+                              className="text-[11px] text-muted-foreground font-medium truncate block max-w-[220px]"
                               title={`${student.recentAttendance.batchName} (${formatDate(student.recentAttendance.date)})`}
                             >
                               {student.recentAttendance.batchName} ({formatDate(student.recentAttendance.date)})
                             </span>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-x-1.5 rounded-full bg-surface-hover px-2.5 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border">
+                          <span className="inline-flex items-center gap-x-1.5 rounded-[var(--radius-pill)] bg-surface-hover px-2.5 py-0.5 text-xs font-medium text-muted-foreground border border-border">
                             <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                             No record
                           </span>

@@ -66,7 +66,7 @@ export function Navbar() {
       };
     });
 
-  const showNavLinks = user || features.publicSite;
+  const showNavLinks = user || features?.publicSite !== false;
 
   return (
     <header
@@ -139,7 +139,7 @@ export function Navbar() {
               })}
 
               {/* Resources Menu for Logged-Out Users */}
-              {!user && features.publicSite && (
+              {!user && features?.publicSite !== false && (
                 <DropdownMenu
                   align="left"
                   className="w-72 p-2"

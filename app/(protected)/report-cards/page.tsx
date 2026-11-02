@@ -2,34 +2,37 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
-import { apiGet, apiPost, apiPatch, apiPut } from '@/lib/api';
+import { useAuth } from '@/components/providers/auth-provider';
+import { apiGet, apiPost, apiPut } from '@/lib/api';
 import {
   ReportPeriod,
   ReportCardsRosterResponse,
   StudentFullReportCard,
 } from '@/lib/types/report-card';
 import { PrintableReportCard } from '@/components/report-card/printable-report-card';
+import { PageHeader } from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   FileText,
   Plus,
   Printer,
-  Calendar,
   AlertTriangle,
-  CheckCircle2,
   Lock,
   Unlock,
   Loader2,
   Users,
-  Search,
-  ExternalLink,
 } from 'lucide-react';
 
 interface BatchOption {
   id: string;
   name: string;
+  teacherId?: string | null;
 }
 
 export default function StaffReportCardsPage() {
+  const { user, isLoading: authLoading } = useAuth();
+
   const [batches, setBatches] = useState<BatchOption[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [periods, setPeriods] = useState<ReportPeriod[]>([]);
@@ -61,34 +64,64 @@ export default function StaffReportCardsPage() {
 
   // 1. Fetch batches
   useEffect(() => {
+    if (authLoading) return;
+
+    let active = true;
     async function loadBatches() {
       try {
         setLoadingBatches(true);
         const res = await apiGet<{ success: boolean; data: BatchOption[] | { items?: BatchOption[] } }>('/api/batches');
-        const batchList = Array.isArray(res.data) ? res.data : res.data?.items || [];
+        if (!active) return;
+
+        const rawList = Array.isArray(res.data) ? res.data : res.data?.items || [];
+        const isTeacher = user?.role === 'TEACHER';
+        const batchList = isTeacher
+          ? rawList.filter((b) => b.teacherId === user?.id)
+          : rawList;
+
         setBatches(batchList);
         if (batchList.length > 0) {
-          setSelectedBatchId(batchList[0].id);
+          setSelectedBatchId((prev) => {
+            return batchList.some((b) => b.id === prev) ? prev : batchList[0].id;
+          });
+        } else {
+          setSelectedBatchId('');
+          setPeriods([]);
+          setSelectedPeriodId('');
+          setRosterData(null);
         }
-      } catch (err) {
+      } catch {
+        if (!active) return;
         toast.error('Failed to load batches');
       } finally {
-        setLoadingBatches(false);
+        if (active) setLoadingBatches(false);
       }
     }
     loadBatches();
-  }, []);
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user?.role, user?.id]);
 
   // 2. Fetch report periods when batch changes
   useEffect(() => {
-    if (!selectedBatchId) return;
+    if (!selectedBatchId) {
+      setPeriods([]);
+      setSelectedPeriodId('');
+      setRosterData(null);
+      return;
+    }
 
+    let active = true;
     async function loadPeriods() {
       try {
         setLoadingPeriods(true);
         const res = await apiGet<{ success: boolean; data: ReportPeriod[] }>(
           `/api/batches/${selectedBatchId}/report-periods`
         );
+        if (!active) return;
+
         const periodList = Array.isArray(res.data) ? res.data : [];
         setPeriods(periodList);
         if (periodList.length > 0) {
@@ -97,46 +130,67 @@ export default function StaffReportCardsPage() {
           setSelectedPeriodId('');
           setRosterData(null);
         }
-      } catch (err) {
+      } catch {
+        if (!active) return;
+        setPeriods([]);
+        setSelectedPeriodId('');
+        setRosterData(null);
         toast.error('Failed to load report periods');
       } finally {
-        setLoadingPeriods(false);
+        if (active) setLoadingPeriods(false);
       }
     }
     loadPeriods();
+
+    return () => {
+      active = false;
+    };
   }, [selectedBatchId]);
 
-  // 3. Fetch roster cards when period changes
-  const fetchRosterCards = useCallback(async () => {
-    if (!selectedPeriodId) return;
-    try {
-      setLoadingCards(true);
-      const res = await apiGet<{ success: boolean; data: ReportCardsRosterResponse }>(
-        `/api/report-periods/${selectedPeriodId}/cards?limit=100`
-      );
-      if (res.data) {
-        setRosterData(res.data);
-
-        // Initialize remarks map
-        const initialRemarks: Record<string, { text: string; status: 'idle' | 'saving' | 'saved' }> = {};
-        for (const c of res.data.cards) {
-          initialRemarks[c.student.id] = {
-            text: c.remark?.text || '',
-            status: 'idle',
-          };
-        }
-        setRemarks(initialRemarks);
-      }
-    } catch (err) {
-      toast.error('Failed to load report cards roster');
-    } finally {
-      setLoadingCards(false);
-    }
-  }, [selectedPeriodId]);
+  // 3. Fetch roster cards when period changes or reloaded
+  const [rosterReloadKey, setRosterReloadKey] = useState(0);
+  const fetchRosterCards = useCallback(() => {
+    setRosterReloadKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
-    fetchRosterCards();
-  }, [fetchRosterCards]);
+    let ignore = false;
+
+    async function loadRoster() {
+      if (!selectedPeriodId) {
+        setRosterData(null);
+        return;
+      }
+      setLoadingCards(true);
+      try {
+        const res = await apiGet<{ success: boolean; data: ReportCardsRosterResponse }>(
+          `/api/report-periods/${selectedPeriodId}/cards?limit=100`
+        );
+        if (!ignore && res.data) {
+          setRosterData(res.data);
+
+          // Initialize remarks map
+          const initialRemarks: Record<string, { text: string; status: 'idle' | 'saving' | 'saved' }> = {};
+          for (const c of res.data.cards) {
+            initialRemarks[c.student.id] = {
+              text: c.remark?.text || '',
+              status: 'idle',
+            };
+          }
+          setRemarks(initialRemarks);
+        }
+      } catch {
+        if (!ignore) toast.error('Failed to load report cards roster');
+      } finally {
+        if (!ignore) setLoadingCards(false);
+      }
+    }
+
+    void loadRoster();
+    return () => {
+      ignore = true;
+    };
+  }, [selectedPeriodId, rosterReloadKey]);
 
   // Handle Create Period
   const handleCreatePeriod = async (e: React.FormEvent) => {
@@ -177,8 +231,8 @@ export default function StaffReportCardsPage() {
       if (res.data?.id) {
         setSelectedPeriodId(res.data.id);
       }
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to create report period');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create report period');
     } finally {
       setActionLoading(false);
     }
@@ -206,8 +260,8 @@ export default function StaffReportCardsPage() {
       );
       setPeriods(Array.isArray(periodsRes.data) ? periodsRes.data : []);
       fetchRosterCards();
-    } catch (err: any) {
-      toast.error(err?.message || 'Action failed');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Action failed');
     } finally {
       setActionLoading(false);
     }
@@ -236,7 +290,7 @@ export default function StaffReportCardsPage() {
           [studentId]: { ...prev[studentId], status: 'idle' },
         }));
       }, 2000);
-    } catch (err) {
+    } catch {
       toast.error('Failed to save remark');
       setRemarks((prev) => ({
         ...prev,
@@ -272,7 +326,7 @@ export default function StaffReportCardsPage() {
       if (res.data) {
         setPrintSingleCard(res.data);
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to load student report card for printing');
     } finally {
       setLoadingPrint(false);
@@ -298,7 +352,7 @@ export default function StaffReportCardsPage() {
         }
       }
       setPrintAllCards(allCards);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load all report cards for printing');
     } finally {
       setLoadingPrint(false);
@@ -310,27 +364,24 @@ export default function StaffReportCardsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Report Cards Management</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage academic periods, evaluate grades, enter teacher remarks, and publish student cards.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsCreateOpen(true)}
-          disabled={!selectedBatchId || actionLoading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-control bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
-        >
-          <Plus className="h-4 w-4" />
-          Create Report Period
-        </button>
-      </div>
+      <PageHeader
+        title="Report Cards Management"
+        description="Manage academic periods, evaluate grades, enter teacher remarks, and publish student cards."
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsCreateOpen(true)}
+            disabled={!selectedBatchId || actionLoading}
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            Create Report Period
+          </Button>
+        }
+      />
 
       {/* Selectors Bar */}
-      <div className="p-4 rounded-card border border-border bg-surface flex flex-wrap items-center gap-4">
+      <div className="p-4 rounded-[var(--radius-card)] border border-border bg-surface flex flex-wrap items-center gap-4">
         {/* Batch Select */}
         <div className="flex-1 min-w-[200px]">
           <label className="text-xs font-semibold text-muted-foreground block mb-1">Select Batch</label>
@@ -338,15 +389,17 @@ export default function StaffReportCardsPage() {
             value={selectedBatchId}
             onChange={(e) => setSelectedBatchId(e.target.value)}
             disabled={loadingBatches || actionLoading || batches.length === 0}
-            className="w-full px-3 py-2 rounded-control border border-border bg-background text-foreground text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-60"
+            className="w-full px-3 py-2 rounded-[var(--radius-control)] border border-border bg-background text-foreground text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-60"
           >
             {loadingBatches ? (
               <option value="">Loading batches...</option>
             ) : batches.length === 0 ? (
-              <option value="">No batches available</option>
+              <option value="">
+                {user?.role === 'TEACHER' ? 'No assigned batches' : 'No batches available'}
+              </option>
             ) : (
               <>
-                <option value="" disabled>Select a batch...</option>
+                <option value="">Select a batch...</option>
                 {batches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -366,7 +419,7 @@ export default function StaffReportCardsPage() {
             value={selectedPeriodId}
             onChange={(e) => setSelectedPeriodId(e.target.value)}
             disabled={loadingPeriods || periods.length === 0}
-            className="w-full px-3 py-2 rounded-control border border-border bg-background text-foreground text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+            className="w-full px-3 py-2 rounded-[var(--radius-control)] border border-border bg-background text-foreground text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
           >
             {periods.length === 0 ? (
               <option value="">No report periods for this batch</option>
@@ -460,20 +513,52 @@ export default function StaffReportCardsPage() {
 
         {loadingCards ? (
           <div className="p-12 text-center text-muted-foreground text-sm flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
             Computing student performance data...
           </div>
         ) : !selectedPeriodId ? (
-          <div className="p-12 text-center text-muted-foreground text-sm max-w-md mx-auto">
-            {batches.length === 0
-              ? 'No batches found. Please create a batch before managing report periods and cards.'
-              : periods.length === 0
-              ? 'No report periods found for this batch. Click "Create Report Period" above to get started.'
-              : 'Please select a report period above to review student report cards.'}
+          <div className="p-8">
+            <EmptyState
+              icon={<FileText className="h-8 w-8 text-muted-foreground stroke-[1.5]" />}
+              title={
+                batches.length === 0
+                  ? user?.role === 'TEACHER'
+                    ? 'No assigned batches'
+                    : 'No batches found'
+                  : periods.length === 0
+                  ? 'No report periods for this batch'
+                  : 'No report period selected'
+              }
+              description={
+                batches.length === 0
+                  ? user?.role === 'TEACHER'
+                    ? 'You are not assigned as the teacher of any batches yet. You can only manage report cards for batches assigned to you.'
+                    : 'Please create a batch before managing report periods and cards.'
+                  : periods.length === 0
+                  ? 'No evaluation periods have been created for this batch yet. Click "Create Report Period" to get started.'
+                  : 'Please select a report period above to review student report cards.'
+              }
+              action={
+                selectedBatchId && periods.length === 0 ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setIsCreateOpen(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Create Report Period
+                  </Button>
+                ) : undefined
+              }
+            />
           </div>
         ) : rosterData?.cards.length === 0 ? (
-          <div className="p-12 text-center text-muted-foreground text-sm">
-            No students enrolled in this batch during the selected period.
+          <div className="p-8">
+            <EmptyState
+              icon={<Users className="h-8 w-8 text-muted-foreground stroke-[1.5]" />}
+              title="No students found"
+              description="No students were enrolled in this batch during the selected period."
+            />
           </div>
         ) : (
           <div className="overflow-x-auto">

@@ -41,8 +41,17 @@ export function AuthProvider({
   children: React.ReactNode;
 }) {
   const [user, setUser] = React.useState<AuthUser | null>(initialUser ?? null);
-  const [isLoading, setIsLoading] = React.useState(!initialUser);
+  const [isLoading, setIsLoading] = React.useState(initialUser === undefined);
+  const [prevInitialUser, setPrevInitialUser] = React.useState(initialUser);
   const router = useRouter();
+
+  if (prevInitialUser !== initialUser) {
+    setPrevInitialUser(initialUser);
+    if (initialUser !== undefined) {
+      setUser(initialUser);
+      setIsLoading(false);
+    }
+  }
 
   const refreshUser = React.useCallback(async () => {
     try {
@@ -59,11 +68,7 @@ export function AuthProvider({
   }, []);
 
   React.useEffect(() => {
-    if (initialUser) {
-      setUser(initialUser);
-      setIsLoading(false);
-      return;
-    }
+    if (initialUser !== undefined) return;
 
     let ignore = false;
 

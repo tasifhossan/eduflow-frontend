@@ -161,8 +161,8 @@ export default function TestsHubPage() {
 
           setGroups(result);
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load tests');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load tests');
       } finally {
         setLoading(false);
       }
@@ -185,14 +185,14 @@ export default function TestsHubPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-6xl space-y-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Tests</h1>
-            <p className="mt-2 text-sm text-gray-500">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Tests</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               {isStaff
                 ? `All exams across every batch · ${totalTests} test${totalTests !== 1 ? 's' : ''} total`
                 : `Your upcoming and past exams across enrolled batches`}
@@ -201,7 +201,7 @@ export default function TestsHubPage() {
           {isStaff && (
             <button
               onClick={() => { setSelectedBatchId(''); setShowCreateModal(true); }}
-              className="inline-flex items-center gap-x-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+              className="inline-flex items-center gap-x-1.5 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition shrink-0 self-start sm:self-auto"
             >
               <svg className="-ml-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
               Create Test
@@ -211,8 +211,8 @@ export default function TestsHubPage() {
 
         {/* Create Test Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-md p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[calc(100dvh-2rem)] overflow-y-auto">
               <h2 className="text-lg font-bold text-foreground mb-1">Create New Test</h2>
               <p className="text-sm text-muted-foreground mb-5">Select a batch to create a test in.</p>
               <div className="mb-5">
@@ -251,9 +251,9 @@ export default function TestsHubPage() {
 
         {/* Error */}
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-            <p className="text-sm text-red-600">
-              <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+            <p className="text-sm text-status-danger-text">
+              <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
             </p>
           </div>
         )}
@@ -286,10 +286,10 @@ export default function TestsHubPage() {
             className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden"
           >
             {/* Batch header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-hover/30">
-              <div className="flex items-center gap-x-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-border bg-surface-hover/30">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-x-3 min-w-0">
                 <span
-                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 ${
                     batch.type === 'ACADEMIC'
                       ? 'bg-blue-50 text-blue-700 ring-blue-700/10 dark:bg-blue-950/40 dark:text-blue-300 dark:ring-blue-400/20'
                       : 'bg-amber-50 text-amber-700 ring-amber-700/10 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-400/20'
@@ -304,18 +304,18 @@ export default function TestsHubPage() {
                   {batch.name}
                 </Link>
                 {batch.classLevel && (
-                  <span className="text-xs text-muted-foreground">· {batch.classLevel}</span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">· {batch.classLevel}</span>
                 )}
-                <span className="text-xs text-muted-foreground">· {batch.subject.name}</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">· {batch.subject.name}</span>
               </div>
-              <div className="flex items-center gap-x-3">
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-center justify-between sm:justify-end gap-x-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {tests.length} test{tests.length !== 1 ? 's' : ''}
                 </span>
                 {isStaff && (
                   <Link
                     href={`/batches/${batch.id}/tests/new`}
-                    className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
+                    className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition whitespace-nowrap shrink-0"
                   >
                     + New Test
                   </Link>
@@ -324,23 +324,23 @@ export default function TestsHubPage() {
             </div>
 
             {/* Tests table */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar">
               <table className="min-w-full divide-y divide-border">
                 <thead className="bg-surface">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Title
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Marks
                     </th>
-                    <th className="relative px-6 py-3">
+                    <th className="relative px-4 sm:px-6 py-3">
                       <span className="sr-only">Actions</span>
                     </th>
                   </tr>
@@ -354,14 +354,14 @@ export default function TestsHubPage() {
                       ? `/batches/${batch.id}/tests/${test.id}/result`
                       : `/batches/${batch.id}/tests/${test.id}/take`;
                     const primaryLabel = isStaff
-                      ? 'Manage'
+                       ? 'Manage'
                       : submitted
                       ? 'View Result'
                       : 'Take Test';
 
                     return (
                       <tr key={test.id} className="hover:bg-surface-hover/50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 whitespace-nowrap">
                           <Link
                             href={primaryUrl}
                             className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
@@ -369,25 +369,25 @@ export default function TestsHubPage() {
                             {test.title}
                           </Link>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${typeBadgeClass(test.type)}`}
                           >
                             {test.type}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {formatDate(test.testDate)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 whitespace-nowrap text-sm font-semibold text-foreground">
                           {test.totalMarks}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-x-2">
                             {isStaff && (
                               <Link
                                 href={`/batches/${batch.id}/tests/${test.id}/results`}
-                                className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
+                                className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                               >
                                 {test.type === 'OFFLINE' ? 'Enter Marks' : 'Results'}
                               </Link>
@@ -396,7 +396,7 @@ export default function TestsHubPage() {
                               test.type !== 'OFFLINE' && (
                                 <Link
                                   href={primaryUrl}
-                                  className="inline-flex items-center rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
+                                  className="inline-flex items-center rounded-md border border-border bg-surface px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-hover transition"
                                 >
                                   {primaryLabel}
                                 </Link>
@@ -404,7 +404,7 @@ export default function TestsHubPage() {
                             ) : (
                               <Link
                                 href={primaryUrl}
-                                className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
+                                className={`inline-flex items-center rounded-md border px-2.5 sm:px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
                                   !submitted
                                     ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary-hover'
                                     : 'bg-surface text-foreground border-border hover:bg-surface-hover'

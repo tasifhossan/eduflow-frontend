@@ -140,11 +140,11 @@ export function NavbarAuth() {
   return (
     <div className="flex items-center gap-2 sm:gap-2.5">
       {isAuthPage ? (
-        <Button asChild variant="outline" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4">
+        <Button asChild variant="outline" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4 whitespace-nowrap shrink-0">
           <Link href="/">Back to Home</Link>
         </Button>
       ) : (
-        <Button asChild variant="primary" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4 shadow-sm">
+        <Button asChild variant="primary" size="sm" className="font-semibold text-xs h-9 px-3 sm:px-4 shadow-sm whitespace-nowrap shrink-0">
           <Link href="/login">Log in</Link>
         </Button>
       )}

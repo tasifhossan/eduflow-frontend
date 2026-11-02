@@ -415,7 +415,7 @@ export default function CollectPaymentPage() {
                 </div>
               )}
 
-              {!searchFocused && (
+              {searchResults.length === 0 && !isSearching && (
                 <div className="mt-4 pt-4 border-t border-border/60 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <div className="h-5 w-5 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-[11px]">1</div>
@@ -463,6 +463,64 @@ export default function CollectPaymentPage() {
           )}
         </CardContent>
       </Card>
+
+      {!selectedStudent && (
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-base font-bold text-foreground">
+                  Fee Collection &amp; Receipting Workflow
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-1">
+                  Collect tuition, exam fees, and custom batch charges with automatic FIFO dues settlement or manual allocation.
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/fees/dues">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    View Dues Statement
+                  </Button>
+                </Link>
+                <Link href="/fees/payments">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Recent Payments
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div className="p-4 rounded-[var(--radius-card)] border border-border bg-surface-hover/30 space-y-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <h4 className="text-sm font-semibold text-foreground">Select Student</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Search active students by student name, roll/code (e.g. STD-001), or guardian phone number.
+              </p>
+            </div>
+            <div className="p-4 rounded-[var(--radius-card)] border border-border bg-surface-hover/30 space-y-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                2
+              </div>
+              <h4 className="text-sm font-semibold text-foreground">Allocate &amp; Settle</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Outstanding dues are settled automatically in FIFO order or manually distributed across open charges. Overpayments accumulate to student credit.
+              </p>
+            </div>
+            <div className="p-4 rounded-[var(--radius-card)] border border-border bg-surface-hover/30 space-y-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                3
+              </div>
+              <h4 className="text-sm font-semibold text-foreground">Sequential Receipt</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Generate tamper-proof, race-free sequential money receipts with printable A4/thermal slip support for guardian records.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 2. Account Overview & Open Charges */}
       {selectedStudent && (
