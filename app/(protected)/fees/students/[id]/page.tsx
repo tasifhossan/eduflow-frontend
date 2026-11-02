@@ -453,7 +453,7 @@ export default function StudentLedgerPage({
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <PageHeader title="Student Fee Account" description="Loading statement..." />
         <Card>
           <CardContent className="p-12 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
@@ -467,7 +467,7 @@ export default function StudentLedgerPage({
 
   if (error || !statement) {
     return (
-      <div className="space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <PageHeader title="Student Fee Account" />
         <ErrorState
           title="Account Statement Unavailable"
@@ -481,7 +481,7 @@ export default function StudentLedgerPage({
   const { student, totals, charges, payments } = statement;
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Back button & Page Header */}
       <div className="flex items-center gap-2">
         <Link
