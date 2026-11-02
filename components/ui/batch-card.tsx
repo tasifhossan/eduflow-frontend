@@ -160,7 +160,7 @@ export function BatchCard({ batch, href, className }: BatchCardProps) {
             asChild
             variant="outline"
             size="md"
-            className="w-full font-semibold group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors"
+            className="w-full font-semibold hover:bg-primary-hover hover:text-primary-foreground hover:border-primary-hover group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors"
           >
             <Link href={targetHref}>View Details</Link>
           </Button>
