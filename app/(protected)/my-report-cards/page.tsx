@@ -38,6 +38,12 @@ interface LinkedStudent {
   studentCode?: string | null;
 }
 
+interface MyReportCardsApiResponse {
+  periods: PublishedPeriod[];
+  linkedChildren?: LinkedStudent[];
+  currentStudentId?: string;
+}
+
 export default function MyReportCardsPage() {
   const { user } = useAuth();
   const { center } = useCenter();
@@ -52,6 +58,7 @@ export default function MyReportCardsPage() {
   const [periods, setPeriods] = React.useState<PublishedPeriod[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
   // Card view & print modal state
   const [activeCard, setActiveCard] = React.useState<StudentFullReportCard | null>(null);
@@ -99,10 +106,19 @@ export default function MyReportCardsPage() {
           endpoint += `?studentId=${selectedChildId}`;
         }
 
-        const res = await apiGet<{ success: boolean; data: PublishedPeriod[] }>(endpoint);
+        const res = await apiGet<{
+          success: boolean;
+          data: PublishedPeriod[] | MyReportCardsApiResponse;
+        }>(endpoint);
         if (!ignore) {
-          if (res?.success && Array.isArray(res.data)) {
-            setPeriods(res.data);
+          const list = Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray((res?.data as MyReportCardsApiResponse)?.periods)
+            ? (res.data as MyReportCardsApiResponse).periods
+            : null;
+
+          if (list !== null) {
+            setPeriods(list);
           } else {
             setError('Failed to load published report cards');
           }
@@ -123,7 +139,7 @@ export default function MyReportCardsPage() {
     return () => {
       ignore = true;
     };
-  }, [isGuardian, selectedChildId, isLoadingChildren]);
+  }, [isGuardian, selectedChildId, isLoadingChildren, reloadKey]);
 
   // View full report card
   const handleViewCard = async (periodId: string) => {
@@ -197,6 +213,7 @@ export default function MyReportCardsPage() {
           onRetry={() => {
             setError(null);
             setIsLoading(true);
+            setReloadKey((k) => k + 1);
           }}
         />
       )}

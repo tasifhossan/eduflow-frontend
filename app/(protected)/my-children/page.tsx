@@ -87,19 +87,18 @@ export default function MyChildrenPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-        {/* Header */}
-        <div className="border-b border-gray-200 pb-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="border-b border-border pb-5">
           <div className="flex items-center gap-x-3">
-            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground break-words">
                 My Children
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Select a child to view their attendance, exam results, and fee payments
               </p>
             </div>
@@ -183,6 +182,5 @@ export default function MyChildrenPage() {
           </div>
         )}
       </div>
-    </div>
   );
 }

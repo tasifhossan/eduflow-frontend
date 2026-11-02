@@ -626,9 +626,9 @@ export default function AssignmentsPage() {
                 </div>
 
                 {/* Right side stats & action */}
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-border w-full md:w-auto">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-border w-full md:w-auto">
                   {isStaff && assign.counts && (
-                    <div className="flex items-center gap-1.5 sm:gap-2.5 text-center">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-center">
                       <div className="px-2 py-1 rounded-[var(--radius-control)] bg-surface-hover/50">
                         <p className="text-[10px] sm:text-[11px] text-muted-foreground">Submitted</p>
                         <p className="text-xs font-bold text-foreground">{assign.counts.submitted}</p>
@@ -656,7 +656,7 @@ export default function AssignmentsPage() {
                     </div>
                   )}
 
-                  <Button asChild variant="outline" size="sm" className="gap-1 shrink-0">
+                  <Button asChild variant="outline" size="sm" className="gap-1 shrink-0 ml-auto sm:ml-0">
                     <Link href={`/assignments/${assign.id}`}>
                       <span>View</span>
                       <ChevronRight className="h-4 w-4" />

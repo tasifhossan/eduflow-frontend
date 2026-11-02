@@ -122,9 +122,9 @@ export default function ReceiptPrintPage({
   }
 
   return (
-    <div className="min-h-screen py-4 sm:py-8">
+    <div className="min-h-screen py-4 sm:py-8 px-2 sm:px-4">
       {/* Top action bar (hidden in print) */}
-      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between px-4 print:hidden">
+      <div className="max-w-3xl mx-auto mb-4 sm:mb-6 flex items-center justify-between px-2 sm:px-4 print:hidden">
         <Button
           variant="outline"
           size="sm"
@@ -148,7 +148,7 @@ export default function ReceiptPrintPage({
       {/* Official Receipt Printable Container */}
       <div
         id="official-receipt"
-        className="relative max-w-3xl mx-auto bg-surface rounded-[var(--radius-card)] border border-border p-8 shadow-sm print:shadow-none print:border-none print:p-0 print:max-w-full"
+        className="relative max-w-3xl mx-auto bg-surface rounded-[var(--radius-card)] border border-border p-4 sm:p-6 md:p-8 shadow-sm print:shadow-none print:border-none print:p-0 print:max-w-full overflow-hidden"
       >
         {/* REVERSED Watermark */}
         {receipt.isReversed && (
@@ -241,36 +241,38 @@ export default function ReceiptPrintPage({
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
             Settled Fees & Charges
           </div>
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="bg-muted/40 text-xs font-semibold text-muted-foreground uppercase border-b border-border">
-              <tr>
-                <th className="py-2.5 px-3">Description</th>
-                <th className="py-2.5 px-3">Batch</th>
-                <th className="py-2.5 px-3">Period</th>
-                <th className="py-2.5 px-3 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {receipt.allocatedCharges.length === 0 ? (
+          <div className="overflow-x-auto custom-scrollbar -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="min-w-full text-left text-sm border-collapse">
+              <thead className="bg-muted/40 text-xs font-semibold text-muted-foreground uppercase border-b border-border">
                 <tr>
-                  <td colSpan={4} className="py-4 text-center text-xs text-muted-foreground italic">
-                    Unallocated deposit credited to student account
-                  </td>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Description</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Batch</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">Period</th>
+                  <th className="py-2.5 px-3 text-right whitespace-nowrap">Amount</th>
                 </tr>
-              ) : (
-                receipt.allocatedCharges.map((ch, idx) => (
-                  <tr key={idx} className="text-xs">
-                    <td className="py-2.5 px-3 font-medium text-foreground">{ch.description}</td>
-                    <td className="py-2.5 px-3 text-muted-foreground">{ch.batchName}</td>
-                    <td className="py-2.5 px-3 text-muted-foreground">{ch.period || '—'}</td>
-                    <td className="py-2.5 px-3 text-right font-mono font-semibold text-foreground">
-                      {formatMoney(ch.amount, center.currency, center.currencySymbol)}
+              </thead>
+              <tbody className="divide-y divide-border">
+                {receipt.allocatedCharges.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center text-xs text-muted-foreground italic">
+                      Unallocated deposit credited to student account
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  receipt.allocatedCharges.map((ch, idx) => (
+                    <tr key={idx} className="text-xs">
+                      <td className="py-2.5 px-3 font-medium text-foreground whitespace-nowrap">{ch.description}</td>
+                      <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{ch.batchName}</td>
+                      <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{ch.period || '—'}</td>
+                      <td className="py-2.5 px-3 text-right font-mono font-semibold text-foreground whitespace-nowrap">
+                        {formatMoney(ch.amount, center.currency, center.currencySymbol)}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Totals & Balance Summary */}

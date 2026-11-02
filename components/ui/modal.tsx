@@ -114,7 +114,7 @@ export function Modal({
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
       aria-describedby={description ? 'modal-desc' : undefined}
-      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-6 overflow-hidden"
+      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-2.5 sm:p-6 overflow-y-auto"
     >
       {/* Backdrop */}
       <div
@@ -128,8 +128,8 @@ export function Modal({
         ref={modalRef}
         tabIndex={-1}
         className={cn(
-          'relative z-10 w-full flex flex-col rounded-[var(--radius-card)] border border-border bg-surface text-foreground shadow-popover overflow-hidden',
-          'max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)]',
+          'relative z-10 w-full my-auto flex flex-col rounded-[var(--radius-card)] border border-border bg-surface text-foreground shadow-popover overflow-hidden',
+          'max-h-[calc(100dvh-1.25rem)] sm:max-h-[calc(100dvh-3rem)] min-h-0',
           'animate-in fade-in zoom-in-95 duration-200 focus:outline-none',
           maxWidths[maxWidth],
           className
@@ -162,7 +162,7 @@ export function Modal({
         )}
 
         {/* Body with scrolling */}
-        <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain custom-scrollbar flex-1 min-h-0">
           {children}
         </div>
 

@@ -59,8 +59,9 @@ export default function BatchTestsPage({ params }: PageProps) {
       setErrorMsg(null);
 
       // 1. Fetch batch details
-      const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
-      if (batchRes.success) {
+      const batchEndpoint = role === 'STUDENT' ? `/api/batches/${batchId}/student-view` : `/api/batches/${batchId}`;
+      const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(batchEndpoint).catch(() => null);
+      if (batchRes && batchRes.success) {
         setBatch(batchRes.data);
       }
 
@@ -85,13 +86,18 @@ export default function BatchTestsPage({ params }: PageProps) {
 
           // 4. If student, check if they submitted
           if (role === 'STUDENT') {
-            try {
-              const res = await apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`);
-              if (res && res.success) {
-                setMyResults((prev) => ({ ...prev, [t.id]: true }));
+            const isSub = (t as { isSubmitted?: boolean }).isSubmitted;
+            if (typeof isSub === 'boolean') {
+              setMyResults((prev) => ({ ...prev, [t.id]: isSub }));
+            } else {
+              try {
+                const res = await apiGet<{ success: boolean }>(`/api/tests/${t.id}/my-result`);
+                if (res && res.success) {
+                  setMyResults((prev) => ({ ...prev, [t.id]: true }));
+                }
+              } catch {
+                setMyResults((prev) => ({ ...prev, [t.id]: false }));
               }
-            } catch {
-              setMyResults((prev) => ({ ...prev, [t.id]: false }));
             }
           }
         });
@@ -193,7 +199,10 @@ export default function BatchTestsPage({ params }: PageProps) {
           <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Tests</h3>
           <p className="text-sm text-status-danger-text mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
         </div>
-        <Link href={`/batches/${batchId}`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
+        <Link
+          href={userRole === 'STUDENT' ? `/my-batches/${batchId}` : `/batches/${batchId}`}
+          className="text-primary hover:text-primary-hover hover:underline text-sm font-medium"
+        >
           &larr; Back to batch details
         </Link>
       </div>
@@ -207,9 +216,19 @@ export default function BatchTestsPage({ params }: PageProps) {
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Breadcrumb */}
         <nav className="flex text-sm text-muted-foreground gap-x-2">
-          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
+          <Link
+            href={userRole === 'STUDENT' ? '/my-batches' : '/batches'}
+            className="hover:text-primary font-medium"
+          >
+            {userRole === 'STUDENT' ? 'My Batches' : 'Batches'}
+          </Link>
           <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch?.name}</Link>
+          <Link
+            href={userRole === 'STUDENT' ? `/my-batches/${batchId}` : `/batches/${batchId}`}
+            className="hover:text-primary font-medium"
+          >
+            {batch?.name || 'Batch'}
+          </Link>
           <span>/</span>
           <span className="text-foreground font-semibold">Tests</span>
         </nav>
