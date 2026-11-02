@@ -55,8 +55,9 @@ export function SyllabusProgressCard({
       try {
         let targetBatchId = batchId;
         if (!targetBatchId) {
-          let bUrl = '/api/batches?limit=1';
-          if (studentId) bUrl += `&studentId=${studentId}`;
+          const bUrl = studentId
+            ? `/api/students/${encodeURIComponent(studentId)}/batches`
+            : '/api/batches?limit=1';
           const batchesRes = await apiGet<{
             success: boolean;
             data: { items?: Array<{ id: string }> } | Array<{ id: string }>;

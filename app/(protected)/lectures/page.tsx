@@ -182,12 +182,13 @@ export default function LecturesPage() {
     }
 
     if (isGuardian) {
-      apiGet<{ success: boolean; data: { children?: GuardianChild[] } }>('/api/guardian/children')
+      apiGet<{ success: boolean; data: GuardianChild[] | { children?: GuardianChild[] } }>('/api/guardians/my-students')
         .then((res) => {
-          if (res?.data?.children) {
-            setChildren(res.data.children);
-            if (res.data.children.length > 0) {
-              setSelectedChildId(res.data.children[0].id);
+          if (res?.data) {
+            const list = Array.isArray(res.data) ? res.data : (res.data.children || []);
+            setChildren(list);
+            if (list.length > 0) {
+              setSelectedChildId(list[0].id);
             }
           }
         })
@@ -233,7 +234,15 @@ export default function LecturesPage() {
             params.append('from', weekStart);
             params.append('to', weekEnd);
           }
-          if (isGuardian && selectedChildId) {
+          if (isGuardian) {
+            if (!selectedChildId) {
+              // Wait until child is loaded/selected
+              if (active) {
+                setLectures([]);
+                setIsLoading(false);
+              }
+              return;
+            }
             params.append('studentId', selectedChildId);
           }
         }
