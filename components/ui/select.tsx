@@ -5,12 +5,16 @@ import { ChevronDown } from 'lucide-react';
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   isError?: boolean;
   isSuccess?: boolean;
+  wrapperClassName?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, isError, isSuccess, disabled, children, ...props }, ref) => {
+  ({ className, isError, isSuccess, disabled, children, wrapperClassName, ...props }, ref) => {
+    // If a custom non-full width is specified (e.g. w-32, w-36, w-fit), wrap tightly so chevron stays inside
+    const hasCustomWidth = className && /\bw-(?!full\b)\S+/.test(className);
+
     return (
-      <div className="relative w-full">
+      <div className={cn('relative', hasCustomWidth ? 'w-fit' : 'w-full', wrapperClassName)}>
         <select
           ref={ref}
           disabled={disabled}
