@@ -115,7 +115,7 @@ export default function NotificationsPage() {
     if (isMarkingAll || unreadCount === 0) return;
     setIsMarkingAll(true);
     try {
-      await apiPost('/api/notifications/read-all');
+      await apiPatch('/api/notifications/read', { all: true });
       setItems((prev) =>
         prev.map((i) => ({ ...i, readAt: i.readAt || new Date().toISOString() }))
       );
