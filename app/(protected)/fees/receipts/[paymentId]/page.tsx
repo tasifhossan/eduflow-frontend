@@ -241,8 +241,8 @@ export default function ReceiptPrintPage({
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
             Settled Fees & Charges
           </div>
-          <div className="overflow-x-auto custom-scrollbar -mx-4 sm:mx-0 px-4 sm:px-0">
-            <table className="min-w-full text-left text-sm border-collapse">
+          <div className="w-full overflow-x-auto custom-scrollbar border rounded-lg border-border">
+            <table className="w-full min-w-[500px] text-left text-sm border-collapse">
               <thead className="bg-muted/40 text-xs font-semibold text-muted-foreground uppercase border-b border-border">
                 <tr>
                   <th className="py-2.5 px-3 whitespace-nowrap">Description</th>

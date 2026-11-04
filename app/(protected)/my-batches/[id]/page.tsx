@@ -128,15 +128,15 @@ export default function StudentBatchDetailPage() {
           <span>/</span>
           <Link href="/my-batches" className="hover:text-primary font-medium">My Batches</Link>
           <span>/</span>
-          <span className="text-foreground font-semibold truncate max-w-[200px] sm:max-w-none">{batch.name}</span>
+          <span className="text-foreground font-semibold truncate max-w-[120px] sm:max-w-[200px] md:max-w-none">{batch.name}</span>
         </nav>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-x-3 mb-1">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground break-words">{batch.name}</h1>
+            <div className="flex flex-wrap items-start sm:items-center gap-2 mb-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground break-words">{batch.name}</h1>
               <span
-                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 ${
+                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 mt-0.5 sm:mt-0 ${
                   batch.type === 'ACADEMIC'
                     ? 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-950 dark:text-blue-300'
                     : 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-950 dark:text-purple-300'

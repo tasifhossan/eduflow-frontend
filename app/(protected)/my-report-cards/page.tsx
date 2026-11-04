@@ -45,7 +45,7 @@ interface MyReportCardsApiResponse {
 }
 
 export default function MyReportCardsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { center } = useCenter();
   const isGuardian = user?.role === 'GUARDIAN';
 
@@ -93,6 +93,13 @@ export default function MyReportCardsPage() {
     let ignore = false;
 
     async function loadCards() {
+      if (authLoading || !user) {
+        return;
+      }
+      if (user.role !== 'STUDENT' && user.role !== 'GUARDIAN') {
+        setIsLoading(false);
+        return;
+      }
       if (isGuardian && !selectedChildId && !isLoadingChildren) {
         setIsLoading(false);
         return;
@@ -111,17 +118,16 @@ export default function MyReportCardsPage() {
           data: PublishedPeriod[] | MyReportCardsApiResponse;
         }>(endpoint);
         if (!ignore) {
-          const list = Array.isArray(res?.data)
-            ? res.data
-            : Array.isArray((res?.data as MyReportCardsApiResponse)?.periods)
-            ? (res.data as MyReportCardsApiResponse).periods
-            : null;
+          const raw = res?.data ?? res;
+          const list = Array.isArray(raw)
+            ? raw
+            : Array.isArray((raw as MyReportCardsApiResponse)?.periods)
+            ? (raw as MyReportCardsApiResponse).periods
+            : Array.isArray((res as any)?.periods)
+            ? (res as any).periods
+            : [];
 
-          if (list !== null) {
-            setPeriods(list);
-          } else {
-            setError('Failed to load published report cards');
-          }
+          setPeriods(list);
         }
       } catch (err: unknown) {
         if (!ignore) {
@@ -139,7 +145,7 @@ export default function MyReportCardsPage() {
     return () => {
       ignore = true;
     };
-  }, [isGuardian, selectedChildId, isLoadingChildren, reloadKey]);
+  }, [user, authLoading, isGuardian, selectedChildId, isLoadingChildren, reloadKey]);
 
   // View full report card
   const handleViewCard = async (periodId: string) => {

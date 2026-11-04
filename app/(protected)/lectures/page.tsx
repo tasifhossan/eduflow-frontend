@@ -82,11 +82,11 @@ interface GuardianChild {
 }
 
 export default function LecturesPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { center } = useCenter();
   const tz = center?.timezone || 'Asia/Dhaka';
 
-  const isStaff = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'TEACHER';
+  const isStaff = !!user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' || user.role === 'TEACHER');
   const isGuardian = user?.role === 'GUARDIAN';
   const isStudent = user?.role === 'STUDENT';
 
@@ -209,6 +209,9 @@ export default function LecturesPage() {
     let active = true;
 
     async function load() {
+      if (authLoading || !user) {
+        return;
+      }
       try {
         const params = new URLSearchParams();
 
@@ -275,6 +278,8 @@ export default function LecturesPage() {
       active = false;
     };
   }, [
+    user,
+    authLoading,
     isStaff,
     isGuardian,
     selectedChildId,
