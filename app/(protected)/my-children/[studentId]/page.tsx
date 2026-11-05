@@ -163,19 +163,19 @@ export default function ChildDetailPage({ params }: PageProps) {
     switch (status) {
       case 'PRESENT':
         return (
-          <span className="inline-flex items-center gap-x-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-700/10">
+          <span className="inline-flex items-center gap-x-1 rounded-md bg-status-success-bg px-2.5 py-1 text-xs font-bold text-status-success-text border border-status-success-border">
             <CheckCircle2 className="w-3.5 h-3.5" /> PRESENT
           </span>
         );
       case 'ABSENT':
         return (
-          <span className="inline-flex items-center gap-x-1 rounded-md bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 ring-1 ring-inset ring-red-700/10">
+          <span className="inline-flex items-center gap-x-1 rounded-md bg-status-danger-bg px-2.5 py-1 text-xs font-bold text-status-danger-text border border-status-danger-border">
             <XCircle className="w-3.5 h-3.5" /> ABSENT
           </span>
         );
       case 'LATE':
         return (
-          <span className="inline-flex items-center gap-x-1 rounded-md bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-700/10">
+          <span className="inline-flex items-center gap-x-1 rounded-md bg-status-warning-bg px-2.5 py-1 text-xs font-bold text-status-warning-text border border-status-warning-border">
             <Clock className="w-3.5 h-3.5" /> LATE
           </span>
         );
@@ -189,7 +189,7 @@ export default function ChildDetailPage({ params }: PageProps) {
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-sm font-medium text-gray-500">Loading student performance records...</p>
+          <p className="text-sm font-medium text-muted-foreground">Loading student performance records...</p>
         </div>
       </div>
     );
@@ -215,7 +215,7 @@ export default function ChildDetailPage({ params }: PageProps) {
       </div>
 
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 border border-red-200 dark:border-red-900/50 text-sm text-red-700 dark:text-red-300">
+        <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border text-sm text-status-danger-text">
           {errorMsg}
         </div>
       )}
@@ -316,7 +316,7 @@ export default function ChildDetailPage({ params }: PageProps) {
 
                   <div className="flex items-center justify-between sm:justify-end gap-x-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
                     {res.rank && (
-                      <span className="inline-flex items-center rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
+                      <span className="inline-flex items-center rounded-lg bg-status-warning-bg px-2.5 py-1 text-xs font-bold text-status-warning-text border border-status-warning-border">
                         Rank #{res.rank}
                       </span>
                     )}
@@ -367,10 +367,10 @@ export default function ChildDetailPage({ params }: PageProps) {
                       <div className="flex items-center gap-x-2 flex-wrap">
                         <h3 className="font-bold text-foreground text-sm sm:text-base">Receipt #{p.receiptNumber}</h3>
                         <span
-                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold border ${
                             p.isReversed
-                              ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
-                              : 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
+                              ? 'bg-status-danger-bg text-status-danger-text border-status-danger-border'
+                              : 'bg-status-success-bg text-status-success-text border-status-success-border'
                           }`}
                         >
                           {p.isReversed ? 'REVERSED' : 'PAID'}

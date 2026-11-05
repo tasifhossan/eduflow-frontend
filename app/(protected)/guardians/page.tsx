@@ -85,8 +85,8 @@ export default function AdminGuardiansPage() {
 
         if (gRes.success && gRes.data) setGuardians(gRes.data);
         if (sRes.success && sRes.data) setStudents(sRes.data);
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load guardians and students');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load guardians and students');
       } finally {
         setLoading(false);
       }
@@ -123,8 +123,8 @@ export default function AdminGuardiansPage() {
       } else {
         setCreateError(res.message || 'Failed to create guardian account');
       }
-    } catch (err: any) {
-      setCreateError(err.message || 'Error creating guardian account');
+    } catch (err: unknown) {
+      setCreateError(err instanceof Error ? err.message : 'Error creating guardian account');
     } finally {
       setCreating(false);
     }
@@ -159,8 +159,8 @@ export default function AdminGuardiansPage() {
       } else {
         setLinkError(res.message || 'Failed to link guardian to student');
       }
-    } catch (err: any) {
-      setLinkError(err.message || 'Error linking guardian to student');
+    } catch (err: unknown) {
+      setLinkError(err instanceof Error ? err.message : 'Error linking guardian to student');
     } finally {
       setLinking(false);
     }
@@ -171,7 +171,7 @@ export default function AdminGuardiansPage() {
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-sm font-medium text-gray-500">Loading guardian accounts...</p>
+          <p className="text-sm font-medium text-muted-foreground">Loading guardian accounts...</p>
         </div>
       </div>
     );
@@ -181,12 +181,12 @@ export default function AdminGuardiansPage() {
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Guardian Accounts
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Manage parent/guardian accounts and link them to students
             </p>
           </div>
@@ -214,18 +214,18 @@ export default function AdminGuardiansPage() {
 
         {/* Global Notifications */}
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200 text-sm text-red-700">
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border text-sm text-status-danger-text">
             {errorMsg}
           </div>
         )}
         {createSuccess && (
-          <div className="rounded-lg bg-emerald-50 p-4 border border-emerald-200 text-sm text-emerald-700 flex items-center gap-x-2">
-            <CheckCircle className="w-5 h-5 text-emerald-600" /> {createSuccess}
+          <div className="rounded-lg bg-status-success-bg p-4 border border-status-success-border text-sm text-status-success-text flex items-center gap-x-2">
+            <CheckCircle className="w-5 h-5 text-status-success" /> {createSuccess}
           </div>
         )}
         {linkSuccess && (
-          <div className="rounded-lg bg-emerald-50 p-4 border border-emerald-200 text-sm text-emerald-700 flex items-center gap-x-2">
-            <CheckCircle className="w-5 h-5 text-emerald-600" /> {linkSuccess}
+          <div className="rounded-lg bg-status-success-bg p-4 border border-status-success-border text-sm text-status-success-text flex items-center gap-x-2">
+            <CheckCircle className="w-5 h-5 text-status-success" /> {linkSuccess}
           </div>
         )}
 
@@ -242,7 +242,7 @@ export default function AdminGuardiansPage() {
             </div>
 
             {createError && (
-              <div className="rounded-lg bg-red-500/10 p-3 border border-red-500/20 text-sm text-red-600 dark:text-red-400">
+              <div className="rounded-lg bg-status-danger-bg p-3 border border-status-danger-border text-sm text-status-danger-text">
                 {createError}
               </div>
             )}
@@ -250,7 +250,7 @@ export default function AdminGuardiansPage() {
             <form onSubmit={handleCreateGuardian} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1">
-                  Full Name <span className="text-red-500">*</span>
+                  Full Name <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -264,7 +264,7 @@ export default function AdminGuardiansPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1">
-                  Email Address <span className="text-red-500">*</span>
+                  Email Address <span className="text-danger">*</span>
                 </label>
                 <input
                   type="email"
@@ -291,7 +291,7 @@ export default function AdminGuardiansPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1">
-                  Password <span className="text-red-500">*</span>
+                  Password <span className="text-danger">*</span>
                 </label>
                 <input
                   type="password"
@@ -338,7 +338,7 @@ export default function AdminGuardiansPage() {
             </div>
 
             {linkError && (
-              <div className="rounded-lg bg-red-500/10 p-3 border border-red-500/20 text-sm text-red-600 dark:text-red-400">
+              <div className="rounded-lg bg-status-danger-bg p-3 border border-status-danger-border text-sm text-status-danger-text">
                 {linkError}
               </div>
             )}
@@ -346,7 +346,7 @@ export default function AdminGuardiansPage() {
             <form onSubmit={handleLinkGuardian} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1">
-                  Select Guardian <span className="text-red-500">*</span>
+                  Select Guardian <span className="text-danger">*</span>
                 </label>
                 <select
                   required
@@ -368,7 +368,7 @@ export default function AdminGuardiansPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1">
-                  Select Student <span className="text-red-500">*</span>
+                  Select Student <span className="text-danger">*</span>
                 </label>
                 {(() => {
                   const linkedStudentIds = selectedGuardianId
@@ -435,7 +435,7 @@ export default function AdminGuardiansPage() {
               <Shield className="w-10 h-10 text-muted-foreground/40 mx-auto" />
               <h3 className="text-base font-semibold text-foreground">No guardian accounts found</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Click "Create Guardian" above to register a parent or guardian account.
+                Click &quot;Create Guardian&quot; above to register a parent or guardian account.
               </p>
             </div>
           ) : (
@@ -478,7 +478,7 @@ export default function AdminGuardiansPage() {
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-600/20 shrink-0 self-start sm:self-center">
+                  <span className="inline-flex items-center rounded-md bg-primary-subtle px-2.5 py-1 text-xs font-semibold text-primary border border-primary/20 shrink-0 self-start sm:self-center">
                     GUARDIAN ACCOUNT
                   </span>
                 </div>

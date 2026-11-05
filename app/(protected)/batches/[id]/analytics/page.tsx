@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
 import { formatDate } from '@/lib/format';
+import { PageHeader } from '@/components/dashboard';
+import { Button } from '@/components/ui/button';
+import { ErrorState } from '@/components/ui/error-state';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -44,10 +47,10 @@ interface PageProps {
 
 /** Red / amber / green by percentage band */
 function chapterBadgeClass(pct: number | null): string {
-  if (pct === null) return 'bg-surface-hover text-muted-foreground ring-border';
-  if (pct < 50) return 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20';
-  if (pct < 70) return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20';
-  return 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20';
+  if (pct === null) return 'bg-muted text-muted-foreground border-border';
+  if (pct < 50) return 'bg-status-danger-bg text-status-danger-text border-status-danger-border';
+  if (pct < 70) return 'bg-status-warning-bg text-status-warning-text border-status-warning-border';
+  return 'bg-status-success-bg text-status-success-text border-status-success-border';
 }
 
 function fmt(n: number | null, decimals = 1): string {
@@ -87,8 +90,8 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
         } else {
           setErrorMsg('Failed to load analytics data.');
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load analytics data.');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load analytics data.');
       } finally {
         setLoading(false);
       }
@@ -101,7 +104,7 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading analytics...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading analytics...</span>
       </div>
     );
   }
@@ -110,13 +113,16 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
   if (errorMsg || !data) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Analytics</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
-        </div>
-        <Link href={`/batches/${batchId}`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
-          &larr; Back to batch
-        </Link>
+        <ErrorState
+          title="Error Loading Analytics"
+          message={errorMsg || 'Batch not found or access denied.'}
+          onRetry={() => window.location.reload()}
+        />
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/batches/${batchId}`}>
+            &larr; Back to batch
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -126,29 +132,22 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
   return (
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-6">
-
-        {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
-          <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
-          <span>/</span>
-          <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batchName}</Link>
-          <span>/</span>
-          <span className="text-foreground font-semibold">Analytics</span>
-        </nav>
-
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-5 gap-y-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Batch Analytics</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{batchName} — performance overview across all tests</p>
-          </div>
-          <Link
-            href={`/batches/${batchId}`}
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover transition"
-          >
-            &larr; Back to Batch
-          </Link>
-        </div>
+        <PageHeader
+          title="Batch Analytics"
+          description={`${batchName} — performance overview across all tests`}
+          breadcrumbs={[
+            { label: 'Batches', href: '/batches' },
+            { label: batchName, href: `/batches/${batchId}` },
+            { label: 'Analytics' },
+          ]}
+          actions={
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/batches/${batchId}`}>
+                &larr; Back to Batch
+              </Link>
+            </Button>
+          }
+        />
 
         {/* Overall Average Card */}
         <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card p-6 flex items-center gap-x-6">
@@ -201,8 +200,8 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
                       <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-foreground">{test.totalMarks}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-muted-foreground">{test.resultCount}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right font-semibold text-foreground">{fmt(test.average)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-green-600 dark:text-green-400 font-semibold">{fmt(test.max, 0)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-red-600 dark:text-red-400 font-semibold">{fmt(test.min, 0)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-status-success font-semibold">{fmt(test.max, 0)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-status-danger font-semibold">{fmt(test.min, 0)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -218,13 +217,13 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
             <p className="text-xs text-muted-foreground">
               Chapters sorted weakest-first by average score percentage —{' '}
               <span className="inline-flex items-center gap-x-1">
-                <span className="inline-block w-2 h-2 rounded-full bg-red-500" /> {`<50%`}
+                <span className="inline-block w-2 h-2 rounded-full bg-status-danger" /> {`<50%`}
               </span>{' '}
               <span className="inline-flex items-center gap-x-1">
-                <span className="inline-block w-2 h-2 rounded-full bg-amber-400" /> 50–69%
+                <span className="inline-block w-2 h-2 rounded-full bg-status-warning" /> 50–69%
               </span>{' '}
               <span className="inline-flex items-center gap-x-1">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-500" /> ≥70%
+                <span className="inline-block w-2 h-2 rounded-full bg-status-success" /> ≥70%
               </span>
             </p>
           </div>
@@ -258,7 +257,7 @@ export default function BatchAnalyticsPage({ params }: PageProps) {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-muted-foreground">{chapter.resultCount}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${chapterBadgeClass(chapter.averagePercentage)}`}
+                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold border ${chapterBadgeClass(chapter.averagePercentage)}`}
                         >
                           {chapter.averagePercentage === null
                             ? 'No data'

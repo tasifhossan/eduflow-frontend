@@ -158,7 +158,7 @@ export default function SettingsPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-sm text-slate-500">Loading center settings...</span>
+        <span className="ml-3 text-sm text-muted-foreground">Loading center settings...</span>
       </div>
     );
   }
@@ -593,16 +593,16 @@ export default function SettingsPage() {
 
       {/* Unsaved Changes Banner */}
       {isDirty && (
-        <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
+        <div className="flex items-center justify-between p-3 bg-status-warning-bg border border-status-warning-border rounded-xl text-status-warning-text text-xs">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+            <AlertTriangle className="h-4 w-4 text-status-warning-text shrink-0" />
             <span className="font-medium">You have unsaved changes. Remember to click &quot;Save Changes&quot; to publish them.</span>
           </div>
           <button
             type="button"
             onClick={() => handleSave()}
             disabled={saving}
-            className="font-bold underline hover:text-amber-950 ml-4 cursor-pointer"
+            className="font-bold underline hover:opacity-80 ml-4 cursor-pointer"
           >
             Save now
           </button>
@@ -734,7 +734,7 @@ export default function SettingsPage() {
         <div className="space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Center Name *
               </label>
               <input
@@ -742,13 +742,13 @@ export default function SettingsPage() {
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 placeholder="e.g. Apex Academic Care"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
-              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+              {errors.name && <p className="text-xs text-danger mt-1">{errors.name}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Short Name / Acronym *
               </label>
               <input
@@ -756,13 +756,13 @@ export default function SettingsPage() {
                 value={formData.shortName}
                 onChange={(e) => handleChange('shortName', e.target.value)}
                 placeholder="e.g. APEX"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
-              {errors.shortName && <p className="text-xs text-red-500 mt-1">{errors.shortName}</p>}
+              {errors.shortName && <p className="text-xs text-danger mt-1">{errors.shortName}</p>}
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Tagline / Slogan
               </label>
               <input
@@ -770,7 +770,7 @@ export default function SettingsPage() {
                 value={formData.tagline || ''}
                 onChange={(e) => handleChange('tagline', e.target.value)}
                 placeholder="e.g. Empowering Next Generation Leaders"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
           </div>
@@ -779,7 +779,7 @@ export default function SettingsPage() {
 
           {/* Primary Color Picker & Live Contrast Warning */}
           <div className="space-y-3">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
               Primary Brand Color (Strict Hex #RRGGBB)
             </label>
             <div className="flex flex-wrap items-center gap-4">
@@ -787,32 +787,32 @@ export default function SettingsPage() {
                 type="color"
                 value={primarySanitized}
                 onChange={(e) => handleChange('primaryColor', e.target.value)}
-                className="h-10 w-16 p-1 border border-slate-300 rounded-lg cursor-pointer"
+                className="h-10 w-16 p-1 border border-border rounded-lg cursor-pointer"
               />
               <input
                 type="text"
                 value={formData.primaryColor}
                 onChange={(e) => handleChange('primaryColor', e.target.value)}
                 placeholder="#0ea5e9"
-                className="w-36 px-3 py-2 text-sm font-mono border border-slate-300 rounded-lg uppercase"
+                className="w-36 px-3 py-2 text-sm font-mono border border-border rounded-lg uppercase"
               />
 
               {/* Contrast Indicator Badge */}
               <div
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
                   contrastInfo.contrast >= 4.5
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    ? 'bg-status-success-bg text-status-success-text border border-status-success-border'
+                    : 'bg-status-warning-bg text-status-warning-text border border-status-warning-border'
                 }`}
               >
                 {contrastInfo.contrast >= 4.5 ? (
                   <>
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircle2 className="h-4 w-4 text-status-success-text" />
                     <span>WCAG AA Passed ({contrastInfo.contrast}:1)</span>
                   </>
                 ) : (
                   <>
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertTriangle className="h-4 w-4 text-status-warning-text" />
                     <span>Low Contrast ({contrastInfo.contrast}:1) - Auto-adjusted to {contrastInfo.color}</span>
                   </>
                 )}
@@ -829,7 +829,7 @@ export default function SettingsPage() {
                 Button Preview
               </div>
             </div>
-            {errors.primaryColor && <p className="text-xs text-red-500 mt-1">{errors.primaryColor}</p>}
+            {errors.primaryColor && <p className="text-xs text-danger mt-1">{errors.primaryColor}</p>}
           </div>
 
           <hr className="border-border" />
@@ -838,7 +838,7 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Logo */}
             <div className="space-y-3">
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                 Center Logo (PNG, JPG, WEBP • Max 2 MB)
               </label>
 
@@ -847,7 +847,7 @@ export default function SettingsPage() {
                   {formData.logoUrl ? (
                     <img src={formData.logoUrl} alt="Logo preview" className="h-full w-full object-contain" />
                   ) : (
-                    <span className="text-xs text-slate-400 font-bold">No logo</span>
+                    <span className="text-xs text-muted-foreground font-bold">No logo</span>
                   )}
                 </div>
 
@@ -874,7 +874,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => handleChange('logoUrl', null)}
-                      className="block text-xs text-red-500 hover:underline cursor-pointer"
+                      className="block text-xs text-danger hover:underline cursor-pointer"
                     >
                       Remove logo
                     </button>
@@ -885,7 +885,7 @@ export default function SettingsPage() {
 
             {/* Favicon */}
             <div className="space-y-3">
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                 Browser Favicon (Square PNG, ICO • Max 2 MB)
               </label>
 
@@ -894,7 +894,7 @@ export default function SettingsPage() {
                   {formData.faviconUrl ? (
                     <img src={formData.faviconUrl} alt="Favicon preview" className="h-full w-full object-contain" />
                   ) : (
-                    <span className="text-[10px] text-slate-400 font-bold">Default</span>
+                    <span className="text-[10px] text-muted-foreground font-bold">Default</span>
                   )}
                 </div>
 
@@ -921,7 +921,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => handleChange('faviconUrl', null)}
-                      className="block text-xs text-red-500 hover:underline cursor-pointer"
+                      className="block text-xs text-danger hover:underline cursor-pointer"
                     >
                       Remove favicon
                     </button>
@@ -938,7 +938,7 @@ export default function SettingsPage() {
         <div className="space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Contact Email *
               </label>
               <input
@@ -946,13 +946,13 @@ export default function SettingsPage() {
                 value={formData.contactEmail}
                 onChange={(e) => handleChange('contactEmail', e.target.value)}
                 placeholder="contact@example.com"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
-              {errors.contactEmail && <p className="text-xs text-red-500 mt-1">{errors.contactEmail}</p>}
+              {errors.contactEmail && <p className="text-xs text-danger mt-1">{errors.contactEmail}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Contact Phone *
               </label>
               <input
@@ -960,13 +960,13 @@ export default function SettingsPage() {
                 value={formData.contactPhone}
                 onChange={(e) => handleChange('contactPhone', e.target.value)}
                 placeholder="+8801700000000"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
-              {errors.contactPhone && <p className="text-xs text-red-500 mt-1">{errors.contactPhone}</p>}
+              {errors.contactPhone && <p className="text-xs text-danger mt-1">{errors.contactPhone}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 WhatsApp Hotline
               </label>
               <input
@@ -974,12 +974,12 @@ export default function SettingsPage() {
                 value={formData.whatsapp || ''}
                 onChange={(e) => handleChange('whatsapp', e.target.value)}
                 placeholder="+8801700000000"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Campus / Head Office Address
               </label>
               <input
@@ -987,7 +987,7 @@ export default function SettingsPage() {
                 value={formData.address || ''}
                 onChange={(e) => handleChange('address', e.target.value)}
                 placeholder="House 42, Road 11, Banani, Dhaka-1213"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
           </div>
@@ -1005,7 +1005,7 @@ export default function SettingsPage() {
                   value={formData.socials?.facebook || ''}
                   onChange={(e) => handleSocialChange('facebook', e.target.value)}
                   placeholder="https://facebook.com/yourcoaching"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg"
                 />
               </div>
 
@@ -1016,7 +1016,7 @@ export default function SettingsPage() {
                   value={formData.socials?.youtube || ''}
                   onChange={(e) => handleSocialChange('youtube', e.target.value)}
                   placeholder="https://youtube.com/@yourcoaching"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg"
                 />
               </div>
 
@@ -1027,7 +1027,7 @@ export default function SettingsPage() {
                   value={formData.socials?.linkedin || ''}
                   onChange={(e) => handleSocialChange('linkedin', e.target.value)}
                   placeholder="https://linkedin.com/company/yourcoaching"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg"
                 />
               </div>
 
@@ -1038,7 +1038,7 @@ export default function SettingsPage() {
                   value={formData.socials?.instagram || ''}
                   onChange={(e) => handleSocialChange('instagram', e.target.value)}
                   placeholder="https://instagram.com/yourcoaching"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg"
                 />
               </div>
 
@@ -1049,7 +1049,7 @@ export default function SettingsPage() {
                   value={formData.socials?.website || ''}
                   onChange={(e) => handleSocialChange('website', e.target.value)}
                   placeholder="https://yourcoaching.edu.bd"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg"
                 />
               </div>
             </div>
@@ -1062,7 +1062,7 @@ export default function SettingsPage() {
         <div className="space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Currency Code (ISO) *
               </label>
               <input
@@ -1070,12 +1070,12 @@ export default function SettingsPage() {
                 value={formData.currency}
                 onChange={(e) => handleChange('currency', e.target.value)}
                 placeholder={DEFAULT_CURRENCY}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg uppercase"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg uppercase"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Currency Symbol *
               </label>
               <input
@@ -1083,12 +1083,12 @@ export default function SettingsPage() {
                 value={formData.currencySymbol}
                 onChange={(e) => handleChange('currencySymbol', e.target.value)}
                 placeholder={DEFAULT_CURRENCY_SYMBOL}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Timezone *
               </label>
               <select
@@ -1105,7 +1105,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Default Language
               </label>
               <select
@@ -1119,7 +1119,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Academic Year Start Month
               </label>
               <select
@@ -1135,7 +1135,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Week Starts On *
               </label>
               <select
@@ -1158,7 +1158,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                 Monthly Fee Due Day (1–28) *
               </label>
               <input
@@ -1184,7 +1184,7 @@ export default function SettingsPage() {
       {activeTab === 'receipts' && (
         <div className="space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
               Receipt / Invoice Header Note
             </label>
             <textarea
@@ -1192,13 +1192,13 @@ export default function SettingsPage() {
               value={formData.receiptHeader || ''}
               onChange={(e) => handleChange('receiptHeader', e.target.value)}
               placeholder="e.g. Official Student Payment Receipt — Please retain for admission verification."
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
             <p className="text-[11px] text-muted-foreground mt-1">Appears at the top of printed/downloaded payment receipts.</p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
               Receipt / Invoice Footer Note
             </label>
             <textarea
@@ -1206,7 +1206,7 @@ export default function SettingsPage() {
               value={formData.receiptFooter || ''}
               onChange={(e) => handleChange('receiptFooter', e.target.value)}
               placeholder="e.g. Fees once paid are non-refundable. For accounts inquiries: accounts@example.com"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
             <p className="text-[11px] text-muted-foreground mt-1">Appears at the bottom of student fee receipts and vouchers.</p>
           </div>
@@ -1771,12 +1771,12 @@ export default function SettingsPage() {
       {activeTab === 'homepage' && (
         <div className="space-y-8">
           {/* Live Preview Card */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-700 space-y-4">
-            <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-700/60">
+          <div className="bg-surface text-foreground p-6 rounded-2xl shadow-card border border-border space-y-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border">
               <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
                 <Eye className="h-3.5 w-3.5" /> Live Hero Preview
               </span>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-muted-foreground">
                 {formData.homepage?.showFees !== false ? 'Fees: Displayed' : 'Fees: Hidden'}
               </span>
             </div>
@@ -1796,10 +1796,10 @@ export default function SettingsPage() {
             )}
 
             <div className="max-w-2xl space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-white">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">
                 {formData.homepage?.heroTitle?.trim() || formData.name || 'Your Coaching Center'}
               </h2>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {formData.homepage?.heroSubtitle?.trim() ||
                   formData.tagline ||
                   'Structured coaching programs with expert educators, regular assessments, and student progress tracking.'}
@@ -1807,19 +1807,19 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <span className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-sm">
+              <span className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg shadow-sm">
                 Enquire now
               </span>
-              <span className="px-4 py-2 bg-white/10 text-white text-xs font-semibold rounded-lg border border-white/20">
+              <span className="px-4 py-2 bg-surface text-foreground text-xs font-semibold rounded-lg border border-border">
                 View courses
               </span>
-              <span className="text-xs text-slate-400 ml-auto">
+              <span className="text-xs text-muted-foreground ml-auto">
                 Student login / Go to dashboard
               </span>
             </div>
 
             {(formData.homepage?.heroPoints || []).filter((p) => p && p.trim()).length > 0 && (
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-slate-300">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-muted-foreground">
                 {(formData.homepage?.heroPoints || [])
                   .filter((p) => p && p.trim())
                   .map((pt, i) => (
@@ -1843,10 +1843,10 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Hero Badge (Optional)
                   </label>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     {(formData.homepage?.heroBadge || '').length} / 40
                   </span>
                 </div>
@@ -1856,13 +1856,13 @@ export default function SettingsPage() {
                   value={formData.homepage?.heroBadge || ''}
                   onChange={(e) => handleHomepageChange('heroBadge', e.target.value)}
                   placeholder="e.g. Admissions Open • 2026 Batch"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
                 <p className="text-[11px] text-muted-foreground mt-1">Appears as a prominent pill badge directly above the hero title. Leave empty to omit.</p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                   Hero Key Points (Optional • Up to 3 points, max 30 chars each)
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1871,7 +1871,7 @@ export default function SettingsPage() {
                     const val = currentPoints[idx] || '';
                     return (
                       <div key={idx} className="space-y-1">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                           <span>Point {idx + 1}</span>
                           <span>{val.length} / 30</span>
                         </div>
@@ -1892,7 +1892,7 @@ export default function SettingsPage() {
                               ? 'e.g. Weekly Assessments'
                               : 'e.g. Attendance Tracking'
                           }
-                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
                       </div>
                     );
@@ -1903,10 +1903,10 @@ export default function SettingsPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Hero Title
                   </label>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     {(formData.homepage?.heroTitle || '').length} / 90
                   </span>
                 </div>
@@ -1916,16 +1916,16 @@ export default function SettingsPage() {
                   value={formData.homepage?.heroTitle || ''}
                   onChange={(e) => handleHomepageChange('heroTitle', e.target.value)}
                   placeholder={formData.name || 'e.g. Build Strong Foundations for Board & Entrance Exams'}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Hero Subtitle
                   </label>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     {(formData.homepage?.heroSubtitle || '').length} / 220
                   </span>
                 </div>
@@ -1938,12 +1938,12 @@ export default function SettingsPage() {
                     formData.tagline ||
                     'e.g. Structured coaching programs with verified faculty, small batches, and transparent progress reports.'
                   }
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                   Hero Image (Optional • HTTPS URL or Upload)
                 </label>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -1952,7 +1952,7 @@ export default function SettingsPage() {
                     value={formData.homepage?.heroImageUrl || ''}
                     onChange={(e) => handleHomepageChange('heroImageUrl', e.target.value)}
                     placeholder="https://images.unsplash.com/..."
-                    className="flex-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="flex-1 w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
 
                   <input
@@ -1983,7 +1983,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => handleHomepageChange('heroImageUrl', null)}
-                      className="text-xs text-red-500 hover:underline cursor-pointer shrink-0"
+                      className="text-xs text-danger hover:underline cursor-pointer shrink-0"
                     >
                       Remove
                     </button>
@@ -2026,10 +2026,10 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Announcement Text
                   </label>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     {(formData.homepage?.announcement?.text || '').length} / 160
                   </span>
                 </div>
@@ -2039,16 +2039,16 @@ export default function SettingsPage() {
                   value={formData.homepage?.announcement?.text || ''}
                   onChange={(e) => handleAnnouncementChange('text', e.target.value)}
                   placeholder="e.g. Admissions Open for Academic Session 2026-2027 • Scholarship Test on Nov 15"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Link Label (Optional)
                   </label>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     {(formData.homepage?.announcement?.linkLabel || '').length} / 40
                   </span>
                 </div>
@@ -2058,12 +2058,12 @@ export default function SettingsPage() {
                   value={formData.homepage?.announcement?.linkLabel || ''}
                   onChange={(e) => handleAnnouncementChange('linkLabel', e.target.value)}
                   placeholder="e.g. Register now"
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">
                   Link Destination URL (Relative or HTTPS)
                 </label>
                 <input
@@ -2071,7 +2071,7 @@ export default function SettingsPage() {
                   value={formData.homepage?.announcement?.linkUrl || ''}
                   onChange={(e) => handleAnnouncementChange('linkUrl', e.target.value)}
                   placeholder="/explore or https://..."
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
             </div>
@@ -2158,7 +2158,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => removeHighlight(idx)}
-                        className="p-1.5 text-red-500 hover:text-red-700 cursor-pointer"
+                        className="p-1.5 text-danger hover:text-danger-hover cursor-pointer"
                         title="Remove"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -2223,7 +2223,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => removeWhyChooseUs(idx)}
-                          className="p-1 text-red-500 hover:text-red-700 cursor-pointer ml-1"
+                          className="p-1 text-danger hover:text-danger-hover cursor-pointer ml-1"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -2335,7 +2335,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => removeAdmissionStep(idx)}
-                          className="p-1 text-red-500 hover:text-red-700 cursor-pointer ml-1"
+                          className="p-1 text-danger hover:text-danger-hover cursor-pointer ml-1"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
