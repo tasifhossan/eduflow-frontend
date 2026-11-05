@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
 import { getCurrentUserClient, UserClaims } from '@/lib/client-auth';
 import { formatDateTime } from '@/lib/format';
+import { ErrorState } from '@/components/ui/error-state';
+import { Button } from '@/components/ui/button';
 
 interface Option {
   id: string;
@@ -105,8 +107,8 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
         } else {
           setErrorMsg('Failed to load practice session.');
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load practice session.');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load practice session.');
       } finally {
         setLoading(false);
       }
@@ -156,8 +158,8 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
       } else {
         setErrorMsg(response.message || 'Failed to submit practice session.');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred during practice submission.');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred during practice submission.');
     } finally {
       setIsSubmitting(false);
     }
@@ -166,8 +168,8 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-        <span className="ml-3 text-lg font-medium text-gray-600">Preparing practice session...</span>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <span className="ml-3 text-lg font-medium text-muted-foreground">Preparing practice session...</span>
       </div>
     );
   }
@@ -175,17 +177,17 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
   if (errorMsg && !session) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-xl bg-red-50 p-6 border border-red-200">
-          <h3 className="text-base font-bold text-red-800">Error Loading Practice Session</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
-        </div>
+        <ErrorState
+          title="Error Loading Practice Session"
+          message={errorMsg}
+          onRetry={() => window.location.reload()}
+        />
         {user && (
-          <Link
-            href={`/students/${user.id}`}
-            className="inline-block text-indigo-600 hover:underline text-sm font-semibold"
-          >
-            ← Back to My Profile
-          </Link>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/students/${user.id}`}>
+              &larr; Back to My Profile
+            </Link>
+          </Button>
         )}
       </div>
     );
@@ -203,10 +205,10 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-3xl space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-          <nav className="flex text-sm text-gray-500 gap-x-2">
+        <div className="flex items-center justify-between border-b border-border pb-4">
+          <nav className="flex text-sm text-muted-foreground gap-x-2">
             {user && (
-              <Link href={`/students/${user.id}`} className="hover:text-indigo-600 font-medium">
+              <Link href={`/students/${user.id}`} className="hover:text-primary font-medium">
                 My Profile
               </Link>
             )}
@@ -224,37 +226,37 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
         </div>
 
         {/* Practice Session Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 p-6 text-white shadow-md">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-card">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-x-2 mb-1">
-                <span className="inline-flex items-center rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
                   🎯 Targeted Practice
                 </span>
-                <span className="text-xs text-indigo-200">({session?.totalQuestions} Questions)</span>
+                <span className="text-xs text-muted-foreground">({session?.totalQuestions} Questions)</span>
               </div>
-              <h1 className="text-2xl font-extrabold tracking-tight font-poppins">Weak Chapters Practice</h1>
-              <p className="text-xs text-indigo-200 mt-1">
+              <h1 className="text-2xl font-extrabold tracking-tight font-poppins text-foreground">Weak Chapters Practice</h1>
+              <p className="text-xs text-muted-foreground mt-1">
                 Practice mode does not write to formal test results or affect class ranks.
               </p>
             </div>
 
             {submissionResult && (
-              <div className="flex items-center gap-x-3 bg-white/10 rounded-xl p-3 border border-white/20 backdrop-blur-sm">
+              <div className="flex items-center gap-x-3 bg-muted/50 rounded-xl p-3 border border-border">
                 <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-indigo-200 block tracking-wider">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground block tracking-wider">
                     Score Achieved
                   </span>
-                  <span className="text-2xl font-extrabold text-white font-mono">
+                  <span className="text-2xl font-extrabold text-foreground font-mono">
                     {submissionResult.score}%
                   </span>
                 </div>
-                <div className="h-8 w-px bg-white/20" />
+                <div className="h-8 w-px bg-border" />
                 <div className="text-left">
-                  <span className="text-[10px] uppercase font-bold text-indigo-200 block tracking-wider">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground block tracking-wider">
                     Correct
                   </span>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold text-foreground">
                     {submissionResult.correctAnswers} / {submissionResult.totalQuestions}
                   </span>
                 </div>
@@ -265,23 +267,23 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
 
         {/* Global Error Banner */}
         {errorMsg && (
-          <div className="rounded-xl bg-red-50 p-4 border border-red-200 text-sm text-red-600">
+          <div className="rounded-xl bg-status-danger-bg p-4 border border-status-danger-border text-sm text-status-danger-text">
             <span className="font-bold">Error:</span> {errorMsg}
           </div>
         )}
 
         {/* Submission Results Summary Card */}
         {submissionResult && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-6 space-y-3">
+          <div className="rounded-2xl border border-status-success-border bg-status-success-bg p-6 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-emerald-900 flex items-center gap-x-2">
+              <h2 className="text-lg font-bold text-status-success-text flex items-center gap-x-2">
                 <span>🎉 Practice Completed!</span>
               </h2>
-              <span className="text-xs font-semibold text-emerald-700">
+              <span className="text-xs font-semibold text-status-success-text">
                 Submitted on {formatDateTime(submissionResult.submittedAt)}
               </span>
             </div>
-            <p className="text-xs text-emerald-800">
+            <p className="text-xs text-status-success-text">
               Review your answers below. Correct choices are highlighted in green and incorrect selections in red.
             </p>
           </div>
@@ -301,8 +303,8 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                     className={`rounded-[var(--radius-card)] border bg-surface shadow-card p-6 space-y-4 transition ${
                       review
                         ? review.correct
-                          ? 'border-emerald-500/30'
-                          : 'border-rose-500/30'
+                          ? 'border-status-success-border'
+                          : 'border-status-danger-border'
                         : 'border-border'
                     }`}
                   >
@@ -318,10 +320,10 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                       {/* Review Badge if submitted */}
                       {review ? (
                         <span
-                          className={`inline-flex items-center gap-x-1 rounded-md px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
+                          className={`inline-flex items-center gap-x-1 rounded-md px-2.5 py-1 text-xs font-bold border ${
                             review.correct
-                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-emerald-500/20'
-                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 ring-rose-500/20'
+                              ? 'bg-status-success-bg text-status-success-text border-status-success-border'
+                              : 'bg-status-danger-bg text-status-danger-text border-status-danger-border'
                           }`}
                         >
                           {review.correct ? '✓ Correct' : '✗ Incorrect'}
@@ -347,9 +349,9 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
 
                         if (review) {
                           if (isCorrectOption) {
-                            optionStyle = 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold ring-1 ring-emerald-500/30';
+                            optionStyle = 'border-status-success-border bg-status-success-bg text-status-success-text font-semibold ring-1 ring-status-success-border';
                           } else if (isUserWrongSelection) {
-                            optionStyle = 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold ring-1 ring-rose-500/30';
+                            optionStyle = 'border-status-danger-border bg-status-danger-bg text-status-danger-text font-semibold ring-1 ring-status-danger-border';
                           } else {
                             optionStyle = 'border-border/60 bg-surface text-muted-foreground/50 opacity-60';
                           }
@@ -381,10 +383,10 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                             {review && (
                               <div>
                                 {isCorrectOption && (
-                                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">✓ Correct Answer</span>
+                                  <span className="text-status-success-text font-bold text-xs">✓ Correct Answer</span>
                                 )}
                                 {isUserWrongSelection && (
-                                  <span className="text-rose-600 dark:text-rose-400 font-bold text-xs">Your Choice</span>
+                                  <span className="text-status-danger-text font-bold text-xs">Your Choice</span>
                                 )}
                               </div>
                             )}

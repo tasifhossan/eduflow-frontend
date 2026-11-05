@@ -319,9 +319,9 @@ export default async function StudentDetailPage({
     <div className="p-8">
       <div className="mx-auto max-w-6xl space-y-8">
         {/* Breadcrumb & Navigation */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-5">
+        <div className="flex items-center justify-between border-b border-border pb-5">
           <div className="space-y-1">
-            <nav className="flex text-sm text-gray-500 gap-x-2">
+            <nav className="flex text-sm text-muted-foreground gap-x-2">
               <Link href="/students" className="hover:text-primary font-medium">Students</Link>
               <span>/</span>
               <span className="text-foreground font-semibold">{studentProfile?.name || 'Student Profile'}</span>
@@ -339,9 +339,9 @@ export default async function StudentDetailPage({
         </div>
 
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-            <p className="text-sm text-red-600">
-              <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+            <p className="text-sm text-status-danger-text">
+              <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
             </p>
           </div>
         )}
@@ -394,16 +394,16 @@ export default async function StudentDetailPage({
                         {studentProfile.linkedGuardians.map((g) => (
                           <div
                             key={g.id}
-                            className="rounded-xl bg-purple-500/10 p-3 border border-purple-500/20 text-xs space-y-1"
+                            className="rounded-xl bg-primary/10 p-3 border border-primary/20 text-xs space-y-1"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-purple-600 dark:text-purple-400 text-sm">{g.name}</span>
+                              <span className="font-bold text-primary text-sm">{g.name}</span>
                               {user.role === 'ADMIN' && g.linkId && (
                                 <UnlinkGuardianButton linkId={g.linkId} guardianName={g.name} />
                               )}
                             </div>
-                            <span className="text-purple-600 dark:text-purple-300 block font-medium">{g.email}</span>
-                            {g.phone && <span className="text-purple-600 dark:text-purple-400 block">{g.phone}</span>}
+                            <span className="text-primary block font-medium">{g.email}</span>
+                            {g.phone && <span className="text-primary block">{g.phone}</span>}
                           </div>
                         ))}
                       </div>
@@ -462,20 +462,20 @@ export default async function StudentDetailPage({
                           <span
                             className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ${
                               batch.type === 'ACADEMIC'
-                                ? 'bg-blue-50 text-blue-700 ring-blue-700/10'
-                                : 'bg-amber-50 text-amber-700 ring-amber-700/10'
+                                ? 'bg-primary/10 text-primary ring-primary/20'
+                                : 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
                             }`}
                           >
                             {batch.type}
                           </span>
                         </div>
-                        <div className="mt-2 text-xs text-gray-500 space-y-1">
+                        <div className="mt-2 text-xs text-muted-foreground space-y-1">
                           <p>
-                            <span className="font-semibold text-gray-700">Subject:</span>{' '}
+                            <span className="font-semibold text-foreground">Subject:</span>{' '}
                             {batch.subject?.name || 'N/A'}
                           </p>
                           <p>
-                            <span className="font-semibold text-gray-700">Teacher:</span>{' '}
+                            <span className="font-semibold text-foreground">Teacher:</span>{' '}
                             {batch.teacher?.name || <span className="italic">Unassigned</span>}
                           </p>
                         </div>
@@ -504,11 +504,11 @@ export default async function StudentDetailPage({
 
                     {/* Summary Totals */}
                     <div className="flex gap-x-4 text-xs font-semibold">
-                      <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-lg px-3 py-1.5">
+                      <div className="bg-status-success-bg text-status-success-text border border-status-success-border rounded-lg px-3 py-1.5">
                         <span className="text-[10px] uppercase block font-bold">Total Paid</span>
                         <span className="text-sm font-extrabold">{formatMoney(totalPaidAcrossBatches)}</span>
                       </div>
-                      <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-lg px-3 py-1.5">
+                      <div className="bg-status-warning-bg text-status-warning-text border border-status-warning-border rounded-lg px-3 py-1.5">
                         <span className="text-[10px] uppercase block font-bold">Outstanding</span>
                         <span className="text-sm font-extrabold">{formatMoney(totalOutstanding)}</span>
                       </div>
@@ -569,8 +569,8 @@ export default async function StudentDetailPage({
                                 <span
                                   className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                                     payment.isReversed
-                                      ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
-                                      : 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
+                                      ? 'bg-status-danger-bg text-status-danger-text ring-status-danger-border'
+                                      : 'bg-status-success-bg text-status-success-text ring-status-success-border'
                                   }`}
                                 >
                                   {payment.isReversed ? 'REVERSED' : 'PAID'}
@@ -634,10 +634,10 @@ export default async function StudentDetailPage({
                                   entry.percentage === null
                                     ? 'bg-surface-hover text-muted-foreground ring-border'
                                     : entry.percentage < 50
-                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
+                                    ? 'bg-status-danger-bg text-status-danger-text ring-status-danger-border'
                                     : entry.percentage < 70
-                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
-                                    : 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
+                                    ? 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
+                                    : 'bg-status-success-bg text-status-success-text ring-status-success-border'
                                 }`}
                               >
                                 {entry.percentage !== null ? `${entry.percentage}%` : '—'}
@@ -707,19 +707,19 @@ export default async function StudentDetailPage({
                               <span
                                 className={`inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                                   record.status === 'PRESENT'
-                                    ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-green-600/20'
+                                    ? 'bg-status-success-bg text-status-success-text ring-status-success-border'
                                     : record.status === 'ABSENT'
-                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-600/20'
-                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-600/20'
+                                    ? 'bg-status-danger-bg text-status-danger-text ring-status-danger-border'
+                                    : 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
                                 }`}
                               >
                                 <span
                                   className={`h-1.5 w-1.5 rounded-full ${
                                     record.status === 'PRESENT'
-                                      ? 'bg-green-500'
+                                      ? 'bg-status-success'
                                       : record.status === 'ABSENT'
-                                      ? 'bg-red-500'
-                                      : 'bg-amber-500'
+                                      ? 'bg-status-danger'
+                                      : 'bg-status-warning'
                                   }`}
                                 />
                                 {record.status.charAt(0) + record.status.slice(1).toLowerCase()}

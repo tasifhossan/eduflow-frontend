@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiPatch } from '@/lib/api';
 import { getCurrentUserClient } from '@/lib/client-auth';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { Button } from '@/components/ui/button';
 import { useCenter } from '@/components/providers/center-provider';
 import { formatMoney } from '@/lib/format';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -364,7 +366,7 @@ export default function BatchDetailPage({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading batch details...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading batch details...</span>
       </div>
     );
   }
@@ -372,13 +374,16 @@ export default function BatchDetailPage({ params }: PageProps) {
   if (errorMsg || !batch) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Batch</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg || 'Batch not found or access denied.'}</p>
-        </div>
-        <Link href="/batches" className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
-          &larr; Back to batches list
-        </Link>
+        <ErrorState
+          title="Error Loading Batch"
+          message={errorMsg || 'Batch not found or access denied.'}
+          onRetry={() => window.location.reload()}
+        />
+        <Button asChild variant="outline" size="sm">
+          <Link href="/batches">
+            &larr; Back to batches list
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -456,10 +461,10 @@ export default function BatchDetailPage({ params }: PageProps) {
               <div className="space-y-3 text-sm">
                 <div>
                   <span className="text-muted-foreground font-medium block">Type</span>
-                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold ring-1 ring-inset ${
+                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 mt-0.5 text-xs font-semibold border ${
                     batch.type === 'ACADEMIC'
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 ring-blue-700/10'
-                      : 'bg-primary/10 text-primary ring-primary/20'
+                      ? 'bg-primary-subtle text-primary border-primary/20'
+                      : 'bg-primary/10 text-primary border-primary/20'
                   }`}>
                     {batch.type}
                   </span>
@@ -586,12 +591,12 @@ export default function BatchDetailPage({ params }: PageProps) {
               <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Enroll Student</h2>
 
               {enrollError && (
-                <div className="rounded-md bg-red-500/10 p-3 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
+                <div className="rounded-md bg-status-danger-bg p-3 border border-status-danger-border text-xs text-status-danger-text">
                   {enrollError}
                 </div>
               )}
               {enrollSuccess && (
-                <div className="rounded-md bg-green-500/10 p-3 border border-green-500/20 text-xs text-green-600 dark:text-green-400">
+                <div className="rounded-md bg-status-success-bg p-3 border border-status-success-border text-xs text-status-success-text">
                   {enrollSuccess}
                 </div>
               )}
@@ -688,12 +693,12 @@ export default function BatchDetailPage({ params }: PageProps) {
                                       Base: {formatMoney(netFeeInfo.customFeeAmount ?? netFeeInfo.baseFee, center.currency, center.currencySymbol)}
                                     </span>
                                     {netFeeInfo.customFeeAmount != null && (
-                                      <span className="inline-flex items-center rounded bg-amber-500/10 px-1 py-0.2 text-[10px] font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                      <span className="inline-flex items-center rounded bg-status-warning-bg px-1 py-0.2 text-[10px] font-semibold text-status-warning-text border border-status-warning-border">
                                         Custom
                                       </span>
                                     )}
                                     {netFeeInfo.discountType && netFeeInfo.discountValue && (
-                                      <span className="inline-flex items-center rounded bg-emerald-500/10 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                      <span className="inline-flex items-center rounded bg-status-success-bg px-1.5 py-0.2 text-[10px] font-semibold text-status-success-text border border-status-success-border">
                                         -{netFeeInfo.discountType === 'FIXED' ? formatMoney(netFeeInfo.discountValue, center.currency, center.currencySymbol) : `${netFeeInfo.discountValue}%`}
                                         {netFeeInfo.discountReason ? ` (${netFeeInfo.discountReason})` : ''}
                                       </span>
@@ -718,7 +723,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                                       setUnenrollStudentTarget(student);
                                       setUnenrollError(null);
                                     }}
-                                    className="inline-flex items-center justify-center rounded-md border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition"
+                                    className="inline-flex items-center justify-center rounded-md border border-status-danger-border bg-status-danger-bg px-2.5 py-1 text-xs font-semibold text-status-danger-text hover:bg-danger-subtle transition"
                                   >
                                     Unenroll
                                   </button>
@@ -755,7 +760,7 @@ export default function BatchDetailPage({ params }: PageProps) {
             </div>
 
             {studentFeeError && (
-              <div className="rounded-md bg-red-500/10 p-3 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
+              <div className="rounded-md bg-status-danger-bg p-3 border border-status-danger-border text-xs text-status-danger-text">
                 {studentFeeError}
               </div>
             )}
@@ -853,12 +858,12 @@ export default function BatchDetailPage({ params }: PageProps) {
             </p>
 
             {unenrollError && (
-              <div className="p-3 bg-red-500/10 text-xs text-red-600 dark:text-red-400 rounded-lg border border-red-500/20">
+              <div className="p-3 bg-status-danger-bg text-xs text-status-danger-text rounded-lg border border-status-danger-border">
                 {unenrollError}
               </div>
             )}
 
-            <div className="flex justify-end gap-x-3 pt-3 border-t border-border">
+            <div className="flex justify-end gap-x-3 pt-3 border-border border-t">
               <button
                 type="button"
                 onClick={() => setUnenrollStudentTarget(null)}
@@ -870,7 +875,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                 type="button"
                 disabled={unenrolling}
                 onClick={handleUnenrollStudent}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-danger text-danger-foreground text-xs font-semibold hover:bg-danger-hover disabled:opacity-50"
               >
                 {unenrolling ? 'Unenrolling...' : 'Yes, Unenroll Student'}
               </button>

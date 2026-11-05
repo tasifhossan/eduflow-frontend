@@ -109,8 +109,8 @@ export default function BatchResourcesPage({ params }: PageProps) {
         if (resRes.success && resRes.data) {
           setResources(resRes.data);
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load study materials');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load study materials');
       } finally {
         setLoading(false);
       }
@@ -122,15 +122,15 @@ export default function BatchResourcesPage({ params }: PageProps) {
   const getFileIcon = (fileType: string) => {
     const type = fileType.toLowerCase();
     if (type.includes('pdf') || type.includes('document')) {
-      return <FileText className="w-6 h-6 text-red-500" />;
+      return <FileText className="w-6 h-6 text-danger" />;
     }
     if (type.includes('image') || type.includes('png') || type.includes('jpg') || type.includes('jpeg')) {
-      return <FileImage className="w-6 h-6 text-blue-500" />;
+      return <FileImage className="w-6 h-6 text-info" />;
     }
     if (type.includes('video') || type.includes('mp4')) {
-      return <FileVideo className="w-6 h-6 text-purple-500" />;
+      return <FileVideo className="w-6 h-6 text-primary" />;
     }
-    return <File className="w-6 h-6 text-indigo-500" />;
+    return <File className="w-6 h-6 text-primary" />;
   };
 
   const handleUploadSubmit = async (e: React.FormEvent) => {
@@ -222,9 +222,9 @@ export default function BatchResourcesPage({ params }: PageProps) {
       } else {
         setUploadError(saveRes.message || 'Failed to save resource details');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Upload error:', err);
-      setUploadError(err.message || 'An error occurred during file upload');
+      setUploadError(err instanceof Error ? err.message : 'An error occurred during file upload');
     } finally {
       setUploading(false);
     }
@@ -241,8 +241,8 @@ export default function BatchResourcesPage({ params }: PageProps) {
       } else {
         alert(res.message || 'Failed to delete resource');
       }
-    } catch (err: any) {
-      alert(err.message || 'Error deleting resource');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Error deleting resource');
     } finally {
       setDeletingId(null);
     }
@@ -255,7 +255,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-sm font-medium text-gray-500">Loading study materials...</p>
+          <p className="text-sm font-medium text-muted-foreground">Loading study materials...</p>
         </div>
       </div>
     );
@@ -265,21 +265,21 @@ export default function BatchResourcesPage({ params }: PageProps) {
     <div className="p-8">
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex text-sm text-gray-500 gap-x-2">
+        <nav className="flex text-sm text-muted-foreground gap-x-2">
           <Link href="/batches" className="hover:text-primary font-medium">Batches</Link>
           <span>/</span>
           <Link href={`/batches/${batchId}`} className="hover:text-primary font-medium">{batch?.name || 'Batch'}</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">Study Materials</span>
+          <span className="text-foreground font-semibold">Study Materials</span>
         </nav>
 
         {/* Title Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-5 gap-y-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Study Materials
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               {batch ? `Resources & lecture notes for ${batch.name}` : 'Batch study materials and lecture notes'}
             </p>
           </div>
@@ -303,7 +303,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
 
         {/* Error message if initial fetch failed */}
         {errorMsg && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200 text-sm text-red-700">
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border text-sm text-status-danger-text">
             {errorMsg}
           </div>
         )}
@@ -324,7 +324,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
             </div>
 
             {uploadError && (
-              <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-3 border border-red-200 dark:border-red-900/50 text-sm text-red-700 dark:text-red-300">
+              <div className="rounded-lg bg-status-danger-bg p-3 border border-status-danger-border text-sm text-status-danger-text">
                 {uploadError}
               </div>
             )}
@@ -332,7 +332,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
             <form onSubmit={handleUploadSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1">
-                  Title <span className="text-red-500">*</span>
+                  Title <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -365,7 +365,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
 
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-1">
-                    File <span className="text-red-500">*</span>
+                    File <span className="text-danger">*</span>
                   </label>
                   <input
                     type="file"
@@ -439,7 +439,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
                       <div className="flex items-center gap-x-2 flex-wrap">
                         <h3 className="font-semibold text-foreground text-base">{res.title}</h3>
                         {res.chapter && (
-                          <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                          <span className="inline-flex items-center rounded-md bg-status-info-bg px-2 py-0.5 text-xs font-medium text-status-info-text border border-status-info-border">
                             {res.chapter.name}
                           </span>
                         )}
@@ -473,7 +473,7 @@ export default function BatchResourcesPage({ params }: PageProps) {
                       <button
                         onClick={() => handleDeleteResource(res.id)}
                         disabled={deletingId === res.id}
-                        className="inline-flex items-center rounded-lg border border-red-500/20 bg-red-500/10 p-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition"
+                        className="inline-flex items-center rounded-lg border border-status-danger-border bg-status-danger-bg p-1.5 text-status-danger-text hover:bg-danger-subtle disabled:opacity-50 transition"
                         title="Delete resource"
                       >
                         {deletingId === res.id ? (
