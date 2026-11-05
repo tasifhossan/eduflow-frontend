@@ -401,7 +401,7 @@ export function EnquiryDrawer({
     <>
       {/* Slide-over backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -411,7 +411,7 @@ export function EnquiryDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Enquiry details"
-        className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-surface border-l border-border shadow-2xl flex flex-col focus:outline-none animate-in slide-in-from-right duration-200"
+        className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-surface border-l border-border shadow-2xl flex flex-col focus:outline-hidden animate-in slide-in-from-right duration-200"
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-surface-sunken/40">

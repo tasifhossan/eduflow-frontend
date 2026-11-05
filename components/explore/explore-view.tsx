@@ -393,7 +393,7 @@ export function ExploreView({
             className="fixed inset-0 z-[var(--z-modal)] flex justify-end lg:hidden"
           >
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
               onClick={() => setIsMobileDrawerOpen(false)}
               aria-hidden="true"
             />

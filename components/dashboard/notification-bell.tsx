@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCheck, ExternalLink } from 'lucide-react';
-import { apiGet, apiPatch, apiPost } from '@/lib/api';
+import { apiGet, apiPatch } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import { useCenter } from '@/components/providers/center-provider';
 import { Spinner } from '@/components/ui/spinner';
@@ -147,7 +147,7 @@ export function NotificationBell() {
   const handleItemClick = async (item: NotificationItem) => {
     if (!item.readAt) {
       try {
-        await apiPatch(`/api/notifications/${item.id}/read`);
+        await apiPatch('/api/notifications/read', { ids: [item.id] });
         setItems((prev) =>
           prev.map((i) => (i.id === item.id ? { ...i, readAt: new Date().toISOString() } : i))
         );

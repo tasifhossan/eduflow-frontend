@@ -456,7 +456,7 @@ export function DashboardSidebar({
           {/* Backdrop overlay */}
           <div
             onClick={onMobileClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             aria-hidden="true"
           />
 

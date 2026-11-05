@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Bell, CheckCheck, ExternalLink, Mail, CheckCircle2 } from 'lucide-react';
-import { apiGet, apiPatch, apiPost } from '@/lib/api';
+import { apiGet, apiPatch } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import { useCenter } from '@/components/providers/center-provider';
 import { PageHeader } from '@/components/dashboard/page-header';
@@ -131,7 +131,7 @@ export default function NotificationsPage() {
   const handleMarkSingleRead = async (item: NotificationItem) => {
     if (item.readAt) return;
     try {
-      await apiPatch(`/api/notifications/${item.id}/read`);
+      await apiPatch('/api/notifications/read', { ids: [item.id] });
       setItems((prev) =>
         prev.map((i) => (i.id === item.id ? { ...i, readAt: new Date().toISOString() } : i))
       );
