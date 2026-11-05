@@ -679,7 +679,7 @@ export default function LecturesPage() {
                   <div>
                     <Link
                       href={`/lectures/${lec.id}`}
-                      className="text-base font-bold text-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+                      className="text-base font-bold text-foreground hover:text-primary transition-colors focus-ring"
                     >
                       {lec.title}
                     </Link>

@@ -46,7 +46,7 @@ export function DashboardShell({
           onOpenMobileNav={() => setIsMobileNavOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto bg-background focus:outline-none custom-scrollbar">
+        <main className="flex-1 overflow-y-auto bg-background focus-ring custom-scrollbar">
           {children}
         </main>
       </div>

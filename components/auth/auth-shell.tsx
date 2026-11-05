@@ -160,7 +160,7 @@ export function AuthShell({ children }: AuthShellProps) {
       <main
         id="main"
         tabIndex={-1}
-        className="flex-1 flex flex-col justify-between min-h-dvh p-4 sm:p-6 lg:p-8 relative bg-background focus:outline-none"
+        className="flex-1 flex flex-col justify-between min-h-dvh p-4 sm:p-6 lg:p-8 relative bg-background focus-ring"
         style={{
           backgroundImage: `radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--primary-rgb), 0.06), transparent 75%)`,
         }}

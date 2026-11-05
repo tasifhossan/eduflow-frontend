@@ -17,7 +17,7 @@ export default async function PublicLayout({
       <SkipLink />
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <Navbar />
-        <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
+        <main id="main" tabIndex={-1} className="flex-1 focus-ring">
           {children}
         </main>
         <Footer />

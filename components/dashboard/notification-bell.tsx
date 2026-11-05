@@ -232,7 +232,7 @@ export function NotificationBell() {
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item)}
-                    className={`w-full text-left p-3.5 hover:bg-surface-hover transition-colors flex items-start gap-3 focus-visible:outline-none focus-visible:bg-surface-hover ${
+                    className={`w-full text-left p-3.5 hover:bg-surface-hover transition-colors flex items-start gap-3 focus-ring focus-visible:bg-surface-hover ${
                       isUnread ? 'bg-primary-subtle/20' : ''
                     }`}
                   >
