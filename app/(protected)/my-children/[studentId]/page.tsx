@@ -221,39 +221,42 @@ export default function ChildDetailPage({ params }: PageProps) {
       )}
 
       {/* Tab Selection */}
-      <div className="flex items-center border-b border-border gap-x-4 sm:gap-x-8 overflow-x-auto custom-scrollbar pb-px">
+      <div className="grid grid-cols-3 p-1 rounded-xl bg-muted/40 border border-border sm:flex sm:bg-transparent sm:border-0 sm:p-0 sm:border-b sm:border-border sm:gap-x-8 sm:rounded-none overflow-x-auto custom-scrollbar pb-px">
         <button
           onClick={() => setActiveTab('attendance')}
-          className={`pb-3 text-xs sm:text-sm font-semibold flex items-center gap-x-1.5 sm:gap-x-2 border-b-2 transition whitespace-nowrap shrink-0 ${
+          className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-x-2 py-2 sm:pb-3 px-1 sm:px-0 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-none sm:border-b-2 transition whitespace-nowrap ${
             activeTab === 'attendance'
-              ? 'border-primary text-primary'
+              ? 'bg-background shadow-sm sm:shadow-none sm:bg-transparent border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Calendar className="w-4 h-4 shrink-0" />
-          <span>Attendance ({attendance.length})</span>
+          <span className="sm:hidden">Attendance ({attendance.length})</span>
+          <span className="hidden sm:inline">Attendance ({attendance.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('results')}
-          className={`pb-3 text-xs sm:text-sm font-semibold flex items-center gap-x-1.5 sm:gap-x-2 border-b-2 transition whitespace-nowrap shrink-0 ${
+          className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-x-2 py-2 sm:pb-3 px-1 sm:px-0 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-none sm:border-b-2 transition whitespace-nowrap ${
             activeTab === 'results'
-              ? 'border-primary text-primary'
+              ? 'bg-background shadow-sm sm:shadow-none sm:bg-transparent border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <Award className="w-4 h-4 shrink-0" />
-          <span>Test Results ({results.length})</span>
+          <span className="sm:hidden">Tests ({results.length})</span>
+          <span className="hidden sm:inline">Test Results ({results.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('payments')}
-          className={`pb-3 text-xs sm:text-sm font-semibold flex items-center gap-x-1.5 sm:gap-x-2 border-b-2 transition whitespace-nowrap shrink-0 ${
+          className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-x-2 py-2 sm:pb-3 px-1 sm:px-0 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-none sm:border-b-2 transition whitespace-nowrap ${
             activeTab === 'payments'
-              ? 'border-primary text-primary'
+              ? 'bg-background shadow-sm sm:shadow-none sm:bg-transparent border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <CreditCard className="w-4 h-4 shrink-0" />
-          <span>Fee Payments ({feeAccount?.payments?.length || 0})</span>
+          <span className="sm:hidden">Payments ({feeAccount?.payments?.length || 0})</span>
+          <span className="hidden sm:inline">Fee Payments ({feeAccount?.payments?.length || 0})</span>
         </button>
       </div>
 

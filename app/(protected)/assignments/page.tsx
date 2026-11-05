@@ -135,13 +135,12 @@ export default function AssignmentsPage() {
     }
 
     if (isGuardian) {
-      apiGet<{ success: boolean; data: { children?: GuardianChild[] } }>('/api/guardian/children')
+      apiGet<{ success: boolean; data: GuardianChild[] | { children?: GuardianChild[] }; children?: GuardianChild[] }>('/api/guardians/my-students')
         .then((res) => {
-          if (res?.data?.children) {
-            setChildren(res.data.children);
-            if (res.data.children.length > 0) {
-              setSelectedChildId((prev) => prev || res.data!.children![0].id);
-            }
+          const list = Array.isArray(res?.data) ? res.data : (res?.data?.children || res?.children || []);
+          if (list.length > 0) {
+            setChildren(list);
+            setSelectedChildId((prev) => prev || list[0].id);
           }
         })
         .catch(() => {});

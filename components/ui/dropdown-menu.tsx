@@ -125,7 +125,7 @@ export function DropdownMenu({
           aria-orientation="vertical"
           className={cn(
             'absolute z-[var(--z-dropdown)] mt-2 w-56 rounded-[var(--radius-control)] border border-border bg-surface p-1.5 shadow-popover text-foreground',
-            'animate-in fade-in zoom-in-95 duration-150 focus:outline-none',
+            'animate-in fade-in zoom-in-95 duration-150 focus-ring',
             align === 'right' ? 'right-0' : 'left-0',
             className
           )}
@@ -158,7 +158,7 @@ export function DropdownMenu({
                 }}
                 className={cn(
                   'flex w-full items-start gap-2.5 rounded-[calc(var(--radius-control)-2px)] px-3 py-2 text-xs font-medium transition-colors text-left',
-                  'hover:bg-surface-hover focus-visible:outline-none',
+                  'hover:bg-surface-hover focus-ring',
                   isHighlighted && 'bg-surface-hover',
                   item.danger
                     ? 'text-danger hover:bg-danger/10 hover:text-danger'

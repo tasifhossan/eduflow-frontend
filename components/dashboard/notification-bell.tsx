@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCheck, ExternalLink } from 'lucide-react';
-import { apiGet, apiPatch, apiPost } from '@/lib/api';
+import { apiGet, apiPatch } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import { useCenter } from '@/components/providers/center-provider';
 import { Spinner } from '@/components/ui/spinner';
@@ -132,7 +132,7 @@ export function NotificationBell() {
     if (isMarkingAll || unreadCount === 0) return;
     setIsMarkingAll(true);
     try {
-      await apiPost('/api/notifications/read-all');
+      await apiPatch('/api/notifications/read', { all: true });
       setItems((prev) =>
         prev.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() }))
       );
@@ -147,7 +147,7 @@ export function NotificationBell() {
   const handleItemClick = async (item: NotificationItem) => {
     if (!item.readAt) {
       try {
-        await apiPatch(`/api/notifications/${item.id}/read`);
+        await apiPatch('/api/notifications/read', { ids: [item.id] });
         setItems((prev) =>
           prev.map((i) => (i.id === item.id ? { ...i, readAt: new Date().toISOString() } : i))
         );
@@ -232,7 +232,7 @@ export function NotificationBell() {
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item)}
-                    className={`w-full text-left p-3.5 hover:bg-surface-hover transition-colors flex items-start gap-3 focus-visible:outline-none focus-visible:bg-surface-hover ${
+                    className={`w-full text-left p-3.5 hover:bg-surface-hover transition-colors flex items-start gap-3 focus-ring focus-visible:bg-surface-hover ${
                       isUnread ? 'bg-primary-subtle/20' : ''
                     }`}
                   >

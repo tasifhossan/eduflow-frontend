@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { apiPost } from '@/lib/api';
+import { apiGet, apiPost } from '@/lib/api';
 import { useCenter } from '@/components/providers/center-provider';
 import {
   centerDateTimeInputToUtc,
@@ -134,12 +134,11 @@ export function NewLectureModal({
       };
     }
 
-    fetch(`/api/subjects/${selectedSubjectId}`)
-      .then((res) => res.json())
-      .then((data) => {
+    apiGet<{ data: Array<{ id: string; name: string }> }>(`/api/chapters?subjectId=${selectedSubjectId}`)
+      .then((res) => {
         if (!active) return;
-        if (data?.success && data?.data?.chapters) {
-          setChapters(data.data.chapters);
+        if (res && Array.isArray(res.data)) {
+          setChapters(res.data.map((c) => ({ id: c.id, title: c.name })));
         } else {
           setChapters([]);
         }

@@ -27,8 +27,9 @@ export default function UnlinkGuardianButton({ linkId, guardianName }: UnlinkGua
       } else {
         setError(res?.message || 'Failed to unlink guardian account');
       }
-    } catch (err: any) {
-      setError(err.message || 'Error unlinking guardian account');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error unlinking guardian account';
+      setError(message);
     } finally {
       setLoading(false);
     }

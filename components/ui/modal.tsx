@@ -130,7 +130,7 @@ export function Modal({
         className={cn(
           'relative z-10 w-full my-auto flex flex-col rounded-[var(--radius-card)] border border-border bg-surface text-foreground shadow-popover overflow-hidden',
           'max-h-[calc(100dvh-1.25rem)] sm:max-h-[calc(100dvh-3rem)] min-h-0',
-          'animate-in fade-in zoom-in-95 duration-200 focus:outline-none',
+          'animate-in fade-in zoom-in-95 duration-200 focus-ring',
           maxWidths[maxWidth],
           className
         )}

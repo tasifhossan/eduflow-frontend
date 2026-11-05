@@ -80,7 +80,7 @@ export function Tabs({
           role="tabpanel"
           id={`panel-${currentTab}`}
           aria-labelledby={`tab-${currentTab}`}
-          className="focus-visible:outline-none animate-in fade-in duration-200"
+          className="focus-ring animate-in fade-in duration-200"
         >
           {activeContent}
         </div>
