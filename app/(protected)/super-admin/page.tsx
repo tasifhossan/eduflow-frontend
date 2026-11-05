@@ -67,7 +67,7 @@ export default function SuperAdminDashboardPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading cross-branch dashboard...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading cross-branch dashboard...</span>
       </div>
     );
   }
@@ -75,9 +75,9 @@ export default function SuperAdminDashboardPage() {
   if (errorMsg || !data) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Super Admin Dashboard</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg || 'Access denied or failed to load data.'}</p>
+        <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+          <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Super Admin Dashboard</h3>
+          <p className="text-sm text-status-danger-text mt-1">{errorMsg || 'Access denied or failed to load data.'}</p>
         </div>
         <Link href="/dashboard" className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to Dashboard
@@ -91,13 +91,13 @@ export default function SuperAdminDashboardPage() {
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-5 gap-y-4">
         <div>
           <span className="inline-flex items-center rounded-md bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary uppercase tracking-wider mb-1">
             System Overseer
           </span>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Cross-Branch Master Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">Real-time aggregate performance metrics across all branches</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Cross-Branch Master Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Real-time aggregate performance metrics across all branches</p>
         </div>
         <Link
           href="/branches"
@@ -129,7 +129,7 @@ export default function SuperAdminDashboardPage() {
 
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-card">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Revenue</p>
-          <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">{formatMoney(totalRevenue)}</p>
+          <p className="text-3xl font-extrabold text-status-success mt-2">{formatMoney(totalRevenue)}</p>
           <p className="text-xs text-muted-foreground mt-1">Collected fee payments</p>
         </div>
 
@@ -170,7 +170,7 @@ export default function SuperAdminDashboardPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">{b.address || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-foreground">{b.studentCount}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-foreground">{b.batchCount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-right font-semibold text-status-success">
                       {formatMoney(b.totalRevenue)}
                     </td>
                   </tr>

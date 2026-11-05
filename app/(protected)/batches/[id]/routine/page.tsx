@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
@@ -53,7 +53,34 @@ export default function BatchRoutinePage({ params }: PageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Verify role and load initial data
+  const fetchSlots = useCallback(async () => {
+    const routineRes = await apiGet<{ success: boolean; data: RoutineSlot[] }>(`/api/batches/${batchId}/routine`);
+    if (routineRes.success) {
+      setSlots(routineRes.data);
+    }
+  }, [batchId]);
+
   useEffect(() => {
+    async function loadRoutineAndBatch() {
+      try {
+        setLoading(true);
+        setErrorMsg(null);
+
+        // Fetch batch details
+        const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
+        if (batchRes.success) {
+          setBatch(batchRes.data);
+        }
+
+        // Fetch routine slots
+        await fetchSlots();
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load routine details');
+      } finally {
+        setLoading(false);
+      }
+    }
+
     async function init() {
       const user = await getCurrentUserClient();
       if (!user) {
@@ -68,35 +95,8 @@ export default function BatchRoutinePage({ params }: PageProps) {
       loadRoutineAndBatch();
     }
 
-    async function loadRoutineAndBatch() {
-      try {
-        setLoading(true);
-        setErrorMsg(null);
-
-        // Fetch batch details
-        const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
-        if (batchRes.success) {
-          setBatch(batchRes.data);
-        }
-
-        // Fetch routine slots
-        await fetchSlots();
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load routine details');
-      } finally {
-        setLoading(false);
-      }
-    }
-
     init();
-  }, [batchId, router]);
-
-  const fetchSlots = async () => {
-    const routineRes = await apiGet<{ success: boolean; data: RoutineSlot[] }>(`/api/batches/${batchId}/routine`);
-    if (routineRes.success) {
-      setSlots(routineRes.data);
-    }
-  };
+  }, [batchId, router, fetchSlots]);
 
   const handleAddSlot = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,8 +136,8 @@ export default function BatchRoutinePage({ params }: PageProps) {
       } else {
         setErrorMsg(response.message || 'Failed to add routine slot');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred while adding slot');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred while adding slot');
     } finally {
       setIsSubmitting(false);
     }
@@ -157,8 +157,8 @@ export default function BatchRoutinePage({ params }: PageProps) {
       } else {
         setErrorMsg(response.message || 'Failed to delete routine slot');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred while deleting slot');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred while deleting slot');
     }
   };
 
@@ -166,7 +166,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading class routine...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading class routine...</span>
       </div>
     );
   }
@@ -174,9 +174,9 @@ export default function BatchRoutinePage({ params }: PageProps) {
   if (errorMsg && !batch) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Routine</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+        <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+          <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Routine</h3>
+          <p className="text-sm text-status-danger-text mt-1">{errorMsg}</p>
         </div>
         <Link href={`/batches/${batchId}`} className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to batch details
@@ -221,15 +221,15 @@ export default function BatchRoutinePage({ params }: PageProps) {
         </div>
 
         {errorMsg && (
-          <div className="rounded-lg bg-red-500/10 p-4 border border-red-500/20">
-            <p className="text-sm text-red-600 dark:text-red-400">
-              <span className="font-semibold text-red-700 dark:text-red-300">Error:</span> {errorMsg}
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+            <p className="text-sm text-status-danger-text">
+              <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
             </p>
           </div>
         )}
         {successMsg && (
-          <div className="rounded-lg bg-green-500/10 p-4 border border-green-500/20">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+          <div className="rounded-lg bg-status-success-bg p-4 border border-status-success-border">
+            <p className="text-sm text-status-success-text font-medium">
               ✓ {successMsg}
             </p>
           </div>
@@ -273,7 +273,7 @@ export default function BatchRoutinePage({ params }: PageProps) {
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteSlot(slot.id)}
-                                    className="text-red-500 hover:text-red-700 font-bold ml-1 transition"
+                                    className="text-danger hover:text-danger-hover font-bold ml-1 transition"
                                     title="Delete slot"
                                   >
                                     ✕

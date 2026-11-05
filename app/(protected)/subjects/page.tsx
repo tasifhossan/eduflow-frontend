@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/api';
@@ -40,6 +40,40 @@ export default function SubjectsPage() {
   const [chaptersMap, setChaptersMap] = useState<Record<string, Chapter[]>>({});
   const [loadingChaptersMap, setLoadingChaptersMap] = useState<Record<string, boolean>>({});
 
+  const fetchChapters = useCallback(async (subjectId: string) => {
+    setLoadingChaptersMap((prev) => ({ ...prev, [subjectId]: true }));
+    try {
+      const res = await apiGet<{ success: boolean; data: Chapter[] }>(`/api/chapters?subjectId=${subjectId}`);
+      if (res && res.success && res.data) {
+        setChaptersMap((prev) => ({ ...prev, [subjectId]: res.data }));
+      }
+    } catch (err: unknown) {
+      console.error(`Error loading chapters for subject ${subjectId}:`, err);
+    } finally {
+      setLoadingChaptersMap((prev) => ({ ...prev, [subjectId]: false }));
+    }
+  }, []);
+
+  const loadSubjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      const res = await apiGet<{ success: boolean; data: Subject[] }>('/api/subjects');
+      if (res && res.success && res.data) {
+        setSubjects(res.data);
+        for (const sub of res.data) {
+          fetchChapters(sub.id);
+        }
+      } else {
+        setErrorMsg('Failed to load subjects');
+      }
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Error loading subjects');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchChapters]);
+
   useEffect(() => {
     async function checkAuthAndLoad() {
       const user = await getCurrentUserClient();
@@ -54,42 +88,7 @@ export default function SubjectsPage() {
       loadSubjects();
     }
     checkAuthAndLoad();
-  }, [router]);
-
-  async function loadSubjects() {
-    try {
-      setLoading(true);
-      setErrorMsg(null);
-      const res = await apiGet<{ success: boolean; data: Subject[] }>('/api/subjects');
-      if (res && res.success && res.data) {
-        setSubjects(res.data);
-        // Automatically fetch chapters for all subjects
-        for (const sub of res.data) {
-          fetchChapters(sub.id);
-        }
-      } else {
-        setErrorMsg('Failed to load subjects');
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Error loading subjects');
-    } fontally: {
-      setLoading(false);
-    }
-  }
-
-  async function fetchChapters(subjectId: string) {
-    setLoadingChaptersMap((prev) => ({ ...prev, [subjectId]: true }));
-    try {
-      const res = await apiGet<{ success: boolean; data: Chapter[] }>(`/api/chapters?subjectId=${subjectId}`);
-      if (res && res.success && res.data) {
-        setChaptersMap((prev) => ({ ...prev, [subjectId]: res.data }));
-      }
-    } catch (err) {
-      console.error(`Failed to load chapters for subject ${subjectId}`, err);
-    } finally {
-      setLoadingChaptersMap((prev) => ({ ...prev, [subjectId]: false }));
-    }
-  }
+  }, [router, loadSubjects]);
 
   const handleCreateSubject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,8 +112,8 @@ export default function SubjectsPage() {
       } else {
         setSubjectError(response.message || 'Failed to create subject');
       }
-    } catch (err: any) {
-      setSubjectError(err.message || 'An error occurred while creating subject');
+    } catch (err: unknown) {
+      setSubjectError(err instanceof Error ? err.message : 'An error occurred while creating subject');
     } finally {
       setSavingSubject(false);
     }
@@ -144,8 +143,8 @@ export default function SubjectsPage() {
       } else {
         setChapterError(response.message || 'Failed to create chapter');
       }
-    } catch (err: any) {
-      setChapterError(err.message || 'An error occurred while creating chapter');
+    } catch (err: unknown) {
+      setChapterError(err instanceof Error ? err.message : 'An error occurred while creating chapter');
     } finally {
       setSavingChapter(false);
     }
@@ -155,7 +154,7 @@ export default function SubjectsPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading subjects...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading subjects...</span>
       </div>
     );
   }
@@ -187,9 +186,9 @@ export default function SubjectsPage() {
 
       {/* Error state */}
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <p className="text-sm text-red-600">
-            <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+        <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+          <p className="text-sm text-status-danger-text">
+            <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
           </p>
         </div>
       )}
@@ -198,7 +197,7 @@ export default function SubjectsPage() {
       {subjects.length === 0 ? (
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-12 text-center shadow-card">
           <p className="text-base font-semibold text-foreground">No subjects found</p>
-          <p className="text-sm text-muted-foreground mt-1">Click "+ Add Subject" above to create your first subject.</p>
+          <p className="text-sm text-muted-foreground mt-1">Click &quot;+ Add Subject&quot; above to create your first subject.</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -270,7 +269,7 @@ export default function SubjectsPage() {
             </div>
 
             {subjectError && (
-              <div className="p-3 bg-red-50 text-xs text-red-600 rounded-lg border border-red-200">
+              <div className="p-3 bg-status-danger-bg text-xs text-status-danger-text rounded-lg border border-status-danger-border">
                 {subjectError}
               </div>
             )}
@@ -327,7 +326,7 @@ export default function SubjectsPage() {
             </div>
 
             {chapterError && (
-              <div className="p-3 bg-red-50 text-xs text-red-600 rounded-lg border border-red-200">
+              <div className="p-3 bg-status-danger-bg text-xs text-status-danger-text rounded-lg border border-status-danger-border">
                 {chapterError}
               </div>
             )}

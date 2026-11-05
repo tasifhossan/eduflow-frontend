@@ -57,8 +57,8 @@ export default function MyBatchesListPage() {
         } else {
           setErrorMsg('Failed to load your enrolled batches');
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'An error occurred while fetching your batches');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'An error occurred while fetching your batches');
       } finally {
         setLoading(false);
       }
@@ -69,7 +69,7 @@ export default function MyBatchesListPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading your batches...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading your batches...</span>
       </div>
     );
   }
@@ -77,21 +77,21 @@ export default function MyBatchesListPage() {
   return (
     <div className="p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-5">
-        <nav className="flex text-sm text-gray-500 gap-x-2 mb-1">
+      <div className="border-b border-border pb-5">
+        <nav className="flex text-sm text-muted-foreground gap-x-2 mb-1">
           <Link href="/dashboard" className="hover:text-primary font-medium">Dashboard</Link>
           <span>/</span>
-          <span className="text-gray-900 font-semibold">My Batches</span>
+          <span className="text-foreground font-semibold">My Batches</span>
         </nav>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Enrolled Batches</h1>
-        <p className="mt-1 text-sm text-gray-500">View details, schedules, and active tests for your enrolled courses</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Enrolled Batches</h1>
+        <p className="mt-1 text-sm text-muted-foreground">View details, schedules, and active tests for your enrolled courses</p>
       </div>
 
       {/* Error State */}
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <p className="text-sm text-red-600">
-            <span className="font-semibold text-red-800">Error:</span> {errorMsg}
+        <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+          <p className="text-sm text-status-danger-text">
+            <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
           </p>
         </div>
       )}
@@ -117,8 +117,8 @@ export default function MyBatchesListPage() {
                   <span
                     className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                       batch.type === 'ACADEMIC'
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-blue-500/20'
-                        : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-purple-500/20'
+                        ? 'bg-primary/10 text-primary ring-primary/20'
+                        : 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
                     }`}
                   >
                     {batch.type}

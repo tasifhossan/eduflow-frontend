@@ -81,8 +81,8 @@ export default function StudentBatchDetailPage() {
         if (routineRes && routineRes.success && routineRes.data) {
           setRoutine(routineRes.data);
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'An error occurred while loading batch information.');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'An error occurred while loading batch information.');
       } finally {
         setLoading(false);
       }
@@ -97,7 +97,7 @@ export default function StudentBatchDetailPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading batch details...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading batch details...</span>
       </div>
     );
   }
@@ -105,12 +105,12 @@ export default function StudentBatchDetailPage() {
   if (errorMsg || !batch) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-xl bg-red-50 p-6 border border-red-200 text-center">
-          <h2 className="text-lg font-bold text-red-800">Access Denied / Error</h2>
-          <p className="text-sm text-red-600 mt-1">{errorMsg || 'Batch not found or you are not actively enrolled.'}</p>
+        <div className="rounded-xl bg-status-danger-bg p-6 border border-status-danger-border text-center">
+          <h2 className="text-lg font-bold text-status-danger-text">Access Denied / Error</h2>
+          <p className="text-sm text-status-danger-text mt-1">{errorMsg || 'Batch not found or you are not actively enrolled.'}</p>
           <Link
             href="/my-batches"
-            className="mt-4 inline-block px-4 py-2 bg-red-600 text-white font-semibold text-sm rounded-lg hover:bg-red-700 transition"
+            className="mt-4 inline-block px-4 py-2 bg-danger text-danger-foreground font-semibold text-sm rounded-lg hover:bg-danger-hover transition"
           >
             ← Back to My Batches
           </Link>
@@ -138,8 +138,8 @@ export default function StudentBatchDetailPage() {
               <span
                 className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 mt-0.5 sm:mt-0 ${
                   batch.type === 'ACADEMIC'
-                    ? 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-950 dark:text-blue-300'
-                    : 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-950 dark:text-purple-300'
+                    ? 'bg-primary/10 text-primary ring-primary/20'
+                    : 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
                 }`}
               >
                 {batch.type}

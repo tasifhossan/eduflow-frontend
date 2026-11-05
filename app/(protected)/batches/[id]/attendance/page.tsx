@@ -57,6 +57,22 @@ export default function MarkAttendancePage({ params }: PageProps) {
 
   // Role validation
   useEffect(() => {
+    async function loadBatchInfo() {
+      try {
+        const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
+        if (batchRes.success) {
+          setBatch(batchRes.data);
+        }
+        
+        const studentsRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`);
+        if (studentsRes.success) {
+          setStudents(studentsRes.data);
+        }
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load batch/students data');
+      }
+    }
+
     async function init() {
       const user = await getCurrentUserClient();
       if (!user) {
@@ -71,23 +87,6 @@ export default function MarkAttendancePage({ params }: PageProps) {
     }
     init();
   }, [batchId, router]);
-
-  // Fetch batch details and students once on load
-  async function loadBatchInfo() {
-      try {
-        const batchRes = await apiGet<{ success: boolean; data: BatchDetails }>(`/api/batches/${batchId}`);
-        if (batchRes.success) {
-          setBatch(batchRes.data);
-        }
-        
-        const studentsRes = await apiGet<{ success: boolean; data: Student[] }>(`/api/batches/${batchId}/students`);
-        if (studentsRes.success) {
-          setStudents(studentsRes.data);
-        }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load batch/students data');
-      }
-    }
 
   // Fetch or reset attendance state when students list or date changes
   useEffect(() => {
@@ -120,7 +119,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
         });
 
         setAttendance(initialAttendance);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.warn('Failed to load existing attendance, defaulting to PRESENT:', err);
         // Default all to PRESENT if fetch fails/has no records
         const defaultAttendance: Record<string, 'PRESENT' | 'ABSENT' | 'LATE'> = {};
@@ -165,8 +164,8 @@ export default function MarkAttendancePage({ params }: PageProps) {
       } else {
         setErrorMsg(response.message || 'Failed to save attendance');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred while saving attendance');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred while saving attendance');
     } finally {
       setSaving(false);
     }
@@ -176,9 +175,9 @@ export default function MarkAttendancePage({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         {errorMsg ? (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200 text-center max-w-md">
-            <h3 className="text-sm font-semibold text-red-800">Error Loading Batch</h3>
-            <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border text-center max-w-md">
+            <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Batch</h3>
+            <p className="text-sm text-status-danger-text mt-1">{errorMsg}</p>
             <Link href="/batches" className="text-primary hover:text-primary-hover hover:underline text-sm font-semibold mt-4 block">
               &larr; Back to batches
             </Link>
@@ -186,7 +185,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
         ) : (
           <div className="flex flex-col items-center">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <span className="mt-3 text-sm text-gray-500 font-medium">Loading batch info...</span>
+            <span className="mt-3 text-sm text-muted-foreground font-medium">Loading batch info...</span>
           </div>
         )}
       </div>
@@ -230,15 +229,15 @@ export default function MarkAttendancePage({ params }: PageProps) {
 
         {/* Notifications */}
         {errorMsg && (
-          <div className="rounded-lg bg-red-500/10 p-4 border border-red-500/20">
-            <p className="text-sm text-red-600 dark:text-red-400">
-              <span className="font-semibold text-red-700 dark:text-red-300">Error:</span> {errorMsg}
+          <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+            <p className="text-sm text-status-danger-text">
+              <span className="font-semibold text-status-danger-text">Error:</span> {errorMsg}
             </p>
           </div>
         )}
         {successMsg && (
-          <div className="rounded-lg bg-green-500/10 p-4 border border-green-500/20">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+          <div className="rounded-lg bg-status-success-bg p-4 border border-status-success-border">
+            <p className="text-sm text-status-success-text font-medium">
               ✓ {successMsg}
             </p>
           </div>
@@ -296,7 +295,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
                                 onClick={() => handleStatusChange(student.id, 'PRESENT')}
                                 className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${
                                   status === 'PRESENT'
-                                    ? 'bg-green-600 text-white shadow-sm'
+                                    ? 'bg-status-success text-status-success-fg shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
@@ -307,7 +306,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
                                 onClick={() => handleStatusChange(student.id, 'ABSENT')}
                                 className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${
                                   status === 'ABSENT'
-                                    ? 'bg-red-600 text-white shadow-sm'
+                                    ? 'bg-status-danger text-status-danger-fg shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
@@ -318,7 +317,7 @@ export default function MarkAttendancePage({ params }: PageProps) {
                                 onClick={() => handleStatusChange(student.id, 'LATE')}
                                 className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${
                                   status === 'LATE'
-                                    ? 'bg-amber-500 text-white shadow-sm'
+                                    ? 'bg-status-warning text-status-warning-fg shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
