@@ -36,11 +36,11 @@ type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
 
 function typeBadgeClass(type: string) {
   const map: Record<string, string> = {
-    MCQ: 'bg-blue-50 text-blue-700 ring-blue-700/10',
-    WRITTEN: 'bg-purple-50 text-purple-700 ring-purple-700/10',
-    MIXED: 'bg-amber-50 text-amber-700 ring-amber-700/10',
+    MCQ: 'bg-primary/10 text-primary border border-primary/20',
+    WRITTEN: 'bg-surface-hover text-foreground border border-border',
+    MIXED: 'bg-status-warning-bg text-status-warning-text border border-status-warning-border',
   };
-  return map[type] ?? 'bg-gray-50 text-gray-700 ring-gray-600/20';
+  return map[type] ?? 'bg-muted text-muted-foreground border border-border';
 }
 
 // ─── Page ──────────────────────────────────────────────────────────────────
@@ -191,7 +191,7 @@ export default function TestsHubPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-base text-gray-500 font-medium">Loading tests…</span>
+        <span className="ml-3 text-base text-muted-foreground font-medium">Loading tests…</span>
       </div>
     );
   }
@@ -303,8 +303,8 @@ export default function TestsHubPage() {
                 <span
                   className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset shrink-0 ${
                     batch.type === 'ACADEMIC'
-                      ? 'bg-blue-50 text-blue-700 ring-blue-700/10 dark:bg-blue-950/40 dark:text-blue-300 dark:ring-blue-400/20'
-                      : 'bg-amber-50 text-amber-700 ring-amber-700/10 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-400/20'
+                      ? 'bg-primary/10 text-primary ring-primary/20'
+                      : 'bg-status-warning-bg text-status-warning-text ring-status-warning-border'
                   }`}
                 >
                   {batch.type}

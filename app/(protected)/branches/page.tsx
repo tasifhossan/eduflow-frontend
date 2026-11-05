@@ -53,8 +53,8 @@ export default function BranchesManagementPage() {
         } else {
           setErrorMsg('Failed to load branches.');
         }
-      } catch (err: any) {
-        setErrorMsg(err.message || 'Failed to load branches.');
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load branches.');
       } finally {
         setLoading(false);
       }
@@ -124,8 +124,8 @@ export default function BranchesManagementPage() {
           setFormError('Failed to create branch.');
         }
       }
-    } catch (err: any) {
-      setFormError(err.message || 'An error occurred.');
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : 'An error occurred.');
     } finally {
       setIsSubmitting(false);
     }
@@ -142,8 +142,8 @@ export default function BranchesManagementPage() {
       } else {
         alert('Failed to delete branch.');
       }
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete branch.');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to delete branch.');
     } finally {
       setDeletingId(null);
     }
@@ -153,7 +153,7 @@ export default function BranchesManagementPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="ml-3 text-lg text-gray-500 font-medium">Loading branches...</span>
+        <span className="ml-3 text-lg text-muted-foreground font-medium">Loading branches...</span>
       </div>
     );
   }
@@ -161,9 +161,9 @@ export default function BranchesManagementPage() {
   if (errorMsg) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <h3 className="text-sm font-semibold text-red-800">Error Loading Branches</h3>
-          <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+        <div className="rounded-lg bg-status-danger-bg p-4 border border-status-danger-border">
+          <h3 className="text-sm font-semibold text-status-danger-text">Error Loading Branches</h3>
+          <p className="text-sm text-status-danger-text mt-1">{errorMsg}</p>
         </div>
         <Link href="/dashboard" className="text-primary hover:text-primary-hover hover:underline text-sm font-medium">
           &larr; Back to Dashboard
@@ -198,7 +198,7 @@ export default function BranchesManagementPage() {
       <div className="rounded-[var(--radius-card)] border border-border bg-surface shadow-card overflow-hidden">
         {branches.length === 0 ? (
           <p className="text-sm text-muted-foreground italic py-12 text-center">
-            No branches found. Click "+ Add New Branch" to create one.
+            No branches found. Click &quot;+ Add New Branch&quot; to create one.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -229,7 +229,7 @@ export default function BranchesManagementPage() {
                       <button
                         onClick={() => handleDelete(b.id)}
                         disabled={deletingId === b.id}
-                        className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 disabled:opacity-50 transition"
+                        className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-status-danger-bg text-status-danger-text border border-status-danger-border hover:bg-danger-subtle disabled:opacity-50 transition"
                       >
                         {deletingId === b.id ? 'Deleting...' : 'Delete'}
                       </button>
@@ -260,7 +260,7 @@ export default function BranchesManagementPage() {
             </div>
 
             {formError && (
-              <div className="p-3 bg-red-500/10 text-red-600 dark:text-red-400 text-xs rounded-lg border border-red-500/20">
+              <div className="p-3 bg-status-danger-bg text-status-danger-text text-xs rounded-lg border border-status-danger-border">
                 {formError}
               </div>
             )}

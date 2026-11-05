@@ -39,6 +39,14 @@ const CONVERTED_PATTERNS = [
   path.normalize('app/(protected)/batches/[id]/resources/page.tsx'),
   path.normalize('app/(protected)/my-children/[studentId]/page.tsx'),
   path.normalize('app/(protected)/batches/[id]/analytics/page.tsx'),
+  path.normalize('app/(protected)/tests/page.tsx'),
+  path.normalize('app/(protected)/batches/[id]/attendance/page.tsx'),
+  path.normalize('app/(protected)/my-batches/page.tsx'),
+  path.normalize('app/(protected)/batches/[id]/routine/page.tsx'),
+  path.normalize('app/(protected)/my-batches/[id]/page.tsx'),
+  path.normalize('app/(protected)/branches/page.tsx'),
+  path.normalize('app/(protected)/super-admin/page.tsx'),
+  path.normalize('app/(protected)/subjects/page.tsx'),
 ];
 
 function isConvertedFile(relPath: string): boolean {
