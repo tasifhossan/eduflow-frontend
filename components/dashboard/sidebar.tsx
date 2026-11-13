@@ -128,7 +128,7 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         name: 'Students',
         href: '/students',
-        roles: ['ADMIN', 'TEACHER', 'ACCOUNTANT'],
+        roles: ['ADMIN', 'TEACHER'],
         icon: Users,
       },
       {
