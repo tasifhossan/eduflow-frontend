@@ -79,11 +79,12 @@ export default function WebsiteTeachersPage() {
       if (visibilityFilter === 'public') params.set('isPublicProfile', 'true');
       if (visibilityFilter === 'hidden') params.set('isPublicProfile', 'false');
 
-      const res = await apiGet<{ success: boolean; data: { teachers: TeacherCmsRecord[] } }>(
+      const res = await apiGet<{ success: boolean; data: { teachers?: TeacherCmsRecord[]; items?: TeacherCmsRecord[] } }>(
         `/api/cms/teachers?${params.toString()}`
       );
-      if (res.success && res.data?.teachers) {
-        setTeachers(res.data.teachers);
+      if (res.success && res.data) {
+        const list = res.data.items || res.data.teachers || [];
+        setTeachers(list);
       } else {
         setError('Failed to load teachers.');
       }
@@ -102,13 +103,14 @@ export default function WebsiteTeachersPage() {
     if (visibilityFilter === 'public') params.set('isPublicProfile', 'true');
     if (visibilityFilter === 'hidden') params.set('isPublicProfile', 'false');
 
-    apiGet<{ success: boolean; data: { teachers: TeacherCmsRecord[] } }>(
+    apiGet<{ success: boolean; data: { teachers?: TeacherCmsRecord[]; items?: TeacherCmsRecord[] } }>(
       `/api/cms/teachers?${params.toString()}`
     )
       .then((res) => {
         if (!mounted) return;
-        if (res.success && res.data?.teachers) {
-          setTeachers(res.data.teachers);
+        if (res.success && res.data) {
+          const list = res.data.items || res.data.teachers || [];
+          setTeachers(list);
         } else {
           setError('Failed to load teachers.');
         }
