@@ -430,9 +430,9 @@ export function DashboardSidebar({
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive =
-                    item.href === '/dashboard'
-                      ? pathname === '/dashboard'
-                      : pathname.startsWith(item.href);
+                    item.href === '/dashboard' || item.href === '/website'
+                      ? pathname === item.href
+                      : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                   return (
                     <li key={item.name}>
