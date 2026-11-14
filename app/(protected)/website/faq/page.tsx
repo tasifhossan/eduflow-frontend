@@ -73,7 +73,11 @@ export default function WebsiteFaqPage() {
     try {
       const res = await apiGet<{ success: boolean; data: { items?: FaqRecord[]; faqs?: FaqRecord[] } }>('/api/cms/faq?limit=100');
       if (res.success && res.data) {
-        const list = res.data.items || res.data.faqs || [];
+        const list = Array.isArray(res.data.items)
+          ? res.data.items
+          : Array.isArray(res.data.faqs)
+          ? res.data.faqs
+          : [];
         setItems(list);
       } else {
         setError('Failed to load FAQ items.');
@@ -91,7 +95,11 @@ export default function WebsiteFaqPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          const list = res.data.items || res.data.faqs || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.faqs)
+            ? res.data.faqs
+            : [];
           setItems(list);
         } else {
           setError('Failed to load FAQ items.');

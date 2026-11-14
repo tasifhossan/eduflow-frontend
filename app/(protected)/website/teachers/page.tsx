@@ -83,7 +83,11 @@ export default function WebsiteTeachersPage() {
         `/api/cms/teachers?${params.toString()}`
       );
       if (res.success && res.data) {
-        const list = res.data.items || res.data.teachers || [];
+        const list = Array.isArray(res.data.items)
+          ? res.data.items
+          : Array.isArray(res.data.teachers)
+          ? res.data.teachers
+          : [];
         setTeachers(list);
       } else {
         setError('Failed to load teachers.');
@@ -109,7 +113,11 @@ export default function WebsiteTeachersPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          const list = res.data.items || res.data.teachers || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.teachers)
+            ? res.data.teachers
+            : [];
           setTeachers(list);
         } else {
           setError('Failed to load teachers.');

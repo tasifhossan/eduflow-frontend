@@ -88,7 +88,11 @@ export default function WebsiteReviewsPage() {
         );
 
         if (res.success && res.data) {
-          const list = res.data.items || res.data.reviews || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.reviews)
+            ? res.data.reviews
+            : [];
           setReviews(list);
           if (res.data.pagination) setPagination(res.data.pagination);
         } else {
@@ -118,7 +122,11 @@ export default function WebsiteReviewsPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          const list = res.data.items || res.data.reviews || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.reviews)
+            ? res.data.reviews
+            : [];
           setReviews(list);
           if (res.data.pagination) setPagination(res.data.pagination);
         } else {

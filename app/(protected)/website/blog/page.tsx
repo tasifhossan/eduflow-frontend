@@ -85,7 +85,11 @@ export default function WebsiteBlogListPage() {
         );
 
         if (res.success && res.data) {
-          const list = res.data.items || res.data.posts || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.posts)
+            ? res.data.posts
+            : [];
           setPosts(list);
           if (res.data.pagination) setPagination(res.data.pagination);
 
@@ -123,7 +127,11 @@ export default function WebsiteBlogListPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          const list = res.data.items || res.data.posts || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.posts)
+            ? res.data.posts
+            : [];
           setPosts(list);
           if (res.data.pagination) setPagination(res.data.pagination);
           const cats = Array.from(

@@ -78,7 +78,11 @@ export default function WebsiteTestimonialsPage() {
         '/api/cms/testimonials?limit=100'
       );
       if (res.success && res.data) {
-        const list = res.data.items || res.data.testimonials || [];
+        const list = Array.isArray(res.data.items)
+          ? res.data.items
+          : Array.isArray(res.data.testimonials)
+          ? res.data.testimonials
+          : [];
         setTestimonials(list);
       } else {
         setError('Failed to load testimonials.');
@@ -98,7 +102,11 @@ export default function WebsiteTestimonialsPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          const list = res.data.items || res.data.testimonials || [];
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.testimonials)
+            ? res.data.testimonials
+            : [];
           setTestimonials(list);
         } else {
           setError('Failed to load testimonials.');

@@ -122,11 +122,16 @@ export default function BlogEditorPage() {
   // Load existing categories for combobox
   React.useEffect(() => {
     let mounted = true;
-    apiGet<{ success: boolean; data: { posts: Array<{ category?: string | null }> } }>('/api/cms/blog?limit=50')
+    apiGet<{ success: boolean; data: { posts?: Array<{ category?: string | null }>; items?: Array<{ category?: string | null }> } }>('/api/cms/blog?limit=50')
       .then((res) => {
-        if (mounted && res.success && res.data?.posts) {
+        if (mounted && res.success && res.data) {
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.posts)
+            ? res.data.posts
+            : [];
           const cats = Array.from(
-            new Set(res.data.posts.map((p) => p.category?.trim()).filter((c): c is string => Boolean(c)))
+            new Set(list.map((p) => p.category?.trim()).filter((c): c is string => Boolean(c)))
           );
           setExistingCategories(cats);
         }
