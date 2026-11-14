@@ -22,7 +22,7 @@ export interface CloudinaryUploadResult {
 }
 
 export interface UploadOptions {
-  purpose: 'material' | 'submission' | 'branding';
+  purpose: 'material' | 'submission' | 'branding' | 'content';
   file: File;
   onProgress?: (percent: number) => void;
   signal?: AbortSignal;
@@ -41,7 +41,7 @@ const limitsCache = new Map<string, Promise<UploadLimits>>();
  * Fetches dynamic upload constraints from backend signature endpoint.
  * Zero hardcoded video/audio formats.
  */
-export async function getUploadLimits(purpose: 'material' | 'submission' | 'branding'): Promise<UploadLimits> {
+export async function getUploadLimits(purpose: 'material' | 'submission' | 'branding' | 'content'): Promise<UploadLimits> {
   const cached = limitsCache.get(purpose);
   if (cached) return cached;
 
@@ -69,10 +69,15 @@ export async function getUploadLimits(purpose: 'material' | 'submission' | 'bran
     const fallbackFormats =
       purpose === 'submission'
         ? ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'webp']
-        : purpose === 'branding'
+        : purpose === 'branding' || purpose === 'content'
         ? ['png', 'jpg', 'jpeg', 'webp']
         : ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'webp'];
-    const fallbackMax = purpose === 'submission' ? 10 * 1024 * 1024 : purpose === 'branding' ? 2 * 1024 * 1024 : 15 * 1024 * 1024;
+    const fallbackMax =
+      purpose === 'submission'
+        ? 10 * 1024 * 1024
+        : purpose === 'branding' || purpose === 'content'
+        ? 2 * 1024 * 1024
+        : 15 * 1024 * 1024;
     return {
       allowedFormats: fallbackFormats,
       maxBytes: fallbackMax,

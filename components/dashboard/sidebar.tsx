@@ -27,6 +27,11 @@ import {
   BarChart3,
   Award,
   X,
+  Globe,
+  HelpCircle,
+  MessageSquareQuote,
+  Star,
+  UserCheck,
 } from 'lucide-react';
 import type { CenterPublicData, CenterFeatures } from '@/lib/types/center';
 
@@ -128,7 +133,7 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         name: 'Students',
         href: '/students',
-        roles: ['ADMIN', 'TEACHER', 'ACCOUNTANT'],
+        roles: ['ADMIN', 'TEACHER'],
         icon: Users,
       },
       {
@@ -200,6 +205,47 @@ export const NAV_GROUPS: NavGroup[] = [
         href: '/audit-logs',
         roles: ['ADMIN', 'SUPER_ADMIN'],
         icon: ClipboardList,
+      },
+    ],
+  },
+  {
+    label: 'Website',
+    items: [
+      {
+        name: 'Content Hub',
+        href: '/website',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: Globe,
+      },
+      {
+        name: 'Blog',
+        href: '/website/blog',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: FileText,
+      },
+      {
+        name: 'FAQ',
+        href: '/website/faq',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: HelpCircle,
+      },
+      {
+        name: 'Testimonials',
+        href: '/website/testimonials',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: MessageSquareQuote,
+      },
+      {
+        name: 'Teachers',
+        href: '/website/teachers',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: UserCheck,
+      },
+      {
+        name: 'Reviews',
+        href: '/website/reviews',
+        roles: ['ADMIN', 'SUPER_ADMIN'],
+        icon: Star,
       },
     ],
   },

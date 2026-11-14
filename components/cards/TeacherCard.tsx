@@ -13,6 +13,8 @@ export interface TeacherData {
   avatarUrl?: string | null;
   subjectName?: string | null;
   batchCount?: number;
+  qualifications?: string | null;
+  experienceYears?: number | null;
 }
 
 export interface TeacherCardProps {
@@ -63,6 +65,18 @@ export function TeacherCard({ teacher, className }: TeacherCardProps) {
       {teacher.headline && (
         <p className="mt-1 text-xs font-semibold text-primary line-clamp-1">
           {teacher.headline}
+        </p>
+      )}
+
+      {teacher.qualifications && (
+        <p className="mt-1 text-[11px] font-medium text-muted-foreground line-clamp-1">
+          {teacher.qualifications}
+        </p>
+      )}
+
+      {typeof teacher.experienceYears === 'number' && teacher.experienceYears > 0 && (
+        <p className="text-[11px] text-muted-foreground">
+          {teacher.experienceYears} {teacher.experienceYears === 1 ? 'yr' : 'yrs'} exp
         </p>
       )}
 

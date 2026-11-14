@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, KeyRound, LogOut, ChevronDown, Building, Moon, Sun } from 'lucide-react';
+import { Menu, KeyRound, LogOut, ChevronDown, Building, Moon, Sun, UserCheck } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { apiPost } from '@/lib/api';
@@ -106,6 +106,17 @@ export function DashboardHeader({
       icon: <KeyRound className="h-4 w-4" aria-hidden="true" />,
       onClick: () => router.push('/change-password'),
     },
+    // Teacher public profile
+    ...(user.role === 'TEACHER'
+      ? [
+          {
+            id: 'public-profile',
+            label: 'My public profile',
+            icon: <UserCheck className="h-4 w-4" aria-hidden="true" />,
+            onClick: () => router.push('/profile/public'),
+          },
+        ]
+      : []),
     // 3. Theme toggle row
     {
       custom: (
