@@ -71,9 +71,14 @@ export default function WebsiteFaqPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiGet<{ success: boolean; data: { items: FaqRecord[] } }>('/api/cms/faq?limit=100');
-      if (res.success && res.data?.items) {
-        setItems(res.data.items);
+      const res = await apiGet<{ success: boolean; data: { items?: FaqRecord[]; faqs?: FaqRecord[] } }>('/api/cms/faq?limit=100');
+      if (res.success && res.data) {
+        const list = Array.isArray(res.data.items)
+          ? res.data.items
+          : Array.isArray(res.data.faqs)
+          ? res.data.faqs
+          : [];
+        setItems(list);
       } else {
         setError('Failed to load FAQ items.');
       }
@@ -86,11 +91,16 @@ export default function WebsiteFaqPage() {
 
   React.useEffect(() => {
     let mounted = true;
-    apiGet<{ success: boolean; data: { items: FaqRecord[] } }>('/api/cms/faq?limit=100')
+    apiGet<{ success: boolean; data: { items?: FaqRecord[]; faqs?: FaqRecord[] } }>('/api/cms/faq?limit=100')
       .then((res) => {
         if (!mounted) return;
-        if (res.success && res.data?.items) {
-          setItems(res.data.items);
+        if (res.success && res.data) {
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.faqs)
+            ? res.data.faqs
+            : [];
+          setItems(list);
         } else {
           setError('Failed to load FAQ items.');
         }

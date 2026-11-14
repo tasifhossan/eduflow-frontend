@@ -9,6 +9,7 @@ import {
   Clock,
   AlertCircle,
   UserCheck,
+  Star,
 } from 'lucide-react';
 import { RequireRole } from '@/components/providers/require-role';
 import { PageHeader } from '@/components/dashboard/page-header';
@@ -19,11 +20,12 @@ import { ErrorState } from '@/components/ui/error-state';
 import { apiGet } from '@/lib/api';
 
 interface CmsSummaryData {
-  blog: { draft: number; scheduled: number; published: number; total: number };
-  faq: { draft: number; scheduled: number; published: number; total: number };
-  testimonials: { draft: number; scheduled: number; published: number; total: number };
-  reviews: { visible: number; hidden: number; total: number };
-  teachers: { publicCount: number; totalCount: number };
+  blog?: { draft?: number; scheduled?: number; published?: number };
+  faq?: { draft?: number; scheduled?: number; published?: number };
+  testimonials?: { draft?: number; scheduled?: number; published?: number };
+  hiddenReviews?: number;
+  teachers?: { public?: number; total?: number; publicCount?: number; totalCount?: number };
+  reviews?: { visible?: number; hidden?: number };
 }
 
 export default function WebsiteHubPage() {
@@ -116,201 +118,217 @@ export default function WebsiteHubPage() {
             ))}
           </div>
         ) : data ? (
-          <div className="space-y-6">
-            {/* Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* 1. Blog Card */}
-              <SectionCard
-                title="Blog Articles"
-                description="Articles & admissions announcements"
-                className="flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.blog.published}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Published</div>
-                    </div>
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.blog.scheduled}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Scheduled</div>
-                    </div>
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.blog.draft}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Draft</div>
-                    </div>
-                  </div>
+          (() => {
+            const blogPublished = data.blog?.published ?? 0;
+            const blogScheduled = data.blog?.scheduled ?? 0;
+            const blogDraft = data.blog?.draft ?? 0;
 
-                  {data.blog.published === 0 && (
-                    <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
-                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>No published blog posts yet: this section is hidden on your website.</span>
-                    </div>
-                  )}
+            const faqPublished = data.faq?.published ?? 0;
+            const faqDraft = data.faq?.draft ?? 0;
 
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href="/website/blog" className="flex items-center justify-center gap-1.5">
-                      <span>Manage Blog</span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Link>
-                  </Button>
+            const testPublished = data.testimonials?.published ?? 0;
+            const testDraft = data.testimonials?.draft ?? 0;
+
+            const publicTeachers = data.teachers?.public ?? data.teachers?.publicCount ?? 0;
+            const totalTeachers = data.teachers?.total ?? data.teachers?.totalCount ?? 0;
+
+            const hiddenReviews = data.hiddenReviews ?? data.reviews?.hidden ?? 0;
+
+            return (
+              <div className="space-y-6">
+                {/* Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* 1. Blog Card */}
+                  <SectionCard
+                    title="Blog Articles"
+                    description="Articles & admissions announcements"
+                    className="flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {blogPublished}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Published</div>
+                        </div>
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {blogScheduled}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Scheduled</div>
+                        </div>
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {blogDraft}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Draft</div>
+                        </div>
+                      </div>
+
+                      {blogPublished === 0 && (
+                        <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
+                          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+                          <span>No published blog posts yet: this section is hidden on your website.</span>
+                        </div>
+                      )}
+
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/website/blog" className="flex items-center justify-center gap-1.5">
+                          <span>Manage Blog</span>
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </SectionCard>
+
+                  {/* 2. FAQ Card */}
+                  <SectionCard
+                    title="Admissions FAQ"
+                    description="Frequently asked student questions"
+                    className="flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3 text-center">
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {faqPublished}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Published</div>
+                        </div>
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {faqDraft}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Draft</div>
+                        </div>
+                      </div>
+
+                      {faqPublished === 0 && (
+                        <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
+                          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+                          <span>No published FAQ yet: this section is hidden on your website.</span>
+                        </div>
+                      )}
+
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/website/faq" className="flex items-center justify-center gap-1.5">
+                          <span>Manage FAQ</span>
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </SectionCard>
+
+                  {/* 3. Testimonials Card */}
+                  <SectionCard
+                    title="Student Testimonials"
+                    description="Verified quotes & parent feedback"
+                    className="flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3 text-center">
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {testPublished}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Published</div>
+                        </div>
+                        <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
+                          <div className="text-lg font-bold text-foreground">
+                            {testDraft}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">Draft</div>
+                        </div>
+                      </div>
+
+                      {testPublished === 0 && (
+                        <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
+                          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+                          <span>No published testimonials yet: this section is hidden on your website.</span>
+                        </div>
+                      )}
+
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/website/testimonials" className="flex items-center justify-center gap-1.5">
+                          <span>Manage Testimonials</span>
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </SectionCard>
+
+                  {/* 4. Faculty Profiles Card */}
+                  <SectionCard
+                    title="Faculty Profiles"
+                    description="Public teacher bios & designations"
+                    className="flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      <div className="p-3 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-foreground">
+                            {publicTeachers} / {totalTeachers}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Teachers showing publicly
+                          </div>
+                        </div>
+                        <UserCheck className="h-8 w-8 text-primary/70 shrink-0" aria-hidden="true" />
+                      </div>
+
+                      {publicTeachers === 0 && (
+                        <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
+                          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+                          <span>No public teacher profiles yet: faculty section is hidden on your website.</span>
+                        </div>
+                      )}
+
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/website/teachers" className="flex items-center justify-center gap-1.5">
+                          <span>Manage Teachers</span>
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </SectionCard>
+
+                  {/* 5. Reviews Moderation Card */}
+                  <SectionCard
+                    title="Reviews Moderation"
+                    description="Student course ratings & visibility"
+                    className="flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      <div className="p-3 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-foreground">
+                            {hiddenReviews}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Hidden reviews
+                          </div>
+                        </div>
+                        <Star className="h-8 w-8 text-warning/70 shrink-0" aria-hidden="true" />
+                      </div>
+
+                      <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-surface-hover/40 border border-border text-xs text-muted-foreground">
+                        <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+                        <span>Hidden reviews are excluded from course ratings and avg score.</span>
+                      </div>
+
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/website/reviews" className="flex items-center justify-center gap-1.5">
+                          <span>Moderate Reviews</span>
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </SectionCard>
                 </div>
-              </SectionCard>
-
-              {/* 2. FAQ Card */}
-              <SectionCard
-                title="Admissions FAQ"
-                description="Frequently asked student questions"
-                className="flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 text-center">
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.faq.published}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Published</div>
-                    </div>
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.faq.draft}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Draft</div>
-                    </div>
-                  </div>
-
-                  {data.faq.published === 0 && (
-                    <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
-                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>No published FAQ yet: this section is hidden on your website.</span>
-                    </div>
-                  )}
-
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href="/website/faq" className="flex items-center justify-center gap-1.5">
-                      <span>Manage FAQ</span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </SectionCard>
-
-              {/* 3. Testimonials Card */}
-              <SectionCard
-                title="Student Testimonials"
-                description="Verified quotes & parent feedback"
-                className="flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 text-center">
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.testimonials.published}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Published</div>
-                    </div>
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.testimonials.draft}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Draft</div>
-                    </div>
-                  </div>
-
-                  {data.testimonials.published === 0 && (
-                    <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
-                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>No published testimonials yet: this section is hidden on your website.</span>
-                    </div>
-                  )}
-
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href="/website/testimonials" className="flex items-center justify-center gap-1.5">
-                      <span>Manage Testimonials</span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </SectionCard>
-
-              {/* 4. Faculty Profiles Card */}
-              <SectionCard
-                title="Faculty Profiles"
-                description="Public teacher bios & designations"
-                className="flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="p-3 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {data.teachers.publicCount} / {data.teachers.totalCount}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Teachers showing publicly
-                      </div>
-                    </div>
-                    <UserCheck className="h-8 w-8 text-primary/70 shrink-0" aria-hidden="true" />
-                  </div>
-
-                  {data.teachers.publicCount === 0 && (
-                    <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-status-warning-bg/60 border border-status-warning-border text-status-warning-text text-xs">
-                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-                      <span>No public teacher profiles yet: faculty section is hidden on your website.</span>
-                    </div>
-                  )}
-
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href="/website/teachers" className="flex items-center justify-center gap-1.5">
-                      <span>Manage Teachers</span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </SectionCard>
-
-              {/* 5. Reviews Moderation Card */}
-              <SectionCard
-                title="Reviews Moderation"
-                description="Student course ratings & visibility"
-                className="flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 text-center">
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.reviews.visible}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Visible</div>
-                    </div>
-                    <div className="p-2 rounded-[var(--radius-control)] bg-surface-hover/50 border border-border">
-                      <div className="text-lg font-bold text-foreground">
-                        {data.reviews.hidden}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Hidden</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2 p-2.5 rounded-[var(--radius-control)] bg-surface-hover/40 border border-border text-xs text-muted-foreground">
-                    <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" aria-hidden="true" />
-                    <span>Hidden reviews are excluded from course ratings and avg score.</span>
-                  </div>
-
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href="/website/reviews" className="flex items-center justify-center gap-1.5">
-                      <span>Moderate Reviews</span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </SectionCard>
-            </div>
-          </div>
+              </div>
+            );
+          })()
         ) : null}
       </div>
     </RequireRole>

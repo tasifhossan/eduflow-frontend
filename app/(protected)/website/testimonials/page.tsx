@@ -74,11 +74,16 @@ export default function WebsiteTestimonialsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiGet<{ success: boolean; data: { testimonials: TestimonialRecord[] } }>(
+      const res = await apiGet<{ success: boolean; data: { testimonials?: TestimonialRecord[]; items?: TestimonialRecord[] } }>(
         '/api/cms/testimonials?limit=100'
       );
-      if (res.success && res.data?.testimonials) {
-        setTestimonials(res.data.testimonials);
+      if (res.success && res.data) {
+        const list = Array.isArray(res.data.items)
+          ? res.data.items
+          : Array.isArray(res.data.testimonials)
+          ? res.data.testimonials
+          : [];
+        setTestimonials(list);
       } else {
         setError('Failed to load testimonials.');
       }
@@ -91,13 +96,18 @@ export default function WebsiteTestimonialsPage() {
 
   React.useEffect(() => {
     let mounted = true;
-    apiGet<{ success: boolean; data: { testimonials: TestimonialRecord[] } }>(
+    apiGet<{ success: boolean; data: { testimonials?: TestimonialRecord[]; items?: TestimonialRecord[] } }>(
       '/api/cms/testimonials?limit=100'
     )
       .then((res) => {
         if (!mounted) return;
-        if (res.success && res.data?.testimonials) {
-          setTestimonials(res.data.testimonials);
+        if (res.success && res.data) {
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.testimonials)
+            ? res.data.testimonials
+            : [];
+          setTestimonials(list);
         } else {
           setError('Failed to load testimonials.');
         }

@@ -38,7 +38,8 @@ interface ReviewCmsRecord {
 }
 
 interface ReviewListResponse {
-  reviews: ReviewCmsRecord[];
+  reviews?: ReviewCmsRecord[];
+  items?: ReviewCmsRecord[];
   pagination: {
     page: number;
     limit: number;
@@ -87,8 +88,13 @@ export default function WebsiteReviewsPage() {
         );
 
         if (res.success && res.data) {
-          setReviews(res.data.reviews);
-          setPagination(res.data.pagination);
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.reviews)
+            ? res.data.reviews
+            : [];
+          setReviews(list);
+          if (res.data.pagination) setPagination(res.data.pagination);
         } else {
           setError('Failed to load reviews.');
         }
@@ -116,8 +122,13 @@ export default function WebsiteReviewsPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          setReviews(res.data.reviews);
-          setPagination(res.data.pagination);
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.reviews)
+            ? res.data.reviews
+            : [];
+          setReviews(list);
+          if (res.data.pagination) setPagination(res.data.pagination);
         } else {
           setError('Failed to load reviews.');
         }

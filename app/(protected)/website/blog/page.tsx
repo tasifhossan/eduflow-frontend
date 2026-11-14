@@ -39,7 +39,8 @@ interface BlogPostSummary {
 }
 
 interface BlogListResponse {
-  posts: BlogPostSummary[];
+  posts?: BlogPostSummary[];
+  items?: BlogPostSummary[];
   pagination: {
     page: number;
     limit: number;
@@ -84,13 +85,18 @@ export default function WebsiteBlogListPage() {
         );
 
         if (res.success && res.data) {
-          setPosts(res.data.posts);
-          setPagination(res.data.pagination);
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.posts)
+            ? res.data.posts
+            : [];
+          setPosts(list);
+          if (res.data.pagination) setPagination(res.data.pagination);
 
           // Extract unique categories
           const cats = Array.from(
             new Set(
-              res.data.posts
+              list
                 .map((p) => p.category?.trim())
                 .filter((c): c is string => Boolean(c))
             )
@@ -121,11 +127,16 @@ export default function WebsiteBlogListPage() {
       .then((res) => {
         if (!mounted) return;
         if (res.success && res.data) {
-          setPosts(res.data.posts);
-          setPagination(res.data.pagination);
+          const list = Array.isArray(res.data.items)
+            ? res.data.items
+            : Array.isArray(res.data.posts)
+            ? res.data.posts
+            : [];
+          setPosts(list);
+          if (res.data.pagination) setPagination(res.data.pagination);
           const cats = Array.from(
             new Set(
-              res.data.posts
+              list
                 .map((p) => p.category?.trim())
                 .filter((c): c is string => Boolean(c))
             )
