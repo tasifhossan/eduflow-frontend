@@ -67,6 +67,41 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
     answers: QuestionReview[];
   } | null>(null);
 
+  // AI Tutor Explanations: maps questionId to explanation state
+  const [explanations, setExplanations] = useState<
+    Record<string, { loading?: boolean; text?: string; error?: string }>
+  >({});
+
+  const handleRequestExplanation = async (questionId: string) => {
+    if (!user) return;
+    setExplanations((prev) => ({ ...prev, [questionId]: { loading: true } }));
+    try {
+      const res = await apiPost<{ success: boolean; data: { explanation: string } }>(
+        `/api/students/${user.id}/practice-sessions/${sessionId}/explain`,
+        { questionId }
+      );
+      if (res && res.success && res.data) {
+        setExplanations((prev) => ({
+          ...prev,
+          [questionId]: { loading: false, text: res.data.explanation },
+        }));
+      } else {
+        setExplanations((prev) => ({
+          ...prev,
+          [questionId]: { loading: false, error: 'Failed to generate explanation.' },
+        }));
+      }
+    } catch (err: unknown) {
+      setExplanations((prev) => ({
+        ...prev,
+        [questionId]: {
+          loading: false,
+          error: err instanceof Error ? err.message : 'Error generating explanation.',
+        },
+      }));
+    }
+  };
+
   useEffect(() => {
     async function init() {
       const currentUser = await getCurrentUserClient();
@@ -394,6 +429,45 @@ export default function TakePracticeSessionPage({ params }: PageProps) {
                         );
                       })}
                     </div>
+
+                    {/* AI Tutor Explanation in Review Mode */}
+                    {review && (
+                      <div className="pl-8 pt-2">
+                        {!explanations[q.id]?.text && !explanations[q.id]?.loading && (
+                          <button
+                            type="button"
+                            onClick={() => handleRequestExplanation(q.id)}
+                            className="inline-flex items-center gap-x-1.5 text-xs font-semibold text-primary hover:text-primary-hover focus:outline-none focus:ring-1 focus:ring-primary rounded-lg px-2.5 py-1.5 bg-primary/10 border border-primary/20 transition cursor-pointer"
+                          >
+                            <span>💡</span>
+                            <span>Explain with AI</span>
+                          </button>
+                        )}
+
+                        {explanations[q.id]?.loading && (
+                          <div className="flex items-center gap-x-2 text-xs text-muted-foreground py-1">
+                            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            <span>Generating AI explanation...</span>
+                          </div>
+                        )}
+
+                        {explanations[q.id]?.text && (
+                          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs space-y-1.5 animate-in fade-in duration-200">
+                            <div className="flex items-center gap-x-1.5 font-bold text-primary text-[11px] uppercase tracking-wider">
+                              <span>💡</span>
+                              <span>AI Tutor Explanation</span>
+                            </div>
+                            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                              {explanations[q.id]?.text}
+                            </p>
+                          </div>
+                        )}
+
+                        {explanations[q.id]?.error && (
+                          <p className="text-xs text-status-danger-text mt-1">{explanations[q.id]?.error}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
