@@ -35,6 +35,11 @@ export function Modal({
   );
   const modalRef = React.useRef<HTMLDivElement>(null);
   const previouslyFocusedElement = React.useRef<HTMLElement | null>(null);
+  const onCloseRef = React.useRef(onClose);
+
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   // Focus trap, ESC key listener, and scroll lock
   React.useEffect(() => {
@@ -47,7 +52,7 @@ export function Modal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -76,13 +81,23 @@ export function Modal({
 
     window.addEventListener('keydown', handleKeyDown);
 
-    // Initial focus on modal
+    // Initial focus on modal (avoid stealing focus if user is already interacting with an element inside)
     const timer = setTimeout(() => {
       if (modalRef.current) {
-        const firstFocusable = modalRef.current.querySelector<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        if (modalRef.current.contains(document.activeElement)) {
+          return;
+        }
+
+        const firstInput = modalRef.current.querySelector<HTMLElement>(
+          'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
         );
-        if (firstFocusable) {
+        const firstFocusable = modalRef.current.querySelector<HTMLElement>(
+          'button:not([disabled]), [href], input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+
+        if (firstInput) {
+          firstInput.focus();
+        } else if (firstFocusable) {
           firstFocusable.focus();
         } else {
           modalRef.current.focus();
@@ -96,7 +111,7 @@ export function Modal({
       clearTimeout(timer);
       previouslyFocusedElement.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen || !mounted || typeof document === 'undefined') return null;
 
