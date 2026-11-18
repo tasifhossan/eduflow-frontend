@@ -59,6 +59,7 @@ export default async function RootLayout({
     <html
       lang={center.defaultLocale || "en"}
       className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <style
