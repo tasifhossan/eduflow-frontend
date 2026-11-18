@@ -41,11 +41,11 @@ export function CopyMaterialDialog({
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     setSelectedBatchIds([]);
     setError(null);
     onClose();
-  };
+  }, [onClose]);
 
   React.useEffect(() => {
     if (!isOpen) return;

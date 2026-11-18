@@ -149,14 +149,14 @@ export function MaterialDialog({
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     setUploadingFiles([]);
     setLinkUrl('');
     setLinkTitle('');
     setLinkError(null);
     setSubmitError(null);
     onClose();
-  };
+  }, [onClose]);
 
   // Fetch upload limits on mount
   React.useEffect(() => {
