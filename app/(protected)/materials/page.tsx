@@ -129,6 +129,7 @@ export default function StaffMaterialsPage() {
   const [chapterCounts, setChapterCounts] = React.useState<Record<string, number>>({});
   const [totalCount, setTotalCount] = React.useState(0);
   const [loadingBatches, setLoadingBatches] = React.useState(true);
+  const [loadingChapters, setLoadingChapters] = React.useState(false);
   const [loadingMaterials, setLoadingMaterials] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -163,12 +164,15 @@ export default function StaffMaterialsPage() {
         }
         setBatches(accessible);
 
-        // Preselect batch
-        if (!selectedBatchId && accessible.length > 0) {
-          const matched = initialBatchIdParam
-            ? accessible.find((b) => b.id === initialBatchIdParam)
-            : null;
-          setSelectedBatchId(matched ? matched.id : accessible[0].id);
+        // Preselect batch if none selected yet
+        if (accessible.length > 0) {
+          setSelectedBatchId((prev) => {
+            if (prev && accessible.some((b) => b.id === prev)) return prev;
+            if (initialBatchIdParam && accessible.some((b) => b.id === initialBatchIdParam)) {
+              return initialBatchIdParam;
+            }
+            return accessible[0].id;
+          });
         }
       })
       .catch((err) => {
@@ -181,33 +185,111 @@ export default function StaffMaterialsPage() {
     return () => {
       active = false;
     };
-  }, [user, initialBatchIdParam, selectedBatchId]);
+  }, [user, initialBatchIdParam]);
 
   // 2. When batch changes, fetch its chapters and lectures
   React.useEffect(() => {
+    let active = true;
     if (!selectedBatchId) return;
 
-    const currentBatch = batches.find((b) => b.id === selectedBatchId);
-    const subjectId = currentBatch?.subjectId || currentBatch?.subject?.id;
+    // Call /api/batches/:batchId/materials/summary, /api/batches/:batchId and /api/lectures in parallel
+    const summaryPromise = apiGet<{
+      success: boolean;
+      data: {
+        chapters?: Array<{
+          chapterId: string | null;
+          chapterName: string | null;
+          total: number;
+          drafts: number;
+        }>;
+        totalMaterials?: number;
+      };
+    }>(`/api/batches/${selectedBatchId}/materials/summary`)
+      .then((res) => (res?.success && res.data ? res.data : null))
+      .catch(() => null);
 
-    const chaptersPromise = subjectId
-      ? apiGet<{ success: boolean; data: ChapterItem[] }>(`/api/chapters?subjectId=${subjectId}`)
-          .then((res) => (res?.success && Array.isArray(res.data) ? res.data : []))
-          .catch(() => [])
-      : Promise.resolve([]);
+    const batchDetailsPromise = apiGet<{
+      success: boolean;
+      data: {
+        id: string;
+        name: string;
+        subjectId?: string;
+        subject?: { id?: string; name: string };
+      };
+    }>(`/api/batches/${selectedBatchId}`)
+      .then((res) => (res?.success && res.data ? res.data : null))
+      .catch(() => null);
 
-    chaptersPromise.then((list) => {
-      setChapters(list);
-    });
-
-    apiGet<{ success: boolean; data: { items?: LectureOption[] } | LectureOption[] }>(
-      `/api/lectures?batchId=${selectedBatchId}&limit=100`
-    )
+    const lecturesPromise = apiGet<{
+      success: boolean;
+      data: { items?: LectureOption[] } | LectureOption[];
+    }>(`/api/lectures?batchId=${selectedBatchId}&limit=100`)
       .then((res) => {
         const list = Array.isArray(res?.data) ? res.data : res?.data?.items || [];
-        setLectures(list);
+        return list;
       })
-      .catch(() => setLectures([]));
+      .catch(() => [] as LectureOption[]);
+
+    Promise.all([summaryPromise, batchDetailsPromise, lecturesPromise])
+      .then(async ([summaryData, batchData, lecturesList]) => {
+        if (!active) return;
+
+        setLectures(lecturesList);
+
+        // 1. If summaryData returned chapters, use those authoritative curriculum chapters
+        if (summaryData?.chapters && summaryData.chapters.length > 0) {
+          const list: ChapterItem[] = summaryData.chapters
+            .filter((c) => c.chapterId !== null)
+            .map((c) => ({
+              id: c.chapterId as string,
+              name: c.chapterName || 'Untitled Chapter',
+              subjectId: batchData?.subjectId || batchData?.subject?.id || '',
+            }));
+
+          setChapters(list);
+
+          // Update chapter counts from summary
+          const counts: Record<string, number> = {};
+          summaryData.chapters.forEach((c) => {
+            const key = c.chapterId || 'uncategorized';
+            counts[key] = c.total;
+          });
+          setChapterCounts(counts);
+          if (typeof summaryData.totalMaterials === 'number') {
+            setTotalCount(summaryData.totalMaterials);
+          }
+        } else {
+          // 2. Fallback: Query /api/chapters?subjectId=... if summary had no chapters or failed
+          const resolvedSubjectId =
+            batchData?.subjectId ||
+            batchData?.subject?.id ||
+            batches.find((b) => b.id === selectedBatchId)?.subjectId;
+
+          if (resolvedSubjectId) {
+            try {
+              const chRes = await apiGet<{ success: boolean; data: ChapterItem[] }>(
+                `/api/chapters?subjectId=${resolvedSubjectId}`
+              );
+              if (active && chRes?.success && Array.isArray(chRes.data)) {
+                setChapters(chRes.data);
+              } else if (active) {
+                setChapters([]);
+              }
+            } catch {
+              if (active) setChapters([]);
+            }
+          } else {
+            setChapters([]);
+          }
+        }
+      })
+      .finally(() => {
+        if (active) setLoadingChapters(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [selectedBatchId, batches]);
 
   // 3. Fetch materials for selected batch and active filters
@@ -376,8 +458,15 @@ export default function StaffMaterialsPage() {
                 id="batch-select"
                 value={selectedBatchId}
                 onChange={(e) => {
-                  setSelectedBatchId(e.target.value);
+                  const newBatchId = e.target.value;
+                  setSelectedBatchId(newBatchId);
                   setSelectedChapterId('all');
+                  setChapters([]);
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('batchId', newBatchId);
+                    window.history.replaceState(null, '', url.toString());
+                  }
                 }}
                 disabled={loadingBatches || batches.length === 0}
                 className="rounded-[var(--radius-control)] border border-border bg-surface text-foreground px-3 py-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -473,41 +562,53 @@ export default function StaffMaterialsPage() {
               </button>
 
               {/* Subject Chapters */}
-              {chapters.map((ch, idx) => {
-                const count = chapterCounts[ch.id] || 0;
-                const isSelected = selectedChapterId === ch.id;
+              {loadingChapters ? (
+                <div className="space-y-1.5 py-1">
+                  <div className="h-8 rounded-[var(--radius-control)] bg-muted/60 animate-pulse" />
+                  <div className="h-8 rounded-[var(--radius-control)] bg-muted/60 animate-pulse" />
+                  <div className="h-8 rounded-[var(--radius-control)] bg-muted/60 animate-pulse" />
+                </div>
+              ) : chapters.length === 0 ? (
+                <div className="py-3 px-2 text-center text-[11px] text-muted-foreground border border-dashed border-border rounded-[var(--radius-control)] my-1">
+                  No chapters linked to this batch subject
+                </div>
+              ) : (
+                chapters.map((ch, idx) => {
+                  const count = chapterCounts[ch.id] || 0;
+                  const isSelected = selectedChapterId === ch.id;
 
-                return (
-                  <button
-                    key={ch.id}
-                    type="button"
-                    onClick={() => setSelectedChapterId(ch.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-[var(--radius-control)] text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                      isSelected
-                        ? 'bg-primary text-primary-foreground font-bold'
-                        : 'text-muted-foreground hover:bg-surface-hover hover:text-foreground'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate pr-2">
-                      <span className="h-4 w-4 rounded-full bg-muted flex items-center justify-center text-[10px] shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span className="truncate" title={ch.name}>
-                        {ch.name}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono shrink-0 ${
+                  return (
+                    <button
+                      key={ch.id}
+                      type="button"
+                      onClick={() => setSelectedChapterId(ch.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-[var(--radius-control)] text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         isSelected
-                          ? 'bg-primary-foreground/20 text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
+                          ? 'bg-primary text-primary-foreground font-bold'
+                          : 'text-muted-foreground hover:bg-surface-hover hover:text-foreground'
                       }`}
                     >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+                      <div className="flex items-center gap-2 truncate pr-2">
+                        <span className="h-4 w-4 rounded-full bg-muted flex items-center justify-center text-[10px] shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="truncate" title={ch.name}>
+                          {ch.name}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono shrink-0 ${
+                          isSelected
+                            ? 'bg-primary-foreground/20 text-primary-foreground'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
             </nav>
           </div>
 
