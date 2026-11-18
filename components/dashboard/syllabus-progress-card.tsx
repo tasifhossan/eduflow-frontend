@@ -1,9 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { BookOpen, CheckCircle2, Circle } from 'lucide-react';
+import Link from 'next/link';
+import { BookOpen, CheckCircle2, Circle, ExternalLink, FolderOpen } from 'lucide-react';
 import { apiGet } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { useAuth } from '@/components/providers/auth-provider';
 import { useCenter } from '@/components/providers/center-provider';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -42,11 +44,15 @@ export function SyllabusProgressCard({
   compact = false,
   className = '',
 }: SyllabusProgressCardProps) {
+  const { user } = useAuth();
   const { center } = useCenter();
   const [data, setData] = React.useState<SyllabusProgressData | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [reloadKey, setReloadKey] = React.useState(0);
+
+  const isStaff = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'TEACHER';
+  const materialsBasePath = isStaff ? '/materials' : '/my-materials';
 
   React.useEffect(() => {
     let active = true;
@@ -198,10 +204,14 @@ export function SyllabusProgressCard({
         }`}
       >
         {chapters.map((chap, idx) => {
+          const materialHref = data?.batchId
+            ? `${materialsBasePath}?batchId=${encodeURIComponent(data.batchId)}&chapterId=${encodeURIComponent(chap.id)}`
+            : materialsBasePath;
+
           return (
             <div
               key={chap.id}
-              className="py-2 flex items-center justify-between gap-3 text-xs"
+              className="py-2 flex items-center justify-between gap-3 text-xs group"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 {chap.covered ? (
@@ -215,18 +225,21 @@ export function SyllabusProgressCard({
                     aria-hidden="true"
                   />
                 )}
-                <span
-                  className={`truncate ${
+                <Link
+                  href={materialHref}
+                  className={`truncate inline-flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm ${
                     chap.covered
                       ? 'text-foreground font-medium'
-                      : 'text-muted-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
+                  title={`Open materials for ${chap.title}`}
                 >
-                  <span className="font-semibold text-muted-foreground mr-1.5">
+                  <span className="font-semibold text-muted-foreground">
                     {idx + 1}.
                   </span>
-                  {chap.title}
-                </span>
+                  <span className="truncate">{chap.title}</span>
+                  <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary shrink-0" aria-hidden="true" />
+                </Link>
               </div>
 
               {chap.covered && chap.lastCoveredAt ? (
