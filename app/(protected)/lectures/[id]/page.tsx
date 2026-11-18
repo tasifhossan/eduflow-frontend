@@ -17,6 +17,8 @@ import {
   Edit,
   Eye,
   EyeOff,
+  Sparkles,
+  FolderOpen,
 } from 'lucide-react';
 import { apiGet, apiPatch, apiDelete } from '@/lib/api';
 import { formatCenterTime, formatDate } from '@/lib/tz';
@@ -34,6 +36,7 @@ import { CompleteLectureModal } from '@/components/lectures/complete-lecture-mod
 import { CancelLectureModal } from '@/components/lectures/cancel-lecture-modal';
 import { OnlineClassModal } from '@/components/lectures/online-class-modal';
 import { UploadMaterialModal } from '@/components/lectures/upload-material-modal';
+import { MaterialDialog } from '@/components/materials/material-dialog';
 import { toast } from 'sonner';
 
 interface AttachmentItem {
@@ -100,6 +103,7 @@ export default function LectureDetailPage({ params }: PageProps) {
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isOnlineModalOpen, setIsOnlineModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isPrepModalOpen, setIsPrepModalOpen] = useState(false);
 
   // Publish with notification modal
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
@@ -570,7 +574,7 @@ export default function LectureDetailPage({ params }: PageProps) {
 
       {/* Materials & Learning Attachments Section */}
       <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5 sm:p-6 shadow-card space-y-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-foreground">
               Lecture Materials & Resources
@@ -580,17 +584,43 @@ export default function LectureDetailPage({ params }: PageProps) {
             </p>
           </div>
 
-          {isStaff && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsUploadModalOpen(true)}
-              className="gap-1.5"
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href={
+                isStaff
+                  ? `/materials?batchId=${lecture.batchId}${lecture.chapterId ? `&chapterId=${lecture.chapterId}` : ''}`
+                  : `/my-materials?batchId=${lecture.batchId}${lecture.chapterId ? `&chapterId=${lecture.chapterId}` : ''}`
+              }
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-control)] border border-border bg-surface hover:bg-surface-hover text-foreground text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Upload className="h-4 w-4" aria-hidden="true" />
-              <span>Add Material</span>
-            </Button>
-          )}
+              <FolderOpen className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              <span>View in Materials Library</span>
+            </Link>
+
+            {isStaff && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsPrepModalOpen(true)}
+                  className="gap-1.5"
+                >
+                  <Sparkles className="h-4 w-4 text-secondary" aria-hidden="true" />
+                  <span>Add Preparation Material</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="gap-1.5"
+                >
+                  <Upload className="h-4 w-4" aria-hidden="true" />
+                  <span>Add Material</span>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         {materials.length === 0 ? (
@@ -712,6 +742,32 @@ export default function LectureDetailPage({ params }: PageProps) {
             onClose={() => setIsUploadModalOpen(false)}
             onSuccess={() => fetchLecture()}
             lectureId={lecture.id}
+          />
+
+          <MaterialDialog
+            isOpen={isPrepModalOpen}
+            onClose={() => setIsPrepModalOpen(false)}
+            batchId={lecture.batchId}
+            initialMaterial={{
+              batchId: lecture.batchId,
+              title: '',
+              type: 'PREPARATION',
+              chapterId: lecture.chapterId || null,
+              lectureId: lecture.id,
+            }}
+            preselectedChapterId={lecture.chapterId || null}
+            preselectedLectureId={lecture.id}
+            chapters={
+              lecture.chapter
+                ? [{ id: lecture.chapter.id, title: lecture.chapter.title }]
+                : []
+            }
+            lectures={[{ id: lecture.id, title: lecture.title }]}
+            onSaved={() => {
+              setIsPrepModalOpen(false);
+              toast.success('Preparation material added successfully');
+              fetchLecture();
+            }}
           />
 
           {/* Publish Confirmation Modal with Notify Checkbox */}

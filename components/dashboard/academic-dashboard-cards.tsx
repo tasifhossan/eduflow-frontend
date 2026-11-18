@@ -9,6 +9,9 @@ import {
   Video,
   ClipboardCheck,
   Clock,
+  Sparkles,
+  Files,
+  BookOpen,
 } from 'lucide-react';
 import { apiGet } from '@/lib/api';
 import { formatDate, formatCenterTime, getTimezoneDisplay } from '@/lib/tz';
@@ -43,12 +46,24 @@ interface UpcomingAssignmentItem {
   subject?: { id: string; name: string };
 }
 
+interface RecentStudyMaterial {
+  id: string;
+  title: string;
+  type: string;
+  batchId: string;
+  batchName?: string;
+  chapterTitle?: string;
+  publishedAt?: string | null;
+  isNew?: boolean;
+}
+
 export function StudentAcademicsCards({ studentId }: { studentId?: string }) {
   const { center } = useCenter();
   const tz = center?.timezone || 'Asia/Dhaka';
 
   const [classes, setClasses] = React.useState<LectureToday[]>([]);
   const [assignments, setAssignments] = React.useState<UpcomingAssignmentItem[]>([]);
+  const [recentMaterials, setRecentMaterials] = React.useState<RecentStudyMaterial[]>([]);
   const [summary, setSummary] = React.useState<AcademicSummaryData | null>(null);
   const [loadingClasses, setLoadingClasses] = React.useState(true);
   const [loadingAssignments, setLoadingAssignments] = React.useState(true);
@@ -94,6 +109,42 @@ export function StudentAcademicsCards({ studentId }: { studentId?: string }) {
       })
       .catch(() => setAssignments([]))
       .finally(() => setLoadingAssignments(false));
+
+    // Fetch new study materials across active batches
+    const batchUrl = studentId ? `/api/batches?studentId=${encodeURIComponent(studentId)}` : '/api/batches';
+    apiGet<{ success: boolean; data: Array<{ id: string; name: string }> | { items?: Array<{ id: string; name: string }> } }>(batchUrl)
+      .then(async (res) => {
+        const batchList = Array.isArray(res?.data) ? res.data : res?.data?.items || [];
+        if (batchList.length === 0) return;
+
+        const materialPromises = batchList.slice(0, 3).map((b) => {
+          const matQuery = studentId ? `?studentId=${encodeURIComponent(studentId)}&limit=5` : '?limit=5';
+          return apiGet<{
+            success: boolean;
+            data: { items?: Array<{ id: string; title: string; type: string; publishedAt?: string | null; isNew?: boolean; chapter?: { title: string } | null }> };
+          }>(`/api/batches/${b.id}/materials${matQuery}`)
+            .then((mRes) => {
+              const items = mRes?.data?.items || [];
+              return items
+                .filter((item) => item.isNew)
+                .map((item) => ({
+                  id: item.id,
+                  title: item.title,
+                  type: item.type,
+                  batchId: b.id,
+                  batchName: b.name,
+                  chapterTitle: item.chapter?.title,
+                  publishedAt: item.publishedAt,
+                  isNew: item.isNew,
+                }));
+            })
+            .catch(() => []);
+        });
+
+        const results = await Promise.all(materialPromises);
+        setRecentMaterials(results.flat().slice(0, 5));
+      })
+      .catch(() => {});
   }, [studentId]);
 
   return (
@@ -270,6 +321,61 @@ export function StudentAcademicsCards({ studentId }: { studentId?: string }) {
           )}
         </SectionCard>
       </div>
+
+      {/* New Study Materials Card */}
+      {recentMaterials.length > 0 && (
+        <SectionCard
+          title="New Study Materials"
+          description="Recently published preparation notes, lecture slides, and practice files"
+          actions={
+            <Link
+              href="/my-materials"
+              className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          }
+          noPadding
+        >
+          <ul className="divide-y divide-border" role="list">
+            {recentMaterials.map((m) => (
+              <li
+                key={m.id}
+                className="p-4 hover:bg-surface-hover/30 transition-colors flex items-center justify-between gap-3 text-xs"
+              >
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/my-materials?batchId=${encodeURIComponent(m.batchId)}`}
+                      className="font-semibold text-foreground hover:text-primary transition-colors truncate block"
+                    >
+                      {m.title}
+                    </Link>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-status-success-bg text-status-success-text text-[10px] font-bold">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      <span>NEW</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground text-[11px]">
+                    <span className="capitalize">{m.type.replace('_', ' ').toLowerCase()}</span>
+                    {m.chapterTitle && <span>· {m.chapterTitle}</span>}
+                    {m.batchName && <span>· {m.batchName}</span>}
+                    {m.publishedAt && <span>· {formatDate(m.publishedAt, tz)}</span>}
+                  </div>
+                </div>
+
+                <Link
+                  href={`/my-materials?batchId=${encodeURIComponent(m.batchId)}`}
+                  className="px-2.5 py-1 rounded-[var(--radius-control)] bg-surface-hover text-foreground hover:bg-surface-hover/80 border border-border text-xs font-semibold shrink-0"
+                >
+                  Open
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+      )}
 
       {/* Syllabus Progress Card */}
       <SyllabusProgressCard compact studentId={studentId} />

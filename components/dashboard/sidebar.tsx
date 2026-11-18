@@ -32,6 +32,7 @@ import {
   MessageSquareQuote,
   Star,
   UserCheck,
+  Files,
 } from 'lucide-react';
 import type { CenterPublicData, CenterFeatures } from '@/lib/types/center';
 
@@ -88,6 +89,20 @@ export const NAV_GROUPS: NavGroup[] = [
         roles: ['ADMIN', 'TEACHER', 'STUDENT', 'GUARDIAN', 'SUPER_ADMIN'],
         icon: ClipboardCheck,
         featureFlag: 'assignments',
+      },
+      {
+        name: 'Materials',
+        href: '/materials',
+        roles: ['ADMIN', 'TEACHER', 'SUPER_ADMIN'],
+        icon: Files,
+        featureFlag: 'materials',
+      },
+      {
+        name: 'Materials',
+        href: '/my-materials',
+        roles: ['STUDENT', 'GUARDIAN'],
+        icon: Files,
+        featureFlag: 'materials',
       },
       {
         name: 'Batches',

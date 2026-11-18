@@ -10,6 +10,7 @@ export interface CenterFeatures {
   assignments?: boolean;
   onlineClasses?: boolean;
   attendanceAlerts?: boolean;
+  materials?: boolean;
 }
 
 export interface AttendancePolicy {
