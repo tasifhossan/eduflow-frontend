@@ -56,6 +56,7 @@ interface ChapterItem {
   id: string;
   name: string;
   subjectId: string;
+  position?: number;
 }
 
 interface LectureOption {
@@ -199,6 +200,7 @@ export default function StaffMaterialsPage() {
         chapters?: Array<{
           chapterId: string | null;
           chapterName: string | null;
+          position?: number;
           total: number;
           drafts: number;
         }>;
@@ -244,7 +246,9 @@ export default function StaffMaterialsPage() {
               id: c.chapterId as string,
               name: c.chapterName || 'Untitled Chapter',
               subjectId: batchData?.subjectId || batchData?.subject?.id || '',
-            }));
+              position: c.position,
+            }))
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
           setChapters(list);
 
@@ -271,7 +275,7 @@ export default function StaffMaterialsPage() {
                 `/api/chapters?subjectId=${resolvedSubjectId}`
               );
               if (active && chRes?.success && Array.isArray(chRes.data)) {
-                setChapters(chRes.data);
+                setChapters([...chRes.data].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)));
               } else if (active) {
                 setChapters([]);
               }

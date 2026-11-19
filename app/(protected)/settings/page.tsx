@@ -1381,6 +1381,22 @@ export default function SettingsPage() {
               />
             </div>
 
+            {/* Study Materials */}
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Study Materials</h4>
+                <p className="text-xs text-muted-foreground">
+                  Enables curriculum-linked lecture notes, slides, problem sheets, and video resources.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.features?.materials !== false}
+                onChange={(e) => handleFeatureToggle('materials', e.target.checked)}
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
             {/* Guardian Attendance Alerts */}
             <div className="flex items-center justify-between py-4">
               <div>

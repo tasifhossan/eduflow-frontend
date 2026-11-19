@@ -13,8 +13,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export interface ChapterProgressItem {
   id: string;
-  title: string;
-  order: number;
+  title?: string;
+  name?: string;
+  order?: number;
+  position?: number;
   covered: boolean;
   lastCoveredAt: string | null;
 }
@@ -144,7 +146,9 @@ export function SyllabusProgressCard({
   }
 
   const subject = data?.subject;
-  const chapters = subject?.chapters || [];
+  const chapters = [...(subject?.chapters || [])].sort(
+    (a, b) => (a.order ?? a.position ?? 0) - (b.order ?? b.position ?? 0)
+  );
   const pct = data?.progressPercentage ?? 0;
   const coveredCount = data?.coveredChapters ?? 0;
   const totalCount = data?.totalChapters ?? 0;
@@ -232,12 +236,12 @@ export function SyllabusProgressCard({
                       ? 'text-foreground font-medium'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
-                  title={`Open materials for ${chap.title}`}
+                  title={`Open materials for ${chap.title || chap.name || 'Chapter'}`}
                 >
                   <span className="font-semibold text-muted-foreground">
                     {idx + 1}.
                   </span>
-                  <span className="truncate">{chap.title}</span>
+                  <span className="truncate">{chap.title || chap.name || 'Chapter'}</span>
                   <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary shrink-0" aria-hidden="true" />
                 </Link>
               </div>

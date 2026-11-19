@@ -160,6 +160,7 @@ export const defaultCenterData: CenterPublicData = {
     assignments: true,
     onlineClasses: true,
     attendanceAlerts: true,
+    materials: true,
   },
   homepage: {
     heroBadge: '',
