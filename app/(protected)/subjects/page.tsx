@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiGet, apiPost, apiPatch } from '@/lib/api';
+import { apiGet, apiPost, apiPatch, apiPut } from '@/lib/api';
 import { useAuth } from '@/components/providers/auth-provider';
 import { RequireRole } from '@/components/providers/require-role';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ interface Chapter {
   id: string;
   name: string;
   subjectId: string;
+  position?: number;
 }
 
 export default function SubjectsPage() {
@@ -209,13 +210,33 @@ export default function SubjectsPage() {
     }
   };
 
-  const moveChapter = (subjectId: string, fromIndex: number, toIndex: number) => {
-    const list = [...(chaptersMap[subjectId] || [])];
+  const [reorderingSubjectId, setReorderingSubjectId] = useState<string | null>(null);
+
+  const moveChapter = async (subjectId: string, fromIndex: number, toIndex: number) => {
+    const originalList = chaptersMap[subjectId] || [];
+    const list = [...originalList];
     if (fromIndex < 0 || toIndex < 0 || fromIndex >= list.length || toIndex >= list.length) return;
     const [moved] = list.splice(fromIndex, 1);
     list.splice(toIndex, 0, moved);
     setChaptersMap((prev) => ({ ...prev, [subjectId]: list }));
-    toast.info('Chapter reordered in view (curriculum sequence updated)');
+    setReorderingSubjectId(subjectId);
+    try {
+      const response = await apiPut<{ success: boolean; message?: string }>(
+        `/api/subjects/${subjectId}/chapters/order`,
+        { ids: list.map((c) => c.id) }
+      );
+      if (response && response.success) {
+        toast.success('Chapter order updated successfully');
+      } else {
+        setChaptersMap((prev) => ({ ...prev, [subjectId]: originalList }));
+        toast.error(response?.message || 'Failed to update chapter order');
+      }
+    } catch (err: unknown) {
+      setChaptersMap((prev) => ({ ...prev, [subjectId]: originalList }));
+      toast.error(err instanceof Error ? err.message : 'An error occurred while updating chapter order');
+    } finally {
+      setReorderingSubjectId(null);
+    }
   };
 
   return (
@@ -498,7 +519,8 @@ export default function SubjectsPage() {
                         <button
                           type="button"
                           onClick={() => moveChapter(ch.subjectId, idx, idx - 1)}
-                          disabled={idx === 0}
+                          disabled={idx === 0 || reorderingSubjectId === ch.subjectId || user?.role !== 'SUPER_ADMIN'}
+                          title={user?.role !== 'SUPER_ADMIN' ? 'Only Super Admin can reorder chapters' : undefined}
                           aria-label={`Move ${ch.name} up`}
                           className="h-8 w-8 flex items-center justify-center rounded-[var(--radius-control)] border border-border text-muted-foreground hover:text-foreground hover:bg-surface-hover disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
@@ -507,7 +529,8 @@ export default function SubjectsPage() {
                         <button
                           type="button"
                           onClick={() => moveChapter(ch.subjectId, idx, idx + 1)}
-                          disabled={idx === currentChapters.length - 1}
+                          disabled={idx === currentChapters.length - 1 || reorderingSubjectId === ch.subjectId || user?.role !== 'SUPER_ADMIN'}
+                          title={user?.role !== 'SUPER_ADMIN' ? 'Only Super Admin can reorder chapters' : undefined}
                           aria-label={`Move ${ch.name} down`}
                           className="h-8 w-8 flex items-center justify-center rounded-[var(--radius-control)] border border-border text-muted-foreground hover:text-foreground hover:bg-surface-hover disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >

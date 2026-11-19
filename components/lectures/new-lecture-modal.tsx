@@ -134,11 +134,12 @@ export function NewLectureModal({
       };
     }
 
-    apiGet<{ data: Array<{ id: string; name: string }> }>(`/api/chapters?subjectId=${selectedSubjectId}`)
+    apiGet<{ data: Array<{ id: string; name: string; position?: number }> }>(`/api/chapters?subjectId=${selectedSubjectId}`)
       .then((res) => {
         if (!active) return;
         if (res && Array.isArray(res.data)) {
-          setChapters(res.data.map((c) => ({ id: c.id, title: c.name })));
+          const sorted = [...res.data].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+          setChapters(sorted.map((c) => ({ id: c.id, title: c.name })));
         } else {
           setChapters([]);
         }

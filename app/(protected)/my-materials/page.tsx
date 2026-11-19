@@ -227,7 +227,7 @@ function MyMaterialsContent() {
     if (!selectedBatchId) return;
 
     const query = new URLSearchParams();
-    query.set('limit', '200');
+    query.set('limit', '100');
     if (isGuardian && selectedChildId) {
       query.set('studentId', selectedChildId);
     }
