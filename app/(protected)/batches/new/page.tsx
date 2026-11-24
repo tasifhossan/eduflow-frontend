@@ -40,7 +40,7 @@ export default function NewBatchPage() {
         router.push('/login');
         return;
       }
-      if (user.role !== 'ADMIN') {
+      if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
         router.push('/batches');
         return;
       }

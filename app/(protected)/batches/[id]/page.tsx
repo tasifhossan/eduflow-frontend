@@ -155,7 +155,7 @@ export default function BatchDetailPage({ params }: PageProps) {
         return;
       }
       setUserRole(user.role);
-      if (user.role !== 'ADMIN' && user.role !== 'TEACHER') {
+      if (user.role !== 'ADMIN' && user.role !== 'TEACHER' && user.role !== 'SUPER_ADMIN') {
         router.push('/dashboard');
         return;
       }
@@ -664,7 +664,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                         <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student Info</th>
                         <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone</th>
                         <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fee Breakdown</th>
-                        {userRole === 'ADMIN' && (
+                        {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && (
                           <th scope="col" className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
                         )}
                       </tr>
@@ -709,7 +709,7 @@ export default function BatchDetailPage({ params }: PageProps) {
                                 <span className="text-xs text-muted-foreground italic">Loading fee...</span>
                               )}
                             </td>
-                            {userRole === 'ADMIN' && (
+                            {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && (
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="flex items-center justify-end gap-x-2">
                                   <button

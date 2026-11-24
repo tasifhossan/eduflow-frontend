@@ -128,7 +128,7 @@ export default function BatchesPage() {
     }
   };
 
-  const isAdmin = userRole === 'ADMIN';
+  const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
   const displayedBatches = activeFilter === 'active' ? batches : archivedBatches;
 
   if (loading) {
