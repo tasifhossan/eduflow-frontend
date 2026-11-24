@@ -250,8 +250,6 @@ export default function SettingsPage() {
       data.append('timestamp', String(timestamp));
       data.append('signature', signature);
       data.append('folder', folder);
-      if (allowed_formats) data.append('allowed_formats', allowed_formats);
-      if (max_bytes) data.append('max_bytes', String(max_bytes));
 
       // 3. Post to Cloudinary
       const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
