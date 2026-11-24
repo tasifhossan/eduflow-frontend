@@ -454,14 +454,14 @@ export default function SettingsPage() {
       const payload: Partial<FullCenterSettings> = {
         name: formData.name.trim(),
         shortName: formData.shortName.trim(),
-        tagline: formData.tagline || '',
+        tagline: formData.tagline?.trim() ? formData.tagline.trim() : undefined,
         logoUrl: formData.logoUrl || null,
         faviconUrl: formData.faviconUrl || null,
         primaryColor: formData.primaryColor,
         contactEmail: formData.contactEmail.trim(),
         contactPhone: formData.contactPhone.trim(),
         whatsapp: formData.whatsapp ? formData.whatsapp.trim() : null,
-        address: formData.address ? formData.address.trim() : null,
+        address: formData.address?.trim() ? formData.address.trim() : undefined,
         socials: formData.socials || {},
         currency: formData.currency.trim(),
         currencySymbol: formData.currencySymbol.trim(),
@@ -535,11 +535,35 @@ export default function SettingsPage() {
         toast.error(res.message || 'Failed to update settings');
       }
     } catch (err: unknown) {
-      const apiErr = err as { validationErrors?: Record<string, string>; message?: string };
-      if (apiErr.validationErrors) {
+      const apiErr = err as {
+        data?: {
+          message?: string;
+          errors?: {
+            fieldErrors?: Record<string, string[]>;
+          };
+        };
+        validationErrors?: Record<string, string>;
+        message?: string;
+      };
+
+      const fieldErrors = apiErr?.data?.errors?.fieldErrors;
+      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+        const flattened: Record<string, string> = {};
+        const messages: string[] = [];
+        for (const [field, msgs] of Object.entries(fieldErrors)) {
+          if (Array.isArray(msgs) && msgs.length > 0) {
+            flattened[field] = msgs[0];
+            messages.push(`${field}: ${msgs[0]}`);
+          }
+        }
+        setErrors(flattened);
+        toast.error(`Validation failed: ${messages.join('; ')}`);
+      } else if (apiErr?.validationErrors) {
         setErrors(apiErr.validationErrors);
+        toast.error(err instanceof Error ? err.message : 'Validation error while saving settings');
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Validation error while saving settings');
       }
-      toast.error(err instanceof Error ? err.message : 'Validation error while saving settings');
     } finally {
       setSaving(false);
     }
