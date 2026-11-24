@@ -8,7 +8,15 @@ import { useAuth } from '@/components/providers/auth-provider';
 import { useApi } from '@/lib/use-api';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  BookOpen,
+  Award,
+  Calendar,
+  TrendingUp,
+} from 'lucide-react';
 
 export interface HomeHeroProps {
   center: CenterPublicData;
@@ -101,10 +109,10 @@ export function HomeHero({ center }: HomeHeroProps) {
             ) : null}
           </div>
 
-          {/* Right Column: Hero Image or Tasteful Tokens-Only Visual Card */}
+          {/* Right Column: Hero Image or Rich Academic Showcase Card */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-md aspect-[4/3] rounded-[var(--radius-card)] overflow-hidden border border-border bg-surface shadow-card">
-              {heroImage && !imgError ? (
+            {heroImage && !imgError ? (
+              <div className="relative w-full max-w-md aspect-[4/3] rounded-[var(--radius-card)] overflow-hidden border border-border bg-surface shadow-card">
                 <Image
                   src={heroImage}
                   alt={title}
@@ -114,32 +122,100 @@ export function HomeHero({ center }: HomeHeroProps) {
                   className="object-cover"
                   onError={() => setImgError(true)}
                 />
-              ) : (
-                /* Tasteful visual card showing only center logo (or initial) and short name */
-                <div className="flex h-full w-full flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/10 via-surface to-secondary/10 text-center">
-                  {center.logoUrl ? (
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[var(--radius-card)] bg-surface p-2 border border-border shadow-sm mb-4">
-                      <Image
-                        src={center.logoUrl}
-                        alt=""
-                        fill
-                        sizes="80px"
-                        className="object-contain"
-                        unoptimized
-                        priority
-                      />
+              </div>
+            ) : (
+              /* Rich Academic Showcase Card */
+              <div className="relative w-full max-w-md rounded-[var(--radius-card)] border border-border bg-gradient-to-b from-surface via-surface to-primary/5 p-6 sm:p-7 shadow-card space-y-5">
+                {/* Header: Center identity & active admissions status */}
+                <div className="flex items-center justify-between gap-3 border-b border-border/80 pb-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {center.logoUrl ? (
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-surface p-1.5 border border-border shadow-sm">
+                        <Image
+                          src={center.logoUrl}
+                          alt=""
+                          fill
+                          sizes="48px"
+                          className="object-contain"
+                          unoptimized
+                          priority
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-primary text-white font-black text-xl shadow-sm select-none">
+                        {center.shortName?.[0] || center.name?.[0] || 'S'}
+                      </div>
+                    )}
+                    <div className="min-w-0 text-left">
+                      <h2 className="text-base font-bold text-foreground truncate">
+                        {center.name || center.shortName}
+                      </h2>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {center.shortName ? `${center.shortName} • Academic Portal` : 'Coaching & Academic Care'}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-[var(--radius-card)] bg-primary/15 text-primary font-bold text-3xl mb-4 shadow-sm border border-primary/20 select-none">
-                      {center.shortName?.[0] || center.name?.[0] || 'C'}
-                    </div>
-                  )}
-                  <h2 className="text-xl font-bold text-foreground">
-                    {center.shortName || center.name}
-                  </h2>
+                  </div>
+                  <div className="shrink-0 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-status-success-border bg-status-success-bg px-2.5 py-1 text-[11px] font-semibold text-status-success-text">
+                    <span className="h-1.5 w-1.5 rounded-full bg-status-success animate-pulse" />
+                    <span>Admissions Open</span>
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {/* Key Academic Pillars */}
+                <div className="grid grid-cols-2 gap-2.5 text-left">
+                  <div className="rounded-[var(--radius-control)] border border-border/70 bg-surface-hover/40 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-primary">
+                      <BookOpen className="h-4 w-4" />
+                      <span className="text-xs font-bold text-foreground">Science & Math</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-snug">
+                      Structured board syllabus & concept mastery
+                    </p>
+                  </div>
+
+                  <div className="rounded-[var(--radius-control)] border border-border/70 bg-surface-hover/40 p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-primary">
+                      <Award className="h-4 w-4" />
+                      <span className="text-xs font-bold text-foreground">Model Tests</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-snug">
+                      Weekly evaluations & rank-wise marksheet
+                    </p>
+                  </div>
+                </div>
+
+                {/* Live Academic Schedule Preview Widget */}
+                <div className="rounded-[var(--radius-control)] border border-primary/20 bg-primary/5 p-3.5 space-y-2 text-left">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary" />
+                      Today&apos;s Class Routine
+                    </span>
+                    <span className="text-[10px] font-medium text-primary px-2 py-0.5 rounded-[var(--radius-pill)] bg-primary/10">
+                      Live Schedule
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-primary/10">
+                    <span>Regular Batches (Morning & Evening)</span>
+                    <span className="font-semibold text-foreground">Active Routine</span>
+                  </div>
+                </div>
+
+                {/* Live Attendance & Performance Preview Bar */}
+                <div className="space-y-1.5 text-left pt-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <TrendingUp className="h-3.5 w-3.5 text-secondary" />
+                      Academic Performance & Attendance
+                    </span>
+                    <span className="font-bold text-foreground">95%+</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-[var(--radius-pill)] bg-surface-sunken border border-border/60">
+                    <div className="h-full rounded-[var(--radius-pill)] bg-primary w-[95%]" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </Container>
