@@ -56,7 +56,7 @@ interface StudentFeeAccountSummary {
 }
 
 interface AdminTeacherSummary {
-  role: 'ADMIN' | 'TEACHER';
+  role: 'ADMIN' | 'TEACHER' | 'SUPER_ADMIN';
   stats: {
     totalActiveStudents: number;
     totalBatches: number;
@@ -1115,7 +1115,7 @@ export default async function DashboardPage() {
       {summary && summary.role === 'STUDENT' && (
         <StudentDashboard data={summary as StudentSummary} account={studentAccountData} monthPercent={attendanceMonthPercent} />
       )}
-      {summary && (summary.role === 'ADMIN' || summary.role === 'TEACHER') && (
+      {summary && (summary.role === 'ADMIN' || summary.role === 'TEACHER' || summary.role === 'SUPER_ADMIN') && (
         <AdminTeacherDashboard
           data={summary as AdminTeacherSummary}
           dueSummary={ledgerDuesData}
